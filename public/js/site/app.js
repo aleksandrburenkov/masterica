@@ -15,6 +15,7 @@
         initQuantity();
         initPasswordToggles();
         initSelects();
+        initDatepickers();
         initOutreachCalculator();
         initStickyHeaderShadow();
     });
@@ -68,6 +69,204 @@
                 if (e.key === 'Escape') close();
             });
         });
+    }
+
+    /* --- Кастомный календарь вместо нативного выбора даты --- */
+    function initDatepickers() {
+        var inputs = document.querySelectorAll('.input[type="date"]');
+        if (!inputs.length) return;
+
+        var MONTHS = [
+            'январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
+            'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'
+        ];
+        var WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        var CHEVRON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        var CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        var active = null;
+
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+        function iso(date) { return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()); }
+        function parseIso(value) {
+            if (!value) return null;
+            var parts = value.split('-');
+            if (parts.length !== 3) return null;
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        function sameDay(a, b) {
+            return a && b && a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+        }
+
+        function closePicker() {
+            if (!active) return;
+            active.picker.hidden = true;
+            active = null;
+        }
+
+        function buildPicker() {
+            var picker = document.createElement('div');
+            picker.className = 'datepicker';
+            picker.hidden = true;
+            picker.innerHTML =
+                '<div class="datepicker__head">' +
+                    '<span class="datepicker__title"></span>' +
+                    '<span class="datepicker__nav">' +
+                        '<button type="button" data-nav="-1" aria-label="Предыдущий месяц">' + CHEVRON + '</button>' +
+                        '<button type="button" data-nav="1" aria-label="Следующий месяц">' + CHEVRON_RIGHT + '</button>' +
+                    '</span>' +
+                '</div>' +
+                '<div class="datepicker__weekdays">' + WEEKDAYS.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>' +
+                '<div class="datepicker__grid"></div>' +
+                '<div class="datepicker__foot">' +
+                    '<button type="button" data-action="clear">Очистить</button>' +
+                    '<button type="button" data-action="today">Сегодня</button>' +
+                '</div>';
+            document.body.appendChild(picker);
+            return picker;
+        }
+
+        function render(state) {
+            var input = state.input;
+            var min = parseIso(input.getAttribute('min'));
+            var max = parseIso(input.getAttribute('max'));
+            var selected = parseIso(input.value);
+            var today = new Date();
+
+            state.picker.querySelector('.datepicker__title').textContent =
+                MONTHS[state.viewMonth] + ' ' + state.viewYear;
+
+            var grid = state.picker.querySelector('.datepicker__grid');
+            grid.innerHTML = '';
+
+            var first = new Date(state.viewYear, state.viewMonth, 1);
+            var startOffset = (first.getDay() + 6) % 7;
+            var start = new Date(state.viewYear, state.viewMonth, 1 - startOffset);
+
+            for (var i = 0; i < 42; i++) {
+                var day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'datepicker__day';
+                btn.textContent = day.getDate();
+                btn.setAttribute('data-date', iso(day));
+
+                if (day.getMonth() !== state.viewMonth) btn.classList.add('is-muted');
+                if (sameDay(day, today)) btn.classList.add('is-today');
+                if (sameDay(day, selected)) btn.classList.add('is-selected');
+                if ((min && day < min) || (max && day > max)) btn.disabled = true;
+
+                grid.appendChild(btn);
+            }
+        }
+
+        function position(state) {
+            var rect = state.input.getBoundingClientRect();
+            var picker = state.picker;
+            var width = picker.offsetWidth || 296;
+            var height = picker.offsetHeight || 340;
+            var left = Math.min(rect.left, window.innerWidth - width - 8);
+            var top = rect.bottom + 6;
+
+            if (top + height > window.innerHeight - 8 && rect.top - height - 6 > 8) {
+                top = rect.top - height - 6;
+            }
+
+            picker.style.left = Math.max(8, left) + 'px';
+            picker.style.top = top + 'px';
+        }
+
+        function openPicker(state) {
+            if (active && active !== state) closePicker();
+            var selected = parseIso(state.input.value) || new Date();
+            state.viewYear = selected.getFullYear();
+            state.viewMonth = selected.getMonth();
+            render(state);
+            state.picker.hidden = false;
+            position(state);
+            active = state;
+        }
+
+        inputs.forEach(function (input) {
+            var state = { input: input, picker: buildPicker(), viewYear: 0, viewMonth: 0 };
+
+            state.picker.addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+            state.picker.addEventListener('click', function (e) {
+                var nav = e.target.closest('[data-nav]');
+                if (nav) {
+                    state.viewMonth += parseInt(nav.getAttribute('data-nav'), 10);
+                    if (state.viewMonth < 0) { state.viewMonth = 11; state.viewYear--; }
+                    if (state.viewMonth > 11) { state.viewMonth = 0; state.viewYear++; }
+                    render(state);
+                    return;
+                }
+
+                var action = e.target.closest('[data-action]');
+                if (action) {
+                    var kind = action.getAttribute('data-action');
+                    if (kind === 'clear') {
+                        input.value = '';
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else {
+                        var now = new Date();
+                        var min = parseIso(input.getAttribute('min'));
+                        var max = parseIso(input.getAttribute('max'));
+                        if ((min && now < min) || (max && now > max)) return;
+                        input.value = iso(now);
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    closePicker();
+                    return;
+                }
+
+                var day = e.target.closest('.datepicker__day');
+                if (day && !day.disabled) {
+                    input.value = day.getAttribute('data-date');
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    closePicker();
+                }
+            });
+
+            input.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                input.focus();
+                if (active === state) {
+                    closePicker();
+                } else {
+                    openPicker(state);
+                }
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closePicker();
+                } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    openPicker(state);
+                }
+            });
+        });
+
+        document.addEventListener('mousedown', function (e) {
+            if (!active) return;
+            if (active.input.contains(e.target) || active.picker.contains(e.target)) return;
+            closePicker();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closePicker();
+        });
+
+        window.addEventListener('resize', function () {
+            if (active) position(active);
+        });
+        window.addEventListener('scroll', function () {
+            if (active) position(active);
+        }, { passive: true });
     }
 
     /* --- Раскрывающийся поиск в шапке --- */
