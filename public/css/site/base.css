@@ -120,6 +120,8 @@
 
     --speed: 0.35s;
     --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
+
+    --hero-video-opacity: 0.4;
 }
 
 *,

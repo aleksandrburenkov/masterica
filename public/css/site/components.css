@@ -357,6 +357,74 @@
     }
 }
 
+/* --- Hero с полноэкранным видео-фоном (страница «О студии») --- */
+.hero--video {
+    min-height: 580px;
+    display: flex;
+    align-items: center;
+    /* Декоративный видео-фон не должен реагировать на курсор: блок
+       игнорирует мышь, чтобы браузер не показывал собственные элементы
+       управления видео при наведении. */
+    pointer-events: none;
+}
+/* Интерактивные элементы поверх видео остаются рабочими */
+.hero--video a,
+.hero--video button,
+.hero--video input,
+.hero--video select,
+.hero--video textarea,
+.hero--video .btn,
+.hero--video [tabindex]:not([tabindex="-1"]) {
+    pointer-events: auto;
+}
+video.hero__video {
+    pointer-events: none !important;
+}
+.hero--video .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: var(--hero-video-opacity, 0.4);
+    transition: opacity 0.8s var(--ease);
+
+    z-index: 0;
+    -webkit-mask-image: radial-gradient(
+        ellipse 100% 100% at 50% 50%,
+        #000 0%,
+        rgba(0, 0, 0, 0) 50%
+    );
+    mask-image: radial-gradient(
+        ellipse 100% 100% at 50% 50%,
+        #000 0%,
+        rgba(0, 0, 0, 0) 50%
+    );
+}
+.hero--video.hero--video-loading .hero__video {
+    opacity: 0;
+}
+.hero--video .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
+.hero--video .hero__inner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+}
+.hero--video .hero__inner::before {
+    inset: -20px -4% -20px -4%;
+}
+@media (max-width: 767.98px) {
+    .hero--video .hero__video {
+        display: none;
+    }
+    .hero--video {
+        min-height: 0;
+    }
+}
+
 /* --- Карточки --- */
 .card {
     display: block;
