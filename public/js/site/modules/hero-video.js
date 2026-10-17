@@ -1,15 +1,12 @@
 /* ==========================================================================
-   Корни — видео-фон hero-секции страницы «О студии».
+   Корни — видео-фон hero-секции (.hero--video).
    Только белый список: muted до автоплея, fade-in по loadeddata, обработка
    ошибки загрузки. Видео не останавливается и не блокируется.
    ========================================================================== */
 (function () {
     'use strict';
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var hero = document.querySelector('.hero--video');
-        if (!hero) return;
-
+    function initHeroVideo(hero) {
         var video = hero.querySelector('.hero__video');
         if (!video) return;
 
@@ -44,5 +41,9 @@
         if (source) {
             source.addEventListener('error', fail, { once: true });
         }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.hero--video').forEach(initHeroVideo);
     });
 })();

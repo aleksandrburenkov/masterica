@@ -9,14 +9,14 @@
 @endsection
 
 @section('content')
-    <section class="hero">
+    <section class="hero hero--video">
+        @include('partials.hero-video')
         <div class="container">
-            <div class="hero__inner" style="min-height:auto">
+            <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Онлайн-курсы</h1>
                     <p class="lead">Учитесь в своём темпе: программа по модулям, бесплатный вводный урок и доступ к платным материалам после подтверждения оплаты.</p>
                 </div>
-                <div class="hero__media" style="height:auto"><img src="{{ asset('images/hero-masterclass.png') }}" alt="Онлайн-курс" loading="lazy"></div>
             </div>
         </div>
     </section>

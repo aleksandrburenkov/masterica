@@ -14,9 +14,61 @@
         initReveal();
         initQuantity();
         initPasswordToggles();
+        initSelects();
         initOutreachCalculator();
         initStickyHeaderShadow();
     });
+
+    /* --- Кастомная стрелка выпадающего списка --- */
+    function initSelects() {
+        var chevronSvg = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        document.querySelectorAll('select.select').forEach(function (select) {
+            if (select.closest('.select-wrap')) return;
+
+            var wrap = document.createElement('div');
+            wrap.className = 'select-wrap';
+            select.parentNode.insertBefore(wrap, select);
+            wrap.appendChild(select);
+
+            var chevron = document.createElement('span');
+            chevron.className = 'select-wrap__chevron';
+            chevron.setAttribute('aria-hidden', 'true');
+            chevron.innerHTML = chevronSvg;
+            wrap.appendChild(chevron);
+
+            function open() { wrap.classList.add('is-open'); }
+            function close() { wrap.classList.remove('is-open'); }
+            function toggle() {
+                if (wrap.classList.contains('is-open')) {
+                    close();
+                } else {
+                    open();
+                }
+            }
+
+            /* Повторный клик по списку закрывает его без события change,
+               поэтому состояние переключаем вручную, а не только по focus/blur. */
+            select.addEventListener('mousedown', toggle);
+            select.addEventListener('change', close);
+            select.addEventListener('blur', close);
+            select.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    close();
+                } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    open();
+                }
+            });
+
+            document.addEventListener('mousedown', function (e) {
+                if (!wrap.contains(e.target)) close();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') close();
+            });
+        });
+    }
 
     /* --- Раскрывающийся поиск в шапке --- */
     function initHeaderSearch() {

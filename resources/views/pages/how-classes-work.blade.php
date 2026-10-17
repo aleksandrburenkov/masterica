@@ -9,7 +9,8 @@
 @endsection
 
 @section('content')
-    <section class="hero">
+    <section class="hero hero--video">
+        @include('partials.hero-video')
         <div class="container">
             <div class="hero__inner">
                 <div class="hero__content" data-reveal>
@@ -17,7 +18,6 @@
                     <p class="lead">От выбора техники до готовой работы: понятные шаги, материалы от студии и поддержка ведущего.</p>
                     <a class="btn" href="{{ route('masterclasses.index') }}">Выбрать мастер-класс</a>
                 </div>
-                <div class="hero__media"><img src="{{ asset('images/hero-masterclass.png') }}" alt="Как проходят занятия" loading="lazy"></div>
             </div>
         </div>
     </section>

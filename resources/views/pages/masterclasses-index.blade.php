@@ -10,16 +10,14 @@
 @endsection
 
 @section('content')
-    <section class="hero">
+    <section class="hero hero--video">
+        @include('partials.hero-video')
         <div class="container">
-            <div class="hero__inner" style="min-height:auto">
+            <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Мастер-классы в {{ setting('studio.city', 'Брянске') }}</h1>
                     <p class="lead">Творческие занятия для детей и взрослых — в студии и на выезде.</p>
                     <a class="btn" href="#catalog">Выбрать направление</a>
-                </div>
-                <div class="hero__media" style="height:auto">
-                    <img src="{{ asset('images/photo-2.jpg') }}" alt="Мастер-класс в студии" loading="lazy">
                 </div>
             </div>
         </div>

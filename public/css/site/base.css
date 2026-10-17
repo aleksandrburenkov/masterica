@@ -422,6 +422,47 @@ ul.clean {
     resize: vertical;
 }
 
+/* --- Кастомный выпадающий список --- */
+.select-wrap {
+    position: relative;
+    display: block;
+}
+.select-wrap .select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 48px;
+    border-color: var(--violet);
+    cursor: pointer;
+    text-overflow: ellipsis;
+}
+.select-wrap .select:hover {
+    border-color: var(--accent);
+}
+.select-wrap .select::-ms-expand {
+    display: none;
+}
+.select-wrap__chevron {
+    position: absolute;
+    top: 50%;
+    right: 22px;
+    width: 18px;
+    height: 18px;
+    margin-top: -9px;
+    color: var(--violet);
+    pointer-events: none;
+    transition: transform var(--speed) var(--ease);
+    transform: rotate(0deg);
+}
+.select-wrap__chevron svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.select-wrap.is-open .select-wrap__chevron {
+    transform: rotate(180deg);
+}
+
 /* Поле пароля с кнопкой показа/скрытия */
 .password-field {
     position: relative;

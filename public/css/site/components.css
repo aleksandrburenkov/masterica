@@ -922,7 +922,6 @@ video.hero__video {
 
 /* Футер */
 .site-footer {
-    margin-top: clamp(50px, 6vw, 90px);
     background: #fff;
     border-top: 1px solid var(--line);
     padding-block: clamp(36px, 4vw, 60px) 26px;
