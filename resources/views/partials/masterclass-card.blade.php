@@ -1,6 +1,13 @@
 @props(['masterclass'])
 
-<article class="card card--pad-0 catalog-card" data-reveal>
+<article class="card card--pad-0 catalog-card"
+    data-reveal
+    data-catalog-card
+    data-technique="{{ $masterclass->technique?->slug }}"
+    data-age-min="{{ $masterclass->age_min }}"
+    data-age-max="{{ $masterclass->age_max }}"
+    data-level="{{ $masterclass->level }}"
+    data-format="{{ $masterclass->format }}">
     <a class="catalog-card__media" href="{{ route('masterclasses.show', $masterclass->slug) }}">
         <img src="{{ asset($masterclass->image ?? 'images/hero-masterclass.png') }}" alt="{{ $masterclass->title }}" loading="lazy">
         @if ($masterclass->technique)

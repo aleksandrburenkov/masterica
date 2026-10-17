@@ -587,6 +587,7 @@ video.hero__video {
     border: 1.5px solid var(--line-2);
     background: #fff;
     color: var(--ink-soft);
+    font: inherit;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -601,6 +602,13 @@ video.hero__video {
     color: #fff;
     border-color: transparent;
     box-shadow: 0 8px 20px rgba(83, 92, 230, 0.3);
+}
+
+/* JS-фильтрация каталога: у этих элементов свой display, поэтому
+   атрибут [hidden] нужно продублировать явным правилом. */
+.catalog-card[hidden],
+.btn[hidden] {
+    display: none;
 }
 
 .filter-bar {

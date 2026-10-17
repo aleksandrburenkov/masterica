@@ -6,40 +6,22 @@ use App\Models\Masterclass;
 use App\Models\Technique;
 use App\Models\WorkshopSession;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Request;
 
 class MasterclassController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
         $techniques = Technique::query()->active()->get();
 
-        $query = Masterclass::query()->published()->with('technique');
-
-        if ($techniqueSlug = $request->query('technique')) {
-            $query->whereHas('technique', fn ($q) => $q->where('slug', $techniqueSlug));
-        }
-
-        if ($age = $request->query('age')) {
-            $query->where('age_min', '<=', (int) $age)->where(fn ($q) => $q->whereNull('age_max')->orWhere('age_max', '>=', (int) $age));
-        }
-
-        if ($level = $request->query('level')) {
-            $query->where('level', $level);
-        }
-
-        if ($format = $request->query('format')) {
-            $query->where('format', $format);
-        }
-
-        $hasFilters = (bool) array_filter($request->only(['technique', 'age', 'level', 'format']), fn ($v) => $v !== null && $v !== '');
-
-        $masterclasses = $query->orderBy('sort')->paginate(9)->withQueryString();
+        $masterclasses = Masterclass::query()
+            ->published()
+            ->with('technique')
+            ->orderBy('sort')
+            ->get();
 
         return view('pages.masterclasses-index', [
             'masterclasses' => $masterclasses,
             'techniques' => $techniques,
-            'hasFilters' => $hasFilters,
         ]);
     }
 
