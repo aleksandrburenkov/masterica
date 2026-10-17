@@ -9,10 +9,15 @@ use Throwable;
 /**
  * Репозиторий правовых документов с кэшированием по образцу Settings.
  * Возвращает документы, редактируемые владельцем в админ-панели.
+ *
+ * В кэш кладём только «сырые» массивы атрибутов, а не Eloquent-модели:
+ * сериализация моделей приводит к тому, что при чтении кэша (особенно после
+ * изменения кода/перезапуска PHP) объекты восстанавливаются как
+ * __PHP_Incomplete_Class и падают при обращении к свойствам.
  */
 class LegalDocuments
 {
-    private const CACHE_KEY = 'app.legal_documents.all';
+    private const CACHE_KEY = 'app.legal_documents.attributes';
 
     /** @var array<string, LegalDocument>|null */
     private static ?array $memo = null;
@@ -25,13 +30,15 @@ class LegalDocuments
         }
 
         try {
-            return self::$memo = Cache::rememberForever(self::CACHE_KEY, function () {
+            $attributes = Cache::rememberForever(self::CACHE_KEY, function (): array {
                 return LegalDocument::query()
                     ->orderBy('sort')
                     ->get()
-                    ->keyBy('key')
+                    ->map(fn (LegalDocument $document): array => $document->getAttributes())
                     ->all();
             });
+
+            return self::$memo = LegalDocument::hydrate($attributes)->keyBy('key')->all();
         } catch (Throwable) {
             // До выполнения миграций таблицы может не быть — не ломаем приложение.
             return self::$memo = [];
@@ -53,6 +60,9 @@ class LegalDocuments
     public static function flush(): void
     {
         self::$memo = null;
+
         Cache::forget(self::CACHE_KEY);
+        // Чистим и старый ключ, где могли лежать сериализованные модели.
+        Cache::forget('app.legal_documents.all');
     }
 }

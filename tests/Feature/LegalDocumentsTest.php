@@ -7,6 +7,7 @@ use App\Models\LegalDocument;
 use App\Models\User;
 use App\Support\LegalDocuments;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -145,6 +146,24 @@ class LegalDocumentsTest extends TestCase
         $this->get(route('legal.privacy'))
             ->assertOk()
             ->assertSee('Обновлённая аннотация политики конфиденциальности.');
+    }
+
+    public function test_documents_are_cached_as_plain_arrays_not_models(): void
+    {
+        LegalDocuments::flush();
+        LegalDocuments::all();
+
+        $cached = Cache::get('app.legal_documents.attributes');
+
+        $this->assertIsArray($cached);
+        $this->assertNotEmpty($cached);
+
+        foreach ($cached as $row) {
+            // Сериализация Eloquent-моделей приводила к __PHP_Incomplete_Class.
+            $this->assertIsArray($row);
+        }
+
+        $this->assertContainsOnlyInstancesOf(LegalDocument::class, LegalDocuments::all());
     }
 
     public function test_manager_role_can_still_open_admin_panel(): void

@@ -8,7 +8,8 @@
 
             <div>
                 <h5>Связаться</h5>
-                <a class="footer-phone" href="tel:{{ preg_replace('/[^0-9+]/', '', setting('studio.phone', '')) }}">{{ setting('studio.phone', '+7 (906) 698-31-06') }}</a>
+                <a class="footer-phone"
+                    href="tel:{{ preg_replace('/[^0-9+]/', '', setting('studio.phone', '')) }}">{{ setting('studio.phone', '+7 (906) 698-31-06') }}</a>
                 <ul>
                     <li>{{ setting('studio.address', 'г. Брянск, ул. Московская, д. 23') }}</li>
                     <li>{{ setting('studio.hours', 'Ежедневно 10:00–19:00') }}</li>
@@ -32,24 +33,21 @@
 
             <div>
                 <h5>Правовая информация</h5>
-                @php
-                    $footerDocs = ['privacy_policy', 'consent_personal_data', 'offer_terms', 'license_terms', 'booking_rules', 'platform_terms'];
-                @endphp
-                <ul>
-                    @foreach ($footerDocs as $key)
-                        @php($doc = $legalDocuments[$key] ?? null)
-                        @if ($doc)
+                @php($footerDocs = collect($legalDocuments ?? []))
+                @if ($footerDocs->isNotEmpty())
+                    <ul>
+                        @foreach ($footerDocs as $doc)
                             <li><a href="{{ route('legal.show', $doc->slug) }}">{{ $doc->title }}</a></li>
-                        @endif
-                    @endforeach
-                </ul>
-                @php($privacy = $legalDocuments['privacy_policy'] ?? null)
-                @if ($privacy)
+                        @endforeach
+                    </ul>
+                @endif
+                {{-- @php($privacy = $footerDocs->get('privacy_policy')) --}}
+                {{-- @if ($privacy)
                     <p class="footer-legal-note" style="font-size:13px;margin-top:10px;opacity:.85">
                         Персональные данные обрабатываются в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».
                         <a href="{{ route('legal.show', $privacy->slug) }}">Подробнее</a>.
                     </p>
-                @endif
+                @endif --}}
             </div>
         </div>
 

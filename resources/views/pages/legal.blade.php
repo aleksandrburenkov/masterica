@@ -4,7 +4,7 @@
     $documents = collect($legalDocuments ?? [])->values();
 @endphp
 
-@section('title', $document->title.' — '.setting('studio.name', 'Корни'))
+@section('title', $document->title . ' — ' . setting('studio.name', 'Корни'))
 @section('meta_description', $document->lead ?: $document->title)
 @section('canonical', route('legal.show', $document->slug))
 
@@ -14,16 +14,33 @@
 
 @push('head')
     <style>
-        .legal-body h2 { font-size: 20px; margin: 26px 0 10px; color: var(--ink); }
-        .legal-body h2:first-child { margin-top: 0; }
-        .legal-body p { margin: 0 0 12px; line-height: 1.65; }
-        .legal-body ul { margin: 0 0 12px; padding-left: 22px; display: grid; gap: 6px; }
+        .legal-body h2 {
+            font-size: 20px;
+            margin: 26px 0 10px;
+            color: var(--ink);
+        }
+
+        .legal-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .legal-body p {
+            margin: 0 0 12px;
+            line-height: 1.65;
+        }
+
+        .legal-body ul {
+            margin: 0 0 12px;
+            padding-left: 22px;
+            display: grid;
+            gap: 6px;
+        }
     </style>
 @endpush
 
 @section('content')
     <section class="section section--tight">
-        <div class="container" style="max-width:860px">
+        <div class="container">
             <div class="card">
                 <span class="chip chip--violet">Правовой документ</span>
                 <h1 style="margin-top:12px">{{ $document->title }}</h1>

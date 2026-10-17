@@ -26,6 +26,7 @@ class LegalDocumentForm
                     ->helperText('Не изменяется после создания. По ключу документ находят шаблоны, например legal(\'privacy_policy\').')
                     ->required()
                     ->maxLength(64)
+                    ->trim()
                     ->unique(ignoreRecord: true)
                     ->disabled(fn (string $operation): bool => $operation === 'edit')
                     ->dehydrated()
@@ -34,11 +35,14 @@ class LegalDocumentForm
                     ]),
                 TextInput::make('slug')
                     ->label('Слаг (URL)')
-                    ->helperText('Публичный адрес: /dokumenty/{слаг}')
+                    ->helperText('Публичный адрес документа: /dokumenty/{слаг}. Укажите только последний сегмент (например, politics), без «/dokumenty/» и без «/».')
                     ->required()
                     ->maxLength(120)
+                    ->trim()
+                    ->rule('regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
                     ->unique(ignoreRecord: true)
                     ->validationMessages([
+                        'regex' => 'Слаг может содержать только строчные латинские буквы, цифры и дефисы, без «/». Например: politics.',
                         'unique' => 'Документ с таким слагом уже существует. Укажите другой слаг.',
                     ]),
                 TextInput::make('title')->label('Заголовок')->required()->maxLength(255)->columnSpanFull(),
