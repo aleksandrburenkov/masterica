@@ -1,0 +1,583 @@
+/* ==========================================================================
+   Корни — базовые стили: токены, шрифты, сброс, типографика, сетка
+   ========================================================================== */
+
+/* --- Локальные шрифты из каталога fonts/ --- */
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro_light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro_medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro_bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro_italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../../fonts/gothampro_black.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Als Schlange Sans";
+    src: url("../../fonts/alsschlangesans-thin.woff2") format("woff2");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Als Schlange Sans";
+    src: url("../../fonts/alsschlangesans-light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Als Schlange Sans";
+    src: url("../../fonts/alsschlangesans.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Als Schlange Sans";
+    src: url("../../fonts/alsschlangesans-bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Als Schlange Sans";
+    src: url("../../fonts/alsschlangesans-black.woff2") format("woff2");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --- Токены --- */
+:root {
+    --container: 1520px;
+    --gutter: 10px;
+    /* --gutter: clamp(16px, 4vw, 48px); */
+
+    --ink: #243976;
+    --ink-soft: #39406e;
+    --muted: #6d7396;
+    --muted-2: #9aa0c0;
+
+    --primary: #3b6cf5;
+    --primary-2: #2f5be0;
+    --violet: #8b5cf6;
+    --violet-soft: #b9a6f7;
+    --accent: #7c3aed;
+
+    --grad: linear-gradient(100deg, #3b82f6 0%, #7c5cf6 55%, #a855f7 100%);
+    --grad-soft: linear-gradient(120deg, #eef2ff 0%, #f4f0ff 100%);
+
+    --bg: #f4f5fc;
+    --bg-2: #eef0fb;
+    --card: #ffffff;
+    --line: #e6e8f6;
+    --line-2: #d9ddf0;
+
+    --radius-sm: 12px;
+    --radius: 18px;
+    --radius-lg: 26px;
+
+    --shadow-sm: 0 4px 14px rgba(38, 46, 110, 0.06);
+    --shadow: 0 14px 40px rgba(38, 46, 110, 0.09);
+    --shadow-lg: 0 26px 70px rgba(38, 46, 110, 0.14);
+
+    --font-body: "Gotham Pro", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Als Schlange Sans", "Gotham Pro", "Segoe UI", sans-serif;
+
+    --speed: 0.35s;
+    --ease: cubic-bezier(0.22, 0.8, 0.28, 1);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--ink-soft);
+    background:
+        radial-gradient(1100px 600px at 85% -5%, #eaf0ff 0%, transparent 60%),
+        radial-gradient(900px 500px at -5% 15%, #f2ecff 0%, transparent 55%),
+        var(--bg);
+    background-attachment: fixed;
+    line-height: 1.6;
+    font-size: clamp(15px, 0.5vw + 14px, 17px);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    line-height: 1.15;
+    margin: 0 0 0.5em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+h1 {
+    font-size: clamp(32px, 4.8vw, 78px);
+    width: 100%;
+}
+h2 {
+    font-size: clamp(26px, 2.6vw, 42px);
+}
+h3 {
+    font-size: clamp(20px, 1.6vw, 27px);
+}
+h4 {
+    font-size: clamp(17px, 1.2vw, 21px);
+}
+
+p {
+    margin: 0 0 1em;
+}
+
+a {
+    color: var(--primary-2);
+    text-decoration: none;
+    transition: color var(--speed) var(--ease);
+}
+a:hover {
+    color: var(--accent);
+}
+
+img {
+    max-width: 100%;
+    display: block;
+    pointer-events: none;
+}
+
+ul.clean {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+:focus-visible {
+    outline: 3px solid rgba(124, 92, 246, 0.5);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+/* --- Layout --- */
+.container {
+    width: 100%;
+    max-width: var(--container);
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+}
+
+.section {
+    padding-block: clamp(48px, 6vw, 96px);
+}
+
+.section--tight {
+    padding-block: clamp(32px, 4vw, 60px);
+}
+
+.section-head {
+    max-width: 820px;
+    margin: 0 auto clamp(28px, 4vw, 52px);
+    text-align: center;
+}
+.section-head .eyebrow {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--violet);
+    margin-bottom: 10px;
+}
+.section-head p {
+    color: var(--muted);
+    font-size: clamp(15px, 1.1vw, 18px);
+    margin: 0;
+}
+
+.grid {
+    display: grid;
+    gap: clamp(18px, 2vw, 28px);
+}
+.grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1080px) {
+    .grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 960px) {
+    .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 680px) {
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stack > * + * {
+    margin-top: 16px;
+}
+.muted {
+    color: var(--muted);
+}
+.center {
+    text-align: center;
+}
+.nowrap {
+    white-space: nowrap;
+}
+
+/* --- Buttons --- */
+.btn {
+    --btn-bg: var(--grad);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 30px;
+    border: 0;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--btn-bg);
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(83, 92, 230, 0.32);
+    transition:
+        transform var(--speed) var(--ease),
+        box-shadow var(--speed) var(--ease),
+        filter var(--speed) var(--ease);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(83, 92, 230, 0.42);
+    color: #fff;
+    filter: saturate(1.08);
+}
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn--ghost {
+    --btn-bg: transparent;
+    color: var(--primary-2);
+    border: 2px solid var(--line-2);
+    box-shadow: none;
+}
+.btn--ghost:hover {
+    border-color: var(--violet-soft);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn--light {
+    --btn-bg: #fff;
+    color: var(--primary-2);
+    box-shadow: var(--shadow-sm);
+}
+.btn--light:hover {
+    color: var(--accent);
+}
+
+.btn--sm {
+    padding: 10px 20px;
+    font-size: 11px;
+}
+.btn--block {
+    width: 100%;
+}
+
+.btn:disabled,
+.btn[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- Chips / tags --- */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #eef1ff;
+    color: var(--primary-2);
+    font-size: 13px;
+    font-weight: 500;
+}
+.chip--violet {
+    background: #f2ecff;
+    color: var(--accent);
+}
+
+/* --- Forms --- */
+.field {
+    margin-bottom: 18px;
+}
+.field > label {
+    display: block;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.field .hint {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+}
+.input,
+.select,
+.textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--line-2);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    transition:
+        border-color var(--speed) var(--ease),
+        box-shadow var(--speed) var(--ease);
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: var(--violet-soft);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+    outline: none;
+}
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Поле пароля с кнопкой показа/скрытия */
+.password-field {
+    position: relative;
+}
+.password-field .input {
+    padding-right: 52px;
+}
+.password-field input::-ms-reveal,
+.password-field input::-ms-clear {
+    display: none;
+}
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+        color var(--speed) var(--ease),
+        background var(--speed) var(--ease);
+}
+.password-toggle:hover {
+    color: var(--accent);
+    background: rgba(124, 92, 246, 0.1);
+}
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+.password-toggle__hide {
+    display: none;
+}
+.password-toggle.is-visible .password-toggle__show {
+    display: none;
+}
+.password-toggle.is-visible .password-toggle__hide {
+    display: block;
+}
+
+.checkbox {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--muted);
+}
+.checkbox input {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--violet);
+}
+.error-text {
+    color: #d64550;
+    font-size: 13px;
+    margin-top: 6px;
+}
+.input.is-invalid,
+.select.is-invalid,
+.textarea.is-invalid {
+    border-color: #e88;
+}
+
+.form-note {
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--bg-2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+}
+
+/* --- Flash --- */
+.flash {
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    border: 1px solid transparent;
+}
+.flash--success {
+    background: #eafaf1;
+    color: #1c7a4a;
+    border-color: #bfead3;
+}
+.flash--error {
+    background: #fdeef0;
+    color: #b0323e;
+    border-color: #f4c9ce;
+}
+.flash--info {
+    background: #eef2ff;
+    color: #33459e;
+    border-color: #d5ddfb;
+}
+
+/* --- Utilities --- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+.skip-link {
+    position: absolute;
+    opacity: 0;
+    left: 12px;
+    top: -60px;
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    z-index: 200;
+    transition: top var(--speed) var(--ease);
+}
+.skip-link:focus {
+    top: 12px;
+    color: #fff;
+}
+
+.divider {
+    height: 1px;
+    background: var(--line);
+    border: 0;
+    margin: 0;
+}
+
+::selection {
+    background: rgba(139, 92, 246, 0.25);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+}
+::-webkit-scrollbar-track {
+    background: #eceefb;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(#8ea6f0, #b39df3);
+    border-radius: 999px;
+    border: 2px solid #eceefb;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(#7c98ee, #a686f0);
+}

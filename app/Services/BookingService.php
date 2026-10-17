@@ -1,0 +1,193 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\SessionStatus;
+use App\Models\Booking;
+use App\Models\User;
+use App\Models\WorkshopSession;
+use App\Support\NumberGenerator;
+use App\Support\Settings;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class BookingService
+{
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly NotificationService $notifications,
+    ) {}
+
+    /**
+     * Atomically reserve a seat and confirm a local booking.
+     *
+     * The session row is locked for the duration of the transaction so two
+     * concurrent requests for the last seat cannot both succeed. Server-side
+     * data (price, capacity, publication) is always re-read and re-checked.
+     */
+    public function create(User $user, WorkshopSession $session, array $data): Booking
+    {
+        return DB::transaction(function () use ($user, $session, $data) {
+            $this->expireStaleHolds();
+
+            /** @var WorkshopSession $locked */
+            $locked = WorkshopSession::query()
+                ->whereKey($session->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->assertBookable($locked);
+
+            $participants = max(1, (int) $data['participants_count']);
+
+            if ($this->hasActiveBooking($user, $locked)) {
+                throw ValidationException::withMessages([
+                    'participants_count' => 'На этот сеанс у вас уже есть активная запись.',
+                ]);
+            }
+
+            $reserved = $this->reservedSeats($locked);
+            if ($reserved + $participants > $locked->capacity) {
+                throw ValidationException::withMessages([
+                    'participants_count' => 'На этот сеанс недостаточно свободных мест.',
+                ]);
+            }
+
+            $unit = $locked->priceCents();
+            $holdMinutes = Settings::int('rules.hold_minutes', 15);
+
+            // A cancelled booking may be reused so the same user can re-book
+            // the same session without violating the unique (user, session) index.
+            $booking = Booking::query()->updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'workshop_session_id' => $locked->id,
+                ],
+                [
+                    'number' => NumberGenerator::booking(),
+                    'status' => BookingStatus::Held,
+                    'payment_status' => PaymentStatus::Unpaid,
+                    'participants_count' => $participants,
+                    'contact_name' => $data['contact_name'],
+                    'contact_phone' => $data['contact_phone'],
+                    'contact_email' => $data['contact_email'],
+                    'child_age' => $data['child_age'] ?? null,
+                    'unit_price_cents' => $unit,
+                    'total_cents' => $unit * $participants,
+                    'currency' => $locked->masterclass->currency ?? 'RUB',
+                    'hold_expires_at' => now()->addMinutes($holdMinutes),
+                    'confirmed_at' => null,
+                    'attended_at' => null,
+                    'canceled_at' => null,
+                    'cancel_reason' => null,
+                    'notes' => $data['notes'] ?? null,
+                ],
+            );
+
+            // Local flow: the booking is confirmed immediately, payment is
+            // collected at the studio. No real charge is performed.
+            $this->confirm($booking, 'Подтверждение записи (оплата в студии)');
+
+            return $booking->refresh();
+        });
+    }
+
+    public function confirm(Booking $booking, ?string $reason = null): Booking
+    {
+        $booking->forceFill([
+            'status' => BookingStatus::Confirmed,
+            'confirmed_at' => $booking->confirmed_at ?? now(),
+            'hold_expires_at' => null,
+        ])->save();
+
+        $this->audit->log($booking->user, 'booking.confirmed', $booking, $reason, [
+            'status' => BookingStatus::Confirmed->value,
+        ]);
+        $this->notifications->notify(
+            $booking->user,
+            'Запись подтверждена',
+            'Запись '.$booking->number.' подтверждена. Оплата — в студии.',
+        );
+
+        return $booking;
+    }
+
+    public function cancel(Booking $booking, ?string $reason = null): Booking
+    {
+        if (! $booking->status->isActive()) {
+            return $booking;
+        }
+
+        $booking->forceFill([
+            'status' => BookingStatus::Cancelled,
+            'canceled_at' => now(),
+            'cancel_reason' => $reason,
+            'hold_expires_at' => null,
+        ])->save();
+
+        $this->audit->log($booking->user, 'booking.cancelled', $booking, $reason);
+
+        return $booking;
+    }
+
+    /**
+     * Idempotently expire holds whose timeout has passed. Never touches the
+     * payment status, so a browser refresh cannot alter finances.
+     */
+    public function expireStaleHolds(): int
+    {
+        return Booking::query()
+            ->where('status', BookingStatus::Held->value)
+            ->whereNotNull('hold_expires_at')
+            ->where('hold_expires_at', '<', now())
+            ->update(['status' => BookingStatus::Expired->value, 'updated_at' => now()]);
+    }
+
+    private function assertBookable(WorkshopSession $session): void
+    {
+        if (! $session->is_published || $session->status !== SessionStatus::Scheduled) {
+            throw ValidationException::withMessages([
+                'session' => 'Этот сеанс больше не доступен для записи.',
+            ]);
+        }
+
+        if ($session->starts_at->isPast()) {
+            throw ValidationException::withMessages([
+                'session' => 'Этот сеанс уже прошёл.',
+            ]);
+        }
+    }
+
+    private function hasActiveBooking(User $user, WorkshopSession $session): bool
+    {
+        return Booking::query()
+            ->where('user_id', $user->id)
+            ->where('workshop_session_id', $session->id)
+            ->whereIn('status', [
+                BookingStatus::Held->value,
+                BookingStatus::PendingPayment->value,
+                BookingStatus::Confirmed->value,
+                BookingStatus::Attended->value,
+            ])
+            ->exists();
+    }
+
+    private function reservedSeats(WorkshopSession $session): int
+    {
+        return (int) Booking::query()
+            ->where('workshop_session_id', $session->id)
+            ->where(function ($q) {
+                $q->whereIn('status', [
+                    BookingStatus::PendingPayment->value,
+                    BookingStatus::Confirmed->value,
+                    BookingStatus::Attended->value,
+                ])->orWhere(function ($q2) {
+                    $q2->where('status', BookingStatus::Held->value)
+                        ->where('hold_expires_at', '>', now());
+                });
+            })
+            ->sum('participants_count');
+    }
+}

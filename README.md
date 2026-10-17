@@ -1,58 +1,141 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Арт-студия «Корни» — веб-платформа
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Публичный сайт, запись на мастер-классы, магазин авторских работ, онлайн-курсы,
+личный кабинет и административная панель для творческой студии «Корни» (Брянск).
 
-## About Laravel
+Проект развивает существующее Laravel-приложение: публичный интерфейс на Blade,
+админка на Filament. Отдельного SPA/сборщика нет — CSS и JavaScript лежат в `public/`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Стек
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Компонент | Версия |
+| --- | --- |
+| PHP | 8.3 |
+| Laravel | 13 |
+| Filament | 5 |
+| БД (локально) | MySQL (`masterica_db`) |
+| Blade / нативный JS | — |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Требования
 
-## Learning Laravel
+- PHP 8.3+ с расширениями `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `gd` (по возможности);
+- Composer;
+- MySQL (в OSPanel — база `masterica_db`, пользователь `root` без пароля по умолчанию);
+- Node.js не требуется для работы сайта (Vite используется только стандартными скриптами Laravel и не задействован публичными страницами).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Локальный запуск
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+copy .env.example .env        # Windows; при необходимости поправьте DB_*
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve             # http://127.0.0.1:8000
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+В OSPanel сайт открывается по домену проекта (например `http://masterica`);
+`asset()` подставляет хост запроса автоматически.
 
-## Contributing
+### База данных, миграции и сиды
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Миграции: `php artisan migrate`.
+- Полный набор данных: `php artisan migrate:fresh --seed`.
+- `DatabaseSeeder` запускает:
+  - `SettingsSeeder` — контакты, цены и правила студии (редактируются в админке);
+  - `CatalogSeeder` — техники, мастер Ирина Буренкова, 4 направления, 8 будущих сеансов
+    (даты считаются от даты запуска), 3 товара с вариантами и остатками, 1 онлайн-курс
+    (6 модулей, 18 уроков), 2 авторских материала;
+  - `DemoSeeder` — **только вне production**: демо-аккаунты, демонстрационная запись,
+    заказ, доступ к курсу и синтетические демо-отзывы (помечены `is_demo`).
 
-## Code of Conduct
+### Демонстрационные аккаунты (локально)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Пароль у всех демо-учёток — `password`. Храните эти данные только локально,
+в публичный интерфейс и Git они не попадают.
 
-## Security Vulnerabilities
+| Роль | Email |
+| --- | --- |
+| Владелец (полный доступ, настройки) | `owner@korni.local` |
+| Менеджер | `manager@korni.local` |
+| Мастер | `master@korni.local` |
+| Клиент (с записью, заказом и курсом) | `demo@korni.local` |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Функциональность
 
-## License
+### Публичная часть
+Главная, «О студии», «Как проходят занятия», «Контакты», «Выездные мастер-классы»,
+каталог мастер-классов с фильтрами, страница занятия с записью, магазин и карточка
+товара, корзина и оформление заказа, каталог курсов и страница курса, отзывы,
+авторские материалы, локальный лендинг «Мастер-классы в Брянске», поиск.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Запись на мастер-класс
+Сервер повторно проверяет публикацию сеанса, цену, число мест и правила дублирования.
+Резерв места атомарный (блокировка строки сеанса в транзакции), поэтому последнее место
+нельзя подтвердить дважды. Статусы записи и оплаты хранятся отдельно; локальная запись
+подтверждается сразу, оплата — «в студии».
+
+### Магазин и заказы
+Корзина в сессии, серверная проверка цен/вариантов/остатков при оформлении, снимки
+названия, варианта, SKU, цены и валюты в строках заказа. Склад ведётся append-only
+движениями (поступление, резерв, освобождение, списание, корректировка); резерв
+уменьшает доступный остаток, но не физический.
+
+### Онлайн-курсы
+Программа по модулям, бесплатный preview-урок, серверная проверка доступа к платным
+урокам, прогресс, локальная «тестовая оплата» администратором (без реального списания),
+отзыв доступа с указанием актора и причины.
+
+### Личный кабинет
+Профиль и контакты, предстоящие и прошедшие записи, купленные курсы и прогресс,
+заказы и статусы. Пользователь видит только свои данные (Laravel Policies).
+
+### Административная панель (Filament)
+Расписание, записи, мастера и техники, мастер-классы, товары, варианты и склад,
+заказы, курсы, модули, уроки, доступы и прогресс, отзывы (модерация), публичный
+контент и SEO, пользователи и роли, журнал аудита. Dashboard показывает содержимое
+локальной базы и предстоящие сеансы. Панель закрыта для клиентов (`canAccessPanel`).
+
+Настройки студии (контакты, цены, правила отмены и оплаты) редактируются на странице
+**Настройки студии** (только владелец).
+
+## Тесты
+
+```bash
+php artisan test
+```
+
+Тесты используют SQLite (`:memory:`) и проверяют: публичные страницы, авторизацию,
+разграничение данных между пользователями, денежные расчёты, атомарность записи
+(последнее место), статусы, права на уроки, идемпотентность выдачи доступа,
+доступ к админке и загрузку всех ресурсов/страниц Filament.
+
+## Файлы и хранилище
+
+- Публичные ассеты: `public/css/site/*`, `public/js/site/*`, `public/images/*`, `public/fonts/*`.
+- Шрифты подключены локально из `fonts/` (Gotham Pro, Als Schlange Sans) — внешние CDN не используются.
+- Изображения взяты из каталога `images/` проекта.
+- Платные материалы курсов предназначены для приватного диска (`storage/app/private`, `FILESYSTEM_DISK=local`);
+  постоянные публичные ссылки на них не выдаются.
+- `php artisan storage:link` — если понадобится публичный диск.
+
+## Фоновые процессы
+
+Очереди и почта в локальной версии не требуют внешних сервисов:
+`QUEUE_CONNECTION=database`, `MAIL_MAILER=log`. Уведомления моделируются внутри
+приложения (интерфейс + журнал). Реальные email/SMS, платёжные шлюзы, аналитика и
+телеметрия не подключены.
+
+## Переменные окружения
+
+Ключевые переменные — в `.env.example`. Значимые для локального запуска:
+`APP_URL`, `APP_LOCALE=ru`, `DB_*`, `FILESYSTEM_DISK`, `QUEUE_CONNECTION`, `CACHE_STORE`,
+`SESSION_DRIVER`. Денежные суммы хранятся целыми числами в копейках, время — в UTC
+с отображением в часовом поясе `Europe/Moscow`.
+
+## Ограничения локальной версии
+
+- Данные (цены, расписание, отзывы, профили) — локальные и демонстрационные.
+- Демо-отзывы помечены как `demo` и исключаются из production-сида.
+- Юридические страницы содержат демонстрационные тексты и не являются офертой.
+- Публикация в production, реальные платежи и рассылки требуют отдельного разрешения владельца.

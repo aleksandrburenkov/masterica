@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\OutreachStatus;
+use App\Models\OutreachRequest;
+use App\Models\User;
+use App\Support\NumberGenerator;
+
+class OutreachService
+{
+    public function __construct(
+        private readonly OutreachCalculator $calculator,
+        private readonly AuditLogger $audit,
+        private readonly NotificationService $notifications,
+    ) {}
+
+    /**
+     * Create an outreach workshop request. The price is recalculated on the
+     * server and stored with the request; this is a quote, not a checkout.
+     */
+    public function create(?User $user, array $data): OutreachRequest
+    {
+        $participants = (int) $data['participants_count'];
+        $calc = $this->calculator->calculate($participants);
+
+        $request = OutreachRequest::create([
+            'number' => NumberGenerator::outreach(),
+            'user_id' => $user?->id,
+            'direction' => $data['direction'],
+            'requested_date' => $data['requested_date'],
+            'location' => $data['location'],
+            'participants_count' => $participants,
+            'age_group' => $data['age_group'] ?? null,
+            'contact_name' => $data['contact_name'],
+            'contact_phone' => $data['contact_phone'],
+            'contact_email' => $data['contact_email'],
+            'base_price_cents' => $calc['base_price_cents'],
+            'included_participants' => $calc['included_participants'],
+            'extra_count' => $calc['extra_count'],
+            'extra_price_cents' => $calc['extra_price_cents'],
+            'calc_total_cents' => $calc['total_cents'],
+            'currency' => $calc['currency'],
+            'status' => OutreachStatus::New,
+            'comment' => $data['comment'] ?? null,
+        ]);
+
+        $this->audit->log($user, 'outreach.requested', $request, null, [
+            'total_cents' => $request->calc_total_cents,
+        ]);
+        $this->notifications->notify(
+            $user,
+            'Заявка на выездной мастер-класс принята',
+            'Заявка '.$request->number.'. Мы свяжемся для подтверждения.',
+        );
+
+        return $request;
+    }
+}

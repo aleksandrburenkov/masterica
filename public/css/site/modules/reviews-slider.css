@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Корни — модуль «Карусель отзывов» (на базе Swiper)
+   Подключается только вместе с partials/reviews-slider.
+   ========================================================================== */
+
+.reviews-slider {
+    position: relative;
+}
+
+.reviews-slider .swiper {
+    overflow: hidden;
+    /* Небольшой запас, чтобы тени карточек не обрезались */
+    padding-block: 6px;
+    margin-block: -6px;
+}
+
+.reviews-slider .swiper-slide {
+    height: auto;
+}
+
+.reviews-slider .swiper-slide .review-card {
+    height: 100%;
+}
+
+/* Слайды за пределами области просмотра не должны ждать анимации появления */
+.reviews-slider [data-reveal] {
+    opacity: 1;
+    transform: none;
+}
+
+/* --- Навигация: нижняя правая часть блока --- */
+.reviews-slider__nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.reviews-slider__arrow {
+    --arrow-size: 56px;
+    flex: none;
+    width: var(--arrow-size);
+    height: var(--arrow-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1.5px solid var(--line-2);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--primary-2);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition:
+        color var(--speed) var(--ease),
+        border-color var(--speed) var(--ease),
+        background var(--speed) var(--ease),
+        box-shadow var(--speed) var(--ease),
+        transform var(--speed) var(--ease);
+}
+
+.reviews-slider__arrow svg {
+    width: 22px;
+    height: 22px;
+}
+
+.reviews-slider__arrow:hover {
+    color: #fff;
+    border-color: transparent;
+    background: var(--grad);
+    box-shadow: 0 14px 30px rgba(83, 92, 230, 0.34);
+    transform: translateY(-2px);
+}
+
+.reviews-slider__arrow:active {
+    transform: translateY(0);
+}
+
+.reviews-slider__arrow:focus-visible {
+    outline: 3px solid rgba(124, 92, 246, 0.5);
+    outline-offset: 3px;
+}
+
+/* Стрелка «назад» — зеркальная иконка */
+.reviews-slider__arrow--prev svg {
+    transform: rotate(180deg);
+}
+
+/* Отключённое состояние (граница слайдера) */
+.reviews-slider__arrow.swiper-button-disabled {
+    opacity: 0.4;
+    cursor: default;
+    box-shadow: none;
+    transform: none;
+}
+
+.reviews-slider__arrow.swiper-button-disabled:hover {
+    color: var(--primary-2);
+    border-color: var(--line-2);
+    background: #fff;
+    transform: none;
+}
+
+/* Swiper: скрыть навигацию, если все слайды видны (watchOverflow) */
+.reviews-slider .swiper-button-lock {
+    display: none;
+}
+
+/* --- Резервный вид, если Swiper не загрузился --- */
+.reviews-slider:not(.is-ready) .reviews-slider__nav {
+    display: none;
+}
+
+.reviews-slider:not(.is-ready) .swiper {
+    overflow: visible;
+    padding-block: 0;
+    margin-block: 0;
+}
+
+.reviews-slider:not(.is-ready) .swiper-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(18px, 2vw, 28px);
+}
+
+@media (max-width: 960px) {
+    .reviews-slider:not(.is-ready) .swiper-wrapper {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .reviews-slider:not(.is-ready) .swiper-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .reviews-slider__arrow {
+        --arrow-size: 48px;
+    }
+    .reviews-slider__nav {
+        margin-top: 24px;
+    }
+}
