@@ -6,6 +6,7 @@ use App\Models\Masterclass;
 use App\Services\OutreachCalculator;
 use App\Services\OutreachService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class OutreachController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'direction' => ['required', 'string', 'max:160'],
@@ -44,8 +45,30 @@ class OutreachController extends Controller
 
         $outreach = $this->service->create($request->user(), $data);
 
-        return redirect()
-            ->route('outreach.index')
-            ->with('success', 'Заявка '.$outreach->number.' принята. Расчётная стоимость: '.money($outreach->calc_total_cents).'. Мы свяжемся для подтверждения.');
+        $message = 'Заявка '.$outreach->number.' принята. Расчётная стоимость: '.money($outreach->calc_total_cents).'. Мы свяжемся для подтверждения.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'number' => $outreach->number,
+            ], 201);
+        }
+
+        return redirect()->to($this->redirectTarget($request))->with('success', $message);
+    }
+
+    /**
+     * Возвращаем пользователя на страницу, где была заполнена форма, чтобы
+     * подтверждение отобразилось на месте, а не на странице выездных занятий.
+     */
+    private function redirectTarget(Request $request): string
+    {
+        $source = trim((string) $request->input('source'));
+
+        if ($source !== '' && ! str_contains($source, '://') && ! str_starts_with($source, '//')) {
+            return url($source);
+        }
+
+        return route('outreach.index');
     }
 }

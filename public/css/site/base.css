@@ -708,6 +708,47 @@ ul.clean {
     border-color: #d5ddfb;
 }
 
+/* Всплывающее подтверждение отправки: фиксировано в верхней части экрана
+   и не зависит от текущего положения прокрутки. */
+.flash-toast {
+    position: fixed;
+    left: 50%;
+    top: 96px;
+    z-index: 1100;
+    width: min(680px, calc(100vw - 32px));
+    margin: 0;
+    padding-right: 46px;
+    box-shadow: 0 18px 44px rgba(38, 46, 110, 0.18);
+    opacity: 0;
+    transform: translate(-50%, -16px);
+    transition:
+        opacity var(--speed) var(--ease),
+        transform var(--speed) var(--ease);
+}
+.flash-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+.flash-toast__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.65;
+}
+.flash-toast__close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+}
+
 /* --- Utilities --- */
 .sr-only {
     position: absolute;

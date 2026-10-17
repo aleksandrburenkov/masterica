@@ -17,6 +17,7 @@
         initSelects();
         initDatepickers();
         initOutreachCalculator();
+        initOutreachForm();
         initStickyHeaderShadow();
     });
 
@@ -478,6 +479,120 @@
         input.addEventListener('input', recalc);
         input.addEventListener('change', recalc);
         recalc();
+    }
+
+    /* --- Отправка формы запроса без перезагрузки и прокрутки страницы --- */
+    function initOutreachForm() {
+        var forms = document.querySelectorAll('form[data-outreach]');
+        if (!forms.length || !window.fetch || !window.FormData) return;
+
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (form.checkValidity && !form.checkValidity()) {
+                    if (form.reportValidity) form.reportValidity();
+                    return;
+                }
+
+                var button = form.querySelector('button[type="submit"]');
+                var originalText = button ? button.textContent : '';
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Отправляем…';
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new FormData(form),
+                    credentials: 'same-origin'
+                }).then(function (response) {
+                    return response.json().catch(function () {
+                        return {};
+                    }).then(function (data) {
+                        return { ok: response.ok, status: response.status, data: data };
+                    });
+                }).then(function (result) {
+                    if (result.ok) {
+                        showFlashToast(result.data.message || 'Заявка отправлена. Мы свяжемся с вами.', 'success');
+                        form.reset();
+                        var participants = form.querySelector('[data-outreach-participants]');
+                        if (participants) {
+                            participants.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    } else if (result.status === 422) {
+                        showFlashToast(collectFormErrors(result.data), 'error');
+                    } else {
+                        showFlashToast(result.data.message || 'Не удалось отправить заявку. Попробуйте ещё раз.', 'error');
+                    }
+                }).catch(function () {
+                    showFlashToast('Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.', 'error');
+                }).then(function () {
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+            });
+        });
+    }
+
+    function collectFormErrors(data) {
+        var errors = (data && data.errors) || {};
+        var messages = [];
+        Object.keys(errors).forEach(function (key) {
+            if (Array.isArray(errors[key])) {
+                messages = messages.concat(errors[key]);
+            }
+        });
+        if (!messages.length && data && data.message) messages.push(data.message);
+        return messages.length ? messages.join(' ') : 'Проверьте заполнение формы.';
+    }
+
+    function showFlashToast(message, type) {
+        var previous = document.querySelector('.flash-toast');
+        if (previous && previous.parentNode) previous.parentNode.removeChild(previous);
+
+        var toast = document.createElement('div');
+        toast.className = 'flash-toast flash flash--' + (type === 'error' ? 'error' : 'success');
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+        var text = document.createElement('span');
+        text.className = 'flash-toast__text';
+        text.textContent = message;
+        toast.appendChild(text);
+
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'flash-toast__close';
+        close.setAttribute('aria-label', 'Закрыть');
+        close.innerHTML = '&times;';
+        toast.appendChild(close);
+
+        document.body.appendChild(toast);
+
+        var header = document.querySelector('.site-header');
+        var offset = (header ? header.getBoundingClientRect().height : 0) + 12;
+        toast.style.top = offset + 'px';
+
+        var timer = null;
+        function remove() {
+            if (timer) window.clearTimeout(timer);
+            toast.classList.remove('is-visible');
+            window.setTimeout(function () {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 300);
+        }
+        close.addEventListener('click', remove);
+
+        window.requestAnimationFrame(function () {
+            toast.classList.add('is-visible');
+        });
+        timer = window.setTimeout(remove, 7000);
     }
 
     /* --- Тень шапки при прокрутке --- */
