@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\LegalDocuments;
 use App\Support\Settings;
 
 if (! function_exists('setting')) {
@@ -9,6 +10,17 @@ if (! function_exists('setting')) {
     function setting(string $key, ?string $default = null): ?string
     {
         return Settings::get($key, $default);
+    }
+}
+
+if (! function_exists('legal')) {
+    /**
+     * Read a legally-significant document field (privacy policy, consent, offer…).
+     * Documents live in the `legal_documents` table and are editable in Filament.
+     */
+    function legal(string $key, string $field = 'lead', ?string $default = null): ?string
+    {
+        return LegalDocuments::field($key, $field, $default);
     }
 }
 

@@ -82,12 +82,22 @@
                     <div class="field"><label for="o-comment">Комментарий</label><textarea id="o-comment" class="textarea" name="comment" placeholder="Пожелания по программе, площадке и времени">{{ old('comment') }}</textarea></div>
 
                     <div class="field">
-                        <label class="checkbox"><input type="checkbox" name="consent_data" value="1" required><span>Согласен(на) на обработку данных для ответа на запрос</span></label>
-                        <label class="checkbox" style="margin-top:8px"><input type="checkbox" name="consent_marketing" value="1"><span>Новости и предложения — необязательно</span></label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="consent_data" value="1" required>
+                            <span>
+                                {{ legal('consent_outreach', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения заявки и расчёта стоимости') }}.
+                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                            </span>
+                        </label>
+                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                        <label class="checkbox" style="margin-top:8px">
+                            <input type="checkbox" name="consent_marketing" value="1">
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                        </label>
                     </div>
 
                     <button class="btn btn--block" type="submit">Отправить запрос</button>
-                    <p class="form-note" style="margin-top:14px">Это запрос и расчёт, а не оплата. Итоговую стоимость студия подтверждает до заказа.</p>
+                    <p class="form-note" style="margin-top:14px">Это запрос и расчёт, а не заключённый договор. Договор считается заключённым после подтверждения студии. Условия выезда и оплаты — в <a href="{{ route('legal.show', legal('outreach_terms', 'slug', 'usloviya-vyezdnyh-master-klassov')) }}" target="_blank" rel="noopener">Условиях оказания услуг</a>.</p>
                 </form>
 
                 <div class="calc__result" data-reveal>

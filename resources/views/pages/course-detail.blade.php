@@ -37,7 +37,7 @@
 
                     <div class="detail__price">
                         <span class="price" style="font-size:34px">{{ money($course->price_cents) }}</span>
-                        <span class="muted">доступ {{ (int) round($course->access_days / 30) }} месяцев</span>
+                        <span class="muted">предоставление права доступа на {{ (int) round($course->access_days / 30) }} месяцев</span>
                     </div>
 
                     <div class="fact-grid">
@@ -64,9 +64,9 @@
                             @else
                                 <form action="{{ route('courses.enroll', $course->slug) }}" method="post">
                                     @csrf
-                                    <button class="btn btn--block" type="submit">Записаться на курс</button>
+                                    <button class="btn btn--block" type="submit">Получить доступ к курсу</button>
                                 </form>
-                                <p class="form-note" style="margin-top:14px">В локальной версии доступ открывается после тестовой отметки оплаты администратором. Реальное списание не выполняется.</p>
+                                <p class="form-note" style="margin-top:14px">Оформляя доступ, вы принимаете <a href="{{ route('legal.show', legal('license_terms', 'slug', 'licenzionnoe-soglashenie')) }}" target="_blank" rel="noopener">Лицензионное соглашение</a> и <a href="{{ route('legal.show', legal('platform_terms', 'slug', 'polzovatelskoe-soglashenie')) }}" target="_blank" rel="noopener">Пользовательское соглашение</a>. Оплата означает предоставление права доступа к материалам курса, а не передачу прав на контент. Доступ открывается после подтверждения оплаты.</p>
                             @endif
                         @else
                             <a class="btn btn--block" href="{{ route('login', ['redirect' => url()->current()]) }}">Войти и записаться</a>

@@ -21,7 +21,7 @@ class SettingsSeeder extends Seeder
                 'studio.email' => ['info@korni.local', 'string'],
                 'studio.timezone' => ['Europe/Moscow', 'string'],
                 'studio.og_description' => ['Творческие занятия и авторские работы в Брянске. Плетение из бумажной лозы, канзаши, макраме, фоамиран.', 'text'],
-                'studio.legal_note' => ['Демонстрационные тексты локальной версии. Юридические документы будут предоставлены владельцем отдельно.', 'text'],
+                'studio.legal_note' => ['Все цены указаны в рублях РФ. Правовые документы размещены в разделе «Правовая информация».', 'text'],
             ],
             'pricing' => [
                 'pricing.workshop_price_cents' => ['150000', 'int'],

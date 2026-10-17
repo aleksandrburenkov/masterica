@@ -53,6 +53,8 @@
                             @endforeach
                         </div>
                     @endif
+
+                    <p class="form-note" style="margin-top:16px">Материалы курсов предоставляются в рамках <a href="{{ route('legal.show', legal('license_terms', 'slug', 'licenzionnoe-soglashenie')) }}" target="_blank" rel="noopener">Лицензионного соглашения</a>: копирование, передача третьим лицам и коммерческое использование материалов запрещены.</p>
                 </div>
             </div>
         </div>

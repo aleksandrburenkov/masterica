@@ -38,7 +38,6 @@
                         <div class="feature"><span class="feature__icon"><x-ico name="clock" /></span><div><h4>Часы работы</h4><p>{{ setting('studio.hours', 'Ежедневно 10:00–19:00') }}</p></div></div>
                         <div class="feature"><span class="feature__icon"><x-ico name="mail" /></span><div><h4>Почта студии</h4><p>{{ setting('studio.email', 'info@korni.local') }}</p></div></div>
                     </div>
-                    <div class="note-strip" style="margin-top:18px">Контакты и адрес — из исходного макета и подтверждаются перед публикацией.</div>
                 </div>
 
                 <div class="card" data-reveal>
@@ -55,7 +54,13 @@
                         <div class="field"><label for="ct-phone">Телефон</label><input id="ct-phone" class="input" type="text" name="contact_phone" value="{{ old('contact_phone', auth()->user()?->phone) }}" required></div>
                         <div class="field"><label for="ct-email">Электронная почта</label><input id="ct-email" class="input" type="email" name="contact_email" value="{{ old('contact_email', auth()->user()?->email) }}" required></div>
                         <div class="field"><label for="ct-comment">Сообщение</label><textarea id="ct-comment" class="textarea" name="comment" required>{{ old('comment') }}</textarea></div>
-                        <label class="checkbox" style="margin-bottom:14px"><input type="checkbox" name="consent_data" value="1" required><span>Согласен(на) на обработку данных для ответа</span></label>
+                        <label class="checkbox" style="margin-bottom:14px">
+                            <input type="checkbox" name="consent_data" value="1" required>
+                            <span>
+                                {{ legal('consent_contacts', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения обращения и направления ответа') }}.
+                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                            </span>
+                        </label>
                         <button class="btn btn--block" type="submit">Отправить</button>
                     </form>
                 </div>

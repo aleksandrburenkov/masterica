@@ -90,10 +90,20 @@
                         <input id="r-video" class="input" type="url" name="video_url" value="{{ old('video_url') }}" placeholder="https://">
                     </div>
                     <div class="field">
-                        <label class="checkbox"><input type="checkbox" name="consent_publish" value="1" required><span>Согласен(на) на публикацию отзыва</span></label>
-                        <label class="checkbox" style="margin-top:8px"><input type="checkbox" name="consent_marketing" value="1"><span>Согласен(на) на новости и предложения — необязательно</span></label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="consent_publish" value="1" required>
+                            <span>
+                                {{ legal('consent_review', 'lead', 'Даю согласие на публикацию отзыва и использование моего имени, текста, фото- и видеоматериалов') }}.
+                                <a href="{{ route('legal.show', legal('review_consent', 'slug', 'soglasie-na-publikaciyu-otzyva')) }}" target="_blank" rel="noopener">Подробнее</a>
+                            </span>
+                        </label>
+                        <label class="checkbox" style="margin-top:8px">
+                            <input type="checkbox" name="consent_marketing" value="1">
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                        </label>
                     </div>
                     <button class="btn btn--block" type="submit">Отправить на модерацию</button>
+                    <p class="form-note" style="margin-top:14px">Согласие на публикацию можно отозвать в любое время; после отзыва публикация удаляется или обезличивается.</p>
                 </form>
             @else
                 <div class="card center">

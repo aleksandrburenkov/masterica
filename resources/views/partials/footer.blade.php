@@ -12,6 +12,9 @@
                 <ul>
                     <li>{{ setting('studio.address', 'г. Брянск, ул. Московская, д. 23') }}</li>
                     <li>{{ setting('studio.hours', 'Ежедневно 10:00–19:00') }}</li>
+                    @if (setting('studio.email'))
+                        <li><a href="mailto:{{ setting('studio.email') }}">{{ setting('studio.email') }}</a></li>
+                    @endif
                 </ul>
             </div>
 
@@ -28,12 +31,25 @@
             </div>
 
             <div>
-                <h5>Важно</h5>
+                <h5>Правовая информация</h5>
+                @php
+                    $footerDocs = ['privacy_policy', 'consent_personal_data', 'offer_terms', 'license_terms', 'booking_rules', 'platform_terms'];
+                @endphp
                 <ul>
-                    <li><a href="{{ route('legal.privacy') }}">Политика конфиденциальности</a></li>
-                    <li><a href="{{ route('legal.consent') }}">Согласие на обработку данных</a></li>
-                    <li><a href="{{ route('legal.rules') }}">Правила записи и заказа</a></li>
+                    @foreach ($footerDocs as $key)
+                        @php($doc = $legalDocuments[$key] ?? null)
+                        @if ($doc)
+                            <li><a href="{{ route('legal.show', $doc->slug) }}">{{ $doc->title }}</a></li>
+                        @endif
+                    @endforeach
                 </ul>
+                @php($privacy = $legalDocuments['privacy_policy'] ?? null)
+                @if ($privacy)
+                    <p class="footer-legal-note" style="font-size:13px;margin-top:10px;opacity:.85">
+                        Персональные данные обрабатываются в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».
+                        <a href="{{ route('legal.show', $privacy->slug) }}">Подробнее</a>.
+                    </p>
+                @endif
             </div>
         </div>
 

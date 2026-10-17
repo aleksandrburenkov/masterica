@@ -31,6 +31,7 @@ class OrderTest extends TestCase
             'contact_phone' => '+7 900 111-22-33',
             'contact_email' => 'buyer@example.com',
             'delivery_method' => 'pickup',
+            'accept_offer' => '1',
             'consent_data' => '1',
         ];
     }

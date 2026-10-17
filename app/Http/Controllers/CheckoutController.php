@@ -42,6 +42,8 @@ class CheckoutController extends Controller
             'delivery_method' => ['required', 'in:pickup,city_delivery'],
             'address' => ['nullable', 'required_if:delivery_method,city_delivery', 'string', 'max:255'],
             'comment' => ['nullable', 'string', 'max:1000'],
+            // Акцепт Публичной оферты (договора купли-продажи) — обязателен.
+            'accept_offer' => ['accepted'],
             'consent_data' => ['accepted'],
         ]);
 

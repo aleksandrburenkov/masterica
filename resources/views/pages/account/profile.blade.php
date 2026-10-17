@@ -39,8 +39,14 @@
 
                     <div class="card" style="max-width:640px;margin-top:20px">
                         <h3>Согласия и данные</h3>
-                        <p class="muted" style="font-size:15px">Мы собираем только минимум, необходимый для занятий, заказов и доступа к курсам. Аккаунт оформляет взрослый; отдельный аккаунт ребёнка не создаётся.</p>
-                        <div class="note-strip">{{ setting('studio.legal_note') }}</div>
+                        <p class="muted" style="font-size:15px">Мы собираем только минимум, необходимый для занятий, заказов и доступа к курсам. Аккаунт оформляет совершеннолетнее лицо; отдельный аккаунт ребёнка не создаётся.</p>
+                        <div class="note-strip">
+                            Данные обрабатываются в соответствии с
+                            <a href="{{ route('legal.show', legal('privacy_policy', 'slug', 'politika-konfidencialnosti')) }}" target="_blank" rel="noopener">Политикой конфиденциальности</a>
+                            и <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Согласием на обработку персональных данных</a>.
+                            Данные участников-несовершеннолетних обрабатываются исключительно в объёме, необходимом для оказания услуги, на основании согласия законного представителя.
+                            Условия работы платформы — в <a href="{{ route('legal.show', legal('platform_terms', 'slug', 'polzovatelskoe-soglashenie')) }}" target="_blank" rel="noopener">Пользовательском соглашении</a>.
+                        </div>
                     </div>
                 </div>
             </div>

@@ -60,11 +60,17 @@
                             </div>
                         </div>
                         <div class="field">
-                            <label class="checkbox"><input type="checkbox" name="consent_data" value="1" required><span>Согласен(на) на обработку данных</span></label>
+                            <label class="checkbox">
+                                <input type="checkbox" name="consent_data" value="1" required>
+                                <span>
+                                    {{ legal('consent_registration', 'lead', 'Даю согласие на обработку персональных данных для регистрации и работы личного кабинета') }}.
+                                    <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                                </span>
+                            </label>
                             @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
                         </div>
                         <button class="btn btn--block" type="submit">Зарегистрироваться</button>
-                        <p class="form-note" style="margin-top:14px">Аккаунт оформляет взрослый (родитель или представитель). Подтверждение email в локальной среде не блокирует работу.</p>
+                        <p class="form-note" style="margin-top:14px">Аккаунт оформляет совершеннолетнее лицо (родитель или законный представитель). Данные участников-несовершеннолетних обрабатываются исключительно в объёме, необходимом для оказания услуги, на основании согласия законного представителя.</p>
                     </form>
                 </div>
             </div>

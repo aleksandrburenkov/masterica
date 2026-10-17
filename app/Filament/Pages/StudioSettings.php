@@ -128,7 +128,7 @@ class StudioSettings extends Page
             'email' => ['studio.email', 'Электронная почта'],
             'timezone' => ['studio.timezone', 'Часовой пояс'],
             'og_description' => ['studio.og_description', 'Описание для SEO (OG)', true],
-            'legal_note' => ['studio.legal_note', 'Примечание (демо-документы)', true],
+            'legal_note' => ['studio.legal_note', 'Примечание в футере', true],
 
             'workshop_price_cents' => ['pricing.workshop_price_cents', 'Обычный МК: цена, коп.'],
             'workshop_duration_minutes' => ['pricing.workshop_duration_minutes', 'Обычный МК: длительность, мин'],

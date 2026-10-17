@@ -6,6 +6,7 @@ use App\Models\ContentPage;
 use App\Models\Course;
 use App\Models\Masterclass;
 use App\Models\Product;
+use App\Support\LegalDocuments;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -48,6 +49,9 @@ class SitemapController extends Controller
         }
         foreach (ContentPage::query()->published()->get() as $item) {
             $urls[] = ['loc' => route('guides.show', $item->slug), 'changefreq' => 'monthly', 'priority' => '0.5', 'lastmod' => $item->updated_at->toDateString()];
+        }
+        foreach (LegalDocuments::all() as $document) {
+            $urls[] = ['loc' => route('legal.show', $document->slug), 'changefreq' => 'yearly', 'priority' => '0.3', 'lastmod' => $document->updated_at->toDateString()];
         }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";

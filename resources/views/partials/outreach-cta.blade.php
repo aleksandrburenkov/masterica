@@ -73,17 +73,20 @@
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="consent_data" value="1" required>
-                            <span>Согласие на обработку данных для ответа на запрос</span>
+                            <span>
+                                {{ legal('consent_outreach', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения заявки и расчёта стоимости') }}.
+                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                            </span>
                         </label>
                         @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
                         <label class="checkbox" style="margin-top:8px">
                             <input type="checkbox" name="consent_marketing" value="1">
-                            <span>Новости и предложения — необязательно</span>
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
                         </label>
                     </div>
 
                     <button type="submit" class="btn btn--block">Отправить запрос</button>
-                    <p class="form-note" style="margin-top:14px">{{ setting('studio.legal_note') }}</p>
+                    <p class="form-note" style="margin-top:14px">Заявка не является заключённым договором до её подтверждения студией. Условия выезда — в <a href="{{ route('legal.show', legal('outreach_terms', 'slug', 'usloviya-vyezdnyh-master-klassov')) }}" target="_blank" rel="noopener">Условиях оказания услуг</a>.</p>
                 </form>
             </div>
         </div>

@@ -52,9 +52,22 @@
 
                     <div class="field">
                         <label class="checkbox">
-                            <input type="checkbox" name="consent_data" value="1" required>
-                            <span>Согласен(на) на обработку данных для оформления заказа</span>
+                            <input type="checkbox" name="accept_offer" value="1" required>
+                            <span>
+                                Я ознакомлен(а) и согласен(на) с
+                                <a href="{{ route('legal.show', legal('offer_terms', 'slug', 'publichnaya-oferta')) }}" target="_blank" rel="noopener">условиями Публичной оферты</a>
+                                и принимаю их (акцепт оферты). Условия возврата и обмена товара указаны в оферте.
+                            </span>
                         </label>
+                        @error('accept_offer')<div class="error-text">{{ $message }}</div>@enderror
+                        <label class="checkbox" style="margin-top:8px">
+                            <input type="checkbox" name="consent_data" value="1" required>
+                            <span>
+                                {{ legal('consent_checkout', 'lead', 'Даю согласие на обработку персональных данных для оформления и доставки заказа') }}.
+                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                            </span>
+                        </label>
+                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
                     </div>
 
                     <button class="btn btn--block" type="submit">Подтвердить заказ</button>

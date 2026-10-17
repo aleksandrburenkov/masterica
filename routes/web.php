@@ -65,10 +65,11 @@ Route::get('/materialy/{page:slug}', [PageController::class, 'guide'])->name('gu
 // Поиск
 Route::get('/poisk', [SearchController::class, 'index'])->name('search');
 
-// Юридические (демонстрационные) страницы
+// Правовые документы (политика, согласия, оферта, лицензия и др.)
 Route::get('/politika-konfidencialnosti', [PageController::class, 'privacy'])->name('legal.privacy');
 Route::get('/soglasie-na-obrabotku-dannyh', [PageController::class, 'consent'])->name('legal.consent');
 Route::get('/pravila-zapisi-i-zakaza', [PageController::class, 'rules'])->name('legal.rules');
+Route::get('/dokumenty/{document:slug}', [PageController::class, 'legal'])->name('legal.show');
 
 // SEO
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

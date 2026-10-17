@@ -11,9 +11,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // Production-safe content: studio settings, catalogue and course.
+        // Production-safe content: studio settings, legal documents, catalogue and course.
         $this->call([
             SettingsSeeder::class,
+            LegalDocumentsSeeder::class,
             CatalogSeeder::class,
         ]);
 

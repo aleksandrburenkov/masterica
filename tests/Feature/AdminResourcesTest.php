@@ -42,6 +42,7 @@ class AdminResourcesTest extends TestCase
             'course-enrollments' => ['course-enrollments'],
             'reviews' => ['reviews'],
             'content-pages' => ['content-pages'],
+            'legal-documents' => ['legal-documents'],
             'users' => ['users'],
             'audit-logs' => ['audit-logs'],
         ];
@@ -72,6 +73,7 @@ class AdminResourcesTest extends TestCase
             'course-enrollments' => ['course-enrollments'],
             'reviews' => ['reviews'],
             'content-pages' => ['content-pages'],
+            'legal-documents' => ['legal-documents'],
             'users' => ['users'],
         ];
     }

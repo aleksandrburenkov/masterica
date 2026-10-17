@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Support\LegalDocuments;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::defaultView('vendor.pagination.site');
         Paginator::defaultSimpleView('vendor.pagination.site');
+
+        // Правовые документы доступны во всех шаблонах как $legalDocuments['privacy_policy'] и т.д.
+        View::composer('*', function ($view) {
+            $view->with('legalDocuments', LegalDocuments::all());
+        });
 
         // Force HTTPS in non-local environments for secure cookies and links.
         if ($this->app->environment('production')) {
