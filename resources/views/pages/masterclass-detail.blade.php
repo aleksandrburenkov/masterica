@@ -91,7 +91,7 @@
                     <x-ico name="calendar" />
                     <h3>Свободных сеансов пока нет</h3>
                     <p>Даты обновляются в расписании студии. Оставьте запрос — и мы сообщим о новых датах.</p>
-                    <a class="btn btn--ghost" href="#booking">Оставить запрос</a>
+                    <a class="btn btn--ghost" href="{{ route('masterclasses.index') }}#request">Оставить запрос</a>
                 </div>
             @else
                 <div class="detail" style="grid-template-columns:1.1fr .9fr">
