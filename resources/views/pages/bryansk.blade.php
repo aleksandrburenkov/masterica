@@ -48,7 +48,6 @@
                     <p class="lead">Творческие занятия в студии по адресу {{ setting('studio.address') }} и на выезде. Телефон: {{ setting('studio.phone') }}.</p>
                     <a class="btn" href="{{ route('masterclasses.index') }}">Выбрать занятие</a>
                 </div>
-                <div class="hero__media"><img src="{{ asset('images/photo-1.jpg') }}" alt="Мастер-классы в Брянске" loading="lazy"></div>
             </div>
         </div>
     </section>

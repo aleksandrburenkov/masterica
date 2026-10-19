@@ -10,12 +10,11 @@
 @section('content')
     <section class="hero">
         <div class="container">
-            <div class="hero__inner" style="min-height:auto">
+            <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Вход в личный кабинет</h1>
                     <p class="lead">Продолжите пользоваться записями, заказами и доступом к курсам.</p>
                 </div>
-                <div class="hero__media" style="height:auto"><img src="{{ asset('images/photo-2.jpg') }}" alt="Личный кабинет" loading="lazy"></div>
             </div>
         </div>
     </section>

@@ -11,12 +11,11 @@
 @section('content')
     <section class="hero">
         <div class="container">
-            <div class="hero__inner" style="min-height:auto">
+            <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Отзывы</h1>
                     <p class="lead">Отзывы проходят модерацию до публикации. Синтетические демонстрационные отзывы помечены как «Демо-отзыв».</p>
                 </div>
-                <div class="hero__media" style="height:auto"><img src="{{ asset('images/photo-1.jpg') }}" alt="Занятие в студии" loading="lazy"></div>
             </div>
         </div>
     </section>

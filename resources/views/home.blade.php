@@ -35,10 +35,6 @@
                         детали уточняйте в карточке сеанса.</p>
                     <a class="btn" href="{{ route('masterclasses.index') }}">Выбрать мастер-класс</a>
                 </div>
-                <div class="hero__media" data-reveal="fade">
-                    <img src="{{ asset('images/hero-masterclass.png') }}"
-                        alt="Занятие в творческой студии «{{ setting('studio.name', 'Корни') }}»" fetchpriority="high">
-                </div>
             </div>
         </div>
     </section>

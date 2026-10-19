@@ -17,7 +17,6 @@
                     <p class="lead">Для праздника, школы, детского сада или компании. Калькулятор показывает расчёт сразу, а студия подтверждает детали.</p>
                     <a class="btn" href="#calculator">Рассчитать стоимость</a>
                 </div>
-                <div class="hero__media"><img src="{{ asset('images/photo-3.jpg') }}" alt="Выездной мастер-класс" loading="lazy"></div>
             </div>
         </div>
     </section>

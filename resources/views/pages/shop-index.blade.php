@@ -11,12 +11,11 @@
 @section('content')
     <section class="hero">
         <div class="container">
-            <div class="hero__inner" style="min-height:auto">
+            <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Магазин авторских работ</h1>
                     <p class="lead">Изделия ручной работы из бумажной лозы и макраме. Готовые работы — срок подготовки {{ setting('rules.delivery_prep_days', '3–5') }} рабочих дней.</p>
                 </div>
-                <div class="hero__media" style="height:auto"><img src="{{ asset('images/photo-3.jpg') }}" alt="Авторские работы студии" loading="lazy"></div>
             </div>
         </div>
     </section>
