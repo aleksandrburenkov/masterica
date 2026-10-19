@@ -26,7 +26,7 @@
     @endpush
 
 @section('content')
-    <section class="hero">
+    <section class="hero hero--home">
         <div class="container">
             <div class="hero__inner">
                 <div class="hero__content" data-reveal>
@@ -34,6 +34,10 @@
                     <p class="lead">Бумажная лоза, бисероплетение, флористика и другие техники — выбирайте занятие, а
                         детали уточняйте в карточке сеанса.</p>
                     <a class="btn" href="{{ route('masterclasses.index') }}">Выбрать мастер-класс</a>
+                </div>
+                <div class="hero__media" data-reveal="fade">
+                    <img src="{{ asset('images/hero-masterclass.png') }}"
+                        alt="Занятие в творческой студии «{{ setting('studio.name', 'Корни') }}»" fetchpriority="high">
                 </div>
             </div>
         </div>
