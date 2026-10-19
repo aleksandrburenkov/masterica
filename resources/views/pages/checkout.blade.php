@@ -14,7 +14,7 @@
             <p class="lead-muted">Контакт взрослого получателя. Итоговая сумма пересчитывается на сервере.</p>
 
             <div class="cart-layout" style="margin-top:24px">
-                <form class="card" method="post" action="{{ route('checkout.store') }}" novalidate>
+                <form class="card" method="post" action="{{ route('checkout.store') }}" data-ajax-form novalidate>
                     @csrf
                     <h3>Контактные данные</h3>
                     <div class="field">

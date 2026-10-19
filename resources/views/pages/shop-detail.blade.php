@@ -52,7 +52,7 @@
                     @else
                         <div class="session-list">
                             @foreach ($product->variants as $variant)
-                                <form class="session-item" action="{{ route('cart.add') }}" method="post">
+                                <form class="session-item" action="{{ route('cart.add') }}" method="post" data-ajax-form>
                                     @csrf
                                     <input type="hidden" name="variant_id" value="{{ $variant->id }}">
                                     <input type="hidden" name="quantity" value="1">

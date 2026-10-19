@@ -6,6 +6,7 @@ use App\Models\ProductVariant;
 use App\Services\CartService;
 use App\Services\StockService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,7 +25,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request): RedirectResponse
+    public function add(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'variant_id' => ['required', 'integer', 'exists:product_variants,id'],
@@ -34,12 +35,22 @@ class CartController extends Controller
         $variant = ProductVariant::query()->with('product')->findOrFail($data['variant_id']);
 
         if (! $variant->is_active || ! $variant->product?->is_published) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Товар недоступен.'], 422);
+            }
+
             return back()->with('error', 'Товар недоступен.');
         }
 
         $this->cart->add($variant->id, $data['quantity']);
 
-        return back()->with('success', 'Товар добавлен в корзину.');
+        $message = 'Товар добавлен в корзину.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], 201);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function update(Request $request, ProductVariant $variant): RedirectResponse

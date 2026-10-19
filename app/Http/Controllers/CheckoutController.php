@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -33,7 +34,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse|View
+    public function store(Request $request): RedirectResponse|View|JsonResponse
     {
         $data = $request->validate([
             'contact_name' => ['required', 'string', 'max:120'],
@@ -48,6 +49,15 @@ class CheckoutController extends Controller
         ]);
 
         $order = $this->orders->place($request->user(), $data);
+
+        // Ошибки валидации при AJAX-отправке возвращаются как JSON и
+        // показываются уведомлением без перезагрузки страницы.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Заказ '.$order->number.' оформлен.',
+                'redirect' => route('checkout.success', $order->number),
+            ], 201);
+        }
 
         return redirect()->route('checkout.success', $order->number);
     }

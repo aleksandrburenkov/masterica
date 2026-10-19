@@ -18,6 +18,8 @@
         initDatepickers();
         initOutreachCalculator();
         initOutreachForm();
+        initAjaxForms();
+        initFlashToasts();
         initStickyHeaderShadow();
     });
 
@@ -495,49 +497,87 @@
                     return;
                 }
 
-                var button = form.querySelector('button[type="submit"]');
-                var originalText = button ? button.textContent : '';
-                if (button) {
-                    button.disabled = true;
-                    button.textContent = 'Отправляем…';
-                }
-
-                fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: new FormData(form),
-                    credentials: 'same-origin'
-                }).then(function (response) {
-                    return response.json().catch(function () {
-                        return {};
-                    }).then(function (data) {
-                        return { ok: response.ok, status: response.status, data: data };
-                    });
-                }).then(function (result) {
-                    if (result.ok) {
-                        showFlashToast(result.data.message || 'Заявка отправлена. Мы свяжемся с вами.', 'success');
-                        form.reset();
-                        var participants = form.querySelector('[data-outreach-participants]');
+                submitFormWithoutReload(form, {
+                    successMessage: 'Заявка отправлена. Мы свяжемся с вами.',
+                    errorMessage: 'Не удалось отправить заявку. Попробуйте ещё раз.',
+                    networkErrorMessage: 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.',
+                    afterSuccess: function (submittedForm) {
+                        var participants = submittedForm.querySelector('[data-outreach-participants]');
                         if (participants) {
                             participants.dispatchEvent(new Event('input', { bubbles: true }));
                         }
-                    } else if (result.status === 422) {
-                        showFlashToast(collectFormErrors(result.data), 'error');
-                    } else {
-                        showFlashToast(result.data.message || 'Не удалось отправить заявку. Попробуйте ещё раз.', 'error');
-                    }
-                }).catch(function () {
-                    showFlashToast('Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.', 'error');
-                }).then(function () {
-                    if (button) {
-                        button.disabled = false;
-                        button.textContent = originalText;
                     }
                 });
             });
+        });
+    }
+
+    /* --- Общая AJAX-отправка форм: страница не перезагружается и не прокручивается --- */
+    function initAjaxForms() {
+        var forms = document.querySelectorAll('form[data-ajax-form]');
+        if (!forms.length || !window.fetch || !window.FormData) return;
+
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                submitFormWithoutReload(form, {
+                    successMessage: 'Готово.',
+                    errorMessage: 'Не удалось отправить форму. Попробуйте ещё раз.',
+                    networkErrorMessage: 'Не удалось отправить форму. Проверьте соединение и попробуйте ещё раз.'
+                });
+            });
+        });
+    }
+
+    function submitFormWithoutReload(form, options) {
+        options = options || {};
+
+        var button = form.querySelector('button[type="submit"]');
+        var originalText = button ? button.textContent : '';
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Отправляем…';
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new FormData(form),
+            credentials: 'same-origin'
+        }).then(function (response) {
+            return response.json().catch(function () {
+                return {};
+            }).then(function (data) {
+                return { ok: response.ok, status: response.status, data: data };
+            });
+        }).then(function (result) {
+            if (result.ok) {
+                if (result.data.redirect) {
+                    window.location.assign(result.data.redirect);
+                    return;
+                }
+
+                showFlashToast(result.data.message || options.successMessage || 'Готово.', 'success');
+                form.reset();
+
+                if (options.afterSuccess) {
+                    options.afterSuccess(form);
+                }
+            } else if (result.status === 422) {
+                showFlashToast(collectFormErrors(result.data), 'error');
+            } else {
+                showFlashToast(result.data.message || options.errorMessage || 'Не удалось отправить форму. Попробуйте ещё раз.', 'error');
+            }
+        }).catch(function () {
+            showFlashToast(options.networkErrorMessage || 'Не удалось отправить форму. Проверьте соединение и попробуйте ещё раз.', 'error');
+        }).then(function () {
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
         });
     }
 
@@ -553,12 +593,59 @@
         return messages.length ? messages.join(' ') : 'Проверьте заполнение формы.';
     }
 
+    /* --- Всплывающие уведомления в верхней части видимой области --- */
+    function getFlashStack() {
+        var stack = document.querySelector('[data-flash-stack]');
+        if (!stack) {
+            stack = document.createElement('div');
+            stack.className = 'flash-stack';
+            stack.setAttribute('data-flash-stack', '');
+            stack.setAttribute('aria-live', 'polite');
+            document.body.appendChild(stack);
+        }
+        positionFlashStack(stack);
+        return stack;
+    }
+
+    function positionFlashStack(stack) {
+        var header = document.querySelector('.site-header');
+        var top = header ? header.getBoundingClientRect().bottom : 0;
+        stack.style.top = Math.max(0, top) + 12 + 'px';
+    }
+
+    function dismissFlashToast(toast) {
+        if (!toast || !toast.parentNode) return;
+        toast.classList.add('is-hiding');
+        window.setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 200);
+    }
+
+    function initFlashToasts() {
+        var stack = document.querySelector('[data-flash-stack]');
+        if (stack) {
+            positionFlashStack(stack);
+            window.addEventListener('resize', function () {
+                positionFlashStack(stack);
+            });
+        }
+
+        document.querySelectorAll('[data-flash-toast]').forEach(function (toast) {
+            var close = toast.querySelector('[data-flash-close]');
+            if (close) {
+                close.addEventListener('click', function () {
+                    dismissFlashToast(toast);
+                });
+            }
+        });
+    }
+
     function showFlashToast(message, type) {
-        var previous = document.querySelector('.flash-toast');
-        if (previous && previous.parentNode) previous.parentNode.removeChild(previous);
+        var stack = getFlashStack();
 
         var toast = document.createElement('div');
         toast.className = 'flash-toast flash flash--' + (type === 'error' ? 'error' : 'success');
+        toast.setAttribute('data-flash-toast', '');
         toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
 
         var text = document.createElement('span');
@@ -569,30 +656,21 @@
         var close = document.createElement('button');
         close.type = 'button';
         close.className = 'flash-toast__close';
-        close.setAttribute('aria-label', 'Закрыть');
+        close.setAttribute('data-flash-close', '');
+        close.setAttribute('aria-label', 'Закрыть уведомление');
         close.innerHTML = '&times;';
         toast.appendChild(close);
 
-        document.body.appendChild(toast);
+        stack.appendChild(toast);
 
-        var header = document.querySelector('.site-header');
-        var offset = (header ? header.getBoundingClientRect().height : 0) + 12;
-        toast.style.top = offset + 'px';
+        var timer = window.setTimeout(function () {
+            dismissFlashToast(toast);
+        }, 7000);
 
-        var timer = null;
-        function remove() {
-            if (timer) window.clearTimeout(timer);
-            toast.classList.remove('is-visible');
-            window.setTimeout(function () {
-                if (toast.parentNode) toast.parentNode.removeChild(toast);
-            }, 300);
-        }
-        close.addEventListener('click', remove);
-
-        window.requestAnimationFrame(function () {
-            toast.classList.add('is-visible');
+        close.addEventListener('click', function () {
+            window.clearTimeout(timer);
+            dismissFlashToast(toast);
         });
-        timer = window.setTimeout(remove, 7000);
     }
 
     /* --- Тень шапки при прокрутке --- */

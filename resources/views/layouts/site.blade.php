@@ -32,16 +32,12 @@
 
     @include('partials.header')
 
+    @include('partials.flash')
+
     <main id="main">
         @hasSection('breadcrumbs')
             <div class="container">
                 @yield('breadcrumbs')
-            </div>
-        @endif
-
-        @if (session('success') || session('error') || session('info') || $errors->any())
-            <div class="container" style="padding-top:20px">
-                @include('partials.flash')
             </div>
         @endif
 

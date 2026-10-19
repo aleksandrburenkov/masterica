@@ -61,6 +61,7 @@ class BookingTest extends TestCase
             ->assertSee('name="contact_name"', false)
             ->assertSee('placeholder="Как к вам обращаться"', false)
             ->assertSee('placeholder="+7 (___) ___-__-__"', false)
+            ->assertSee('data-ajax-form', false)
             ->assertDontSee('Войти и записаться');
     }
 
@@ -85,7 +86,7 @@ class BookingTest extends TestCase
         $session = $this->makeSession();
 
         $this->post(route('bookings.store', 'basket'), $this->payload($session, 2))
-            ->assertRedirect(route('masterclasses.show', 'basket').'#booking')
+            ->assertRedirect(route('masterclasses.show', 'basket'))
             ->assertSessionHas('success');
 
         $booking = Booking::firstOrFail();
@@ -95,6 +96,20 @@ class BookingTest extends TestCase
         $this->assertSame('adult@example.com', $booking->contact_email);
         $this->assertSame(2, $booking->participants_count);
         $this->assertSame($session->priceCents() * 2, $booking->total_cents);
+    }
+
+    public function test_guest_books_without_page_reload_via_json(): void
+    {
+        $session = $this->makeSession();
+
+        $this->postJson(route('bookings.store', 'basket'), $this->payload($session, 2))
+            ->assertCreated()
+            ->assertJsonStructure(['message', 'number']);
+
+        $booking = Booking::firstOrFail();
+        $this->assertNull($booking->user_id);
+        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(2, $booking->participants_count);
     }
 
     public function test_guest_duplicate_booking_is_rejected(): void
@@ -166,7 +181,14 @@ class BookingTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('bookings.store', 'basket'), $this->payload($session, 2))
-            ->assertRedirect(route('account.bookings'));
+            ->assertRedirect(route('masterclasses.show', 'basket'));
+
+        $this->actingAs($user)
+            ->get(route('masterclasses.show', 'basket'))
+            ->assertOk()
+            ->assertSee('flash-stack', false)
+            ->assertSee('data-flash-toast', false)
+            ->assertSee('подтверждена', false);
 
         $booking = Booking::firstOrFail();
         $this->assertSame(BookingStatus::Confirmed, $booking->status);
@@ -174,6 +196,39 @@ class BookingTest extends TestCase
         $this->assertSame($user->id, $booking->user_id);
         $this->assertSame(2, $booking->participants_count);
         $this->assertSame($session->priceCents() * 2, $booking->total_cents);
+    }
+
+    public function test_authenticated_user_books_without_page_reload_via_json(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Client]);
+        $session = $this->makeSession();
+
+        $this->actingAs($user)
+            ->postJson(route('bookings.store', 'basket'), $this->payload($session, 2))
+            ->assertCreated()
+            ->assertJsonStructure(['message', 'number']);
+
+        $booking = Booking::firstOrFail();
+        $this->assertSame($user->id, $booking->user_id);
+        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(2, $booking->participants_count);
+    }
+
+    public function test_booking_validation_errors_are_returned_as_json(): void
+    {
+        $session = $this->makeSession();
+
+        $this->postJson(route('bookings.store', 'basket'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => '',
+            'contact_name' => '',
+            'contact_phone' => '',
+            'contact_email' => '',
+            'consent_data' => '1',
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['participants_count', 'contact_name', 'contact_phone', 'contact_email']);
+
+        $this->assertSame(0, Booking::count());
     }
 
     public function test_duplicate_booking_is_rejected(): void
@@ -195,7 +250,7 @@ class BookingTest extends TestCase
         $session = $this->makeSession(capacity: 1);
 
         $this->actingAs($first)->post(route('bookings.store', 'basket'), $this->payload($session))
-            ->assertRedirect(route('account.bookings'));
+            ->assertRedirect(route('masterclasses.show', 'basket'));
 
         $this->actingAs($second)->post(route('bookings.store', 'basket'), $this->payload($session))
             ->assertSessionHasErrors('participants_count');
@@ -231,7 +286,7 @@ class BookingTest extends TestCase
         $this->actingAs($user)->post(route('bookings.cancel', $booking->number), ['cancel_reason' => 'Передумал']);
 
         $this->actingAs($user)->post(route('bookings.store', 'basket'), $this->payload($session))
-            ->assertRedirect(route('account.bookings'));
+            ->assertRedirect(route('masterclasses.show', 'basket'));
 
         $this->assertSame(1, Booking::count());
         $this->assertSame(BookingStatus::Confirmed, Booking::first()->status);

@@ -708,26 +708,42 @@ ul.clean {
     border-color: #d5ddfb;
 }
 
-/* Всплывающее подтверждение отправки: фиксировано в верхней части экрана
-   и не зависит от текущего положения прокрутки. */
-.flash-toast {
+/* Всплывающие уведомления: фиксированы относительно окна браузера в верхней
+   части текущей видимой области и не зависят от положения прокрутки. */
+.flash-stack {
     position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 88px);
     left: 50%;
-    top: 96px;
     z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     width: min(680px, calc(100vw - 32px));
-    margin: 0;
-    padding-right: 46px;
-    box-shadow: 0 18px 44px rgba(38, 46, 110, 0.18);
-    opacity: 0;
-    transform: translate(-50%, -16px);
-    transition:
-        opacity var(--speed) var(--ease),
-        transform var(--speed) var(--ease);
+    transform: translateX(-50%);
+    pointer-events: none;
 }
-.flash-toast.is-visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
+.flash-toast {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 14px 46px 14px 18px;
+    box-shadow: 0 18px 44px rgba(38, 46, 110, 0.18);
+    pointer-events: auto;
+    animation: flash-toast-in var(--speed) var(--ease);
+}
+.flash-toast.is-hiding {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+        opacity 0.2s var(--ease),
+        transform 0.2s var(--ease);
+}
+.flash-toast__text {
+    white-space: pre-line;
+}
+.flash-toast__list {
+    margin: 8px 0 0;
+    padding-left: 18px;
 }
 .flash-toast__close {
     position: absolute;
@@ -747,6 +763,22 @@ ul.clean {
 .flash-toast__close:hover {
     opacity: 1;
     background: rgba(0, 0, 0, 0.06);
+}
+@keyframes flash-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@media (max-width: 620px) {
+    .flash-stack {
+        top: calc(env(safe-area-inset-top, 0px) + 72px);
+        width: calc(100vw - 24px);
+    }
 }
 
 /* --- Utilities --- */

@@ -43,7 +43,7 @@
                 <div class="card" data-reveal>
                     <h3>Напишите нам</h3>
                     <p class="muted">Оставьте заявку — студия ответит удобным способом.</p>
-                    <form action="{{ route('outreach.store') }}" method="post">
+                    <form action="{{ route('outreach.store') }}" method="post" data-ajax-form>
                         @csrf
                         <input type="hidden" name="direction" value="Вопрос со страницы контактов">
                         <input type="hidden" name="requested_date" value="{{ now()->addWeek()->toDateString() }}">

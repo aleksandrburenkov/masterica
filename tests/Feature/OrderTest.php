@@ -65,6 +65,51 @@ class OrderTest extends TestCase
         $this->assertSame($availableBefore - 1, $stock->availableFor($variant->fresh()));
     }
 
+    public function test_checkout_validation_errors_render_as_fixed_notification(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['cart' => [$variant->id => 1]])
+            ->from(route('checkout.index'))
+            ->followingRedirects()
+            ->post(route('checkout.store'), []);
+
+        $response->assertOk()
+            ->assertSee('flash-stack', false)
+            ->assertSee('data-flash-toast', false)
+            ->assertSee('Проверьте заполнение формы', false);
+    }
+
+    public function test_checkout_ajax_validation_errors_return_json(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $this->actingAs($user)
+            ->withSession(['cart' => [$variant->id => 1]])
+            ->postJson(route('checkout.store'), [])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['contact_name', 'contact_phone', 'contact_email']);
+    }
+
+    public function test_checkout_ajax_success_returns_redirect_url(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $response = $this->actingAs($user)
+            ->withSession(['cart' => [$variant->id => 1]])
+            ->postJson(route('checkout.store'), $this->contact());
+
+        $response->assertCreated()
+            ->assertJsonStructure(['message', 'redirect']);
+
+        $order = Order::firstOrFail();
+        $this->assertSame(route('checkout.success', $order->number), $response->json('redirect'));
+    }
+
     public function test_order_cannot_exceed_available_stock(): void
     {
         $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
@@ -107,6 +152,15 @@ class OrderTest extends TestCase
 
         $this->post(route('cart.add'), ['variant_id' => 999999, 'quantity' => 1])
             ->assertSessionHasErrors('variant_id');
+    }
+
+    public function test_cart_add_returns_json_for_ajax(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+
+        $this->postJson(route('cart.add'), ['variant_id' => $variant->id, 'quantity' => 1])
+            ->assertCreated()
+            ->assertJsonStructure(['message']);
     }
 
     public function test_completing_order_twice_does_not_double_write_off(): void

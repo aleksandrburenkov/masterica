@@ -6,6 +6,7 @@ use App\Enums\ReviewStatus;
 use App\Models\Masterclass;
 use App\Models\Review;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,7 +25,7 @@ class ReviewController extends Controller
         return view('pages.reviews-index', compact('reviews', 'masterclasses'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $this->authorize('create', Review::class);
 
@@ -54,8 +55,14 @@ class ReviewController extends Controller
             'source' => 'Форма на сайте',
         ]);
 
+        $message = 'Спасибо! Отзыв отправлен на модерацию и появится после проверки.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message], 201);
+        }
+
         return redirect()
             ->route('reviews.index')
-            ->with('success', 'Спасибо! Отзыв отправлен на модерацию и появится после проверки.');
+            ->with('success', $message);
     }
 }

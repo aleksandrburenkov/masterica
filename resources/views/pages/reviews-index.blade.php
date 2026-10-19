@@ -44,7 +44,7 @@
             <div class="section-head"><h2>Оставить отзыв</h2><p>Текст или видео. Все отзывы проверяются модератором.</p></div>
 
             @auth
-                <form class="card" action="{{ route('reviews.store') }}" method="post" novalidate>
+                <form class="card" action="{{ route('reviews.store') }}" method="post" data-ajax-form novalidate>
                     @csrf
                     <div class="grid grid-2" style="gap:14px">
                         <div class="field">

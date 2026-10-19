@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Masterclass;
 use App\Models\WorkshopSession;
 use App\Services\BookingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class BookingController extends Controller
 {
     public function __construct(private readonly BookingService $bookings) {}
 
-    public function store(Request $request, Masterclass $masterclass): RedirectResponse
+    public function store(Request $request, Masterclass $masterclass): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'workshop_session_id' => ['required', 'integer'],
@@ -35,11 +36,17 @@ class BookingController extends Controller
 
         $message = 'Запись '.$booking->number.' подтверждена. Оплата — в студии.';
 
-        // Авторизованные клиенты видят запись в личном кабинете, гости — на
-        // странице мастер-класса, где была заполнена форма.
-        return ($request->user()
-            ? redirect()->route('account.bookings')
-            : redirect()->to(route('masterclasses.show', $masterclass->slug).'#booking'))
+        // AJAX-ответ позволяет показать подтверждение без перезагрузки и
+        // прокрутки страницы. Обычная отправка формы остаётся запасным путём.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $message,
+                'number' => $booking->number,
+            ], 201);
+        }
+
+        return redirect()
+            ->route('masterclasses.show', $masterclass->slug)
             ->with('success', $message);
     }
 
