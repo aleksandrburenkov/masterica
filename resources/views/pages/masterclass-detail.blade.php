@@ -103,61 +103,63 @@
 
                     <div class="card sticky-form" id="booking">
                         <h3>Запись на занятие</h3>
-                        @auth
-                            <form action="{{ route('bookings.store', $masterclass->slug) }}" method="post" novalidate>
-                                @csrf
+                        @guest
+                            <p class="muted">Регистрация не нужна: заполните контактные данные, и мы подтвердим запись.</p>
+                        @endguest
+                        <form action="{{ route('bookings.store', $masterclass->slug) }}" method="post" novalidate>
+                            @csrf
+                            <div class="field">
+                                <label for="session">Сеанс</label>
+                                <select id="session" class="select @error('workshop_session_id') is-invalid @enderror" name="workshop_session_id" required>
+                                    @foreach ($sessions as $session)
+                                        @php $local = $session->starts_at->copy()->setTimezone($session->timezone); @endphp
+                                        <option value="{{ $session->id }}" @selected((int) old('workshop_session_id') === $session->id) @disabled($session->seatsLeft() <= 0)>
+                                            {{ $local->translatedFormat('d M, l') }} в {{ $local->format('H:i') }} — свободно {{ $session->seatsLeft() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('workshop_session_id')<div class="error-text">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="field">
+                                <label for="participants">Число участников</label>
+                                <input id="participants" class="input @error('participants_count') is-invalid @enderror" type="number" name="participants_count" min="1" max="8" value="{{ old('participants_count', auth()->check() ? 1 : '') }}" placeholder="Укажите количество участников" required>
+                                @error('participants_count')<div class="error-text">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="field">
+                                <label for="b-name">Контактное имя взрослого</label>
+                                <input id="b-name" class="input @error('contact_name') is-invalid @enderror" type="text" name="contact_name" value="{{ old('contact_name', auth()->user()?->name) }}" placeholder="Как к вам обращаться" required>
+                                @error('contact_name')<div class="error-text">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="grid grid-2" style="gap:14px">
                                 <div class="field">
-                                    <label for="session">Сеанс</label>
-                                    <select id="session" class="select @error('workshop_session_id') is-invalid @enderror" name="workshop_session_id" required>
-                                        @foreach ($sessions as $session)
-                                            @php $local = $session->starts_at->copy()->setTimezone($session->timezone); @endphp
-                                            <option value="{{ $session->id }}" @selected((int) old('workshop_session_id') === $session->id) @disabled($session->seatsLeft() <= 0)>
-                                                {{ $local->translatedFormat('d M, l') }} в {{ $local->format('H:i') }} — свободно {{ $session->seatsLeft() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="field">
-                                    <label for="participants">Число участников</label>
-                                    <input id="participants" class="input @error('participants_count') is-invalid @enderror" type="number" name="participants_count" min="1" max="8" value="{{ old('participants_count', 1) }}" required>
-                                </div>
-                                <div class="field">
-                                    <label for="b-name">Контактное имя взрослого</label>
-                                    <input id="b-name" class="input @error('contact_name') is-invalid @enderror" type="text" name="contact_name" value="{{ old('contact_name', auth()->user()->name) }}" required>
-                                </div>
-                                <div class="grid grid-2" style="gap:14px">
-                                    <div class="field">
-                                        <label for="b-phone">Телефон</label>
-                                        <input id="b-phone" class="input" type="text" name="contact_phone" value="{{ old('contact_phone', auth()->user()->phone) }}" required>
-                                    </div>
-                                    <div class="field">
-                                        <label for="b-email">Электронная почта</label>
-                                        <input id="b-email" class="input" type="email" name="contact_email" value="{{ old('contact_email', auth()->user()->email) }}" required>
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <label for="b-age">Возраст ребёнка (если нужно)</label>
-                                    <input id="b-age" class="input" type="number" name="child_age" min="0" max="99" value="{{ old('child_age') }}" placeholder="Необязательно">
-                                    <div class="hint">Указывайте только минимально необходимое для занятия.</div>
+                                    <label for="b-phone">Телефон</label>
+                                    <input id="b-phone" class="input @error('contact_phone') is-invalid @enderror" type="text" name="contact_phone" value="{{ old('contact_phone', auth()->user()?->phone) }}" placeholder="+7 (___) ___-__-__" required>
+                                    @error('contact_phone')<div class="error-text">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="field">
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="consent_data" value="1" required>
-                                        <span>
-                                            {{ legal('consent_booking', 'lead', 'Даю согласие на обработку персональных данных для оформления записи на мастер-класс') }}.
-                                            <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
-                                        </span>
-                                    </label>
-                                    @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                                    <label for="b-email">Электронная почта</label>
+                                    <input id="b-email" class="input @error('contact_email') is-invalid @enderror" type="email" name="contact_email" value="{{ old('contact_email', auth()->user()?->email) }}" placeholder="name@example.com" required>
+                                    @error('contact_email')<div class="error-text">{{ $message }}</div>@enderror
                                 </div>
-                                <button class="btn btn--block" type="submit">Записаться</button>
-                                <p class="form-note" style="margin-top:14px">После отправки запись подтверждается; оплата — в студии. Порядок отмены и переноса — в <a href="{{ route('legal.show', legal('booking_rules', 'slug', 'pravila-zapisi-i-zakaza')) }}" target="_blank" rel="noopener">Правилах записи и заказа</a>. Данные ребёнка обрабатываются на основании согласия законного представителя.</p>
-                            </form>
-                        @else
-                            <p class="muted">Чтобы записаться, войдите в личный кабинет — так запись сохранится в вашем профиле.</p>
-                            <a class="btn btn--block" href="{{ route('login', ['redirect' => url()->current()]) }}">Войти и записаться</a>
-                            <p class="form-note" style="margin-top:14px">Аккаунт оформляет взрослый. Нет аккаунта? <a href="{{ route('register') }}">Создать</a>.</p>
-                        @endauth
+                            </div>
+                            <div class="field">
+                                <label for="b-age">Возраст ребёнка (если нужно)</label>
+                                <input id="b-age" class="input" type="number" name="child_age" min="0" max="99" value="{{ old('child_age') }}" placeholder="Необязательно">
+                                <div class="hint">Указывайте только минимально необходимое для занятия.</div>
+                            </div>
+                            <div class="field">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="consent_data" value="1" required>
+                                    <span>
+                                        {{ legal('consent_booking', 'lead', 'Даю согласие на обработку персональных данных для оформления записи на мастер-класс') }}.
+                                        <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                                    </span>
+                                </label>
+                                @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                            </div>
+                            <button class="btn btn--block" type="submit">Записаться</button>
+                            <p class="form-note" style="margin-top:14px">После отправки запись подтверждается; оплата — в студии. Порядок отмены и переноса — в <a href="{{ route('legal.show', legal('booking_rules', 'slug', 'pravila-zapisi-i-zakaza')) }}" target="_blank" rel="noopener">Правилах записи и заказа</a>. Данные ребёнка обрабатываются на основании согласия законного представителя.</p>
+                        </form>
                     </div>
                 </div>
             @endif

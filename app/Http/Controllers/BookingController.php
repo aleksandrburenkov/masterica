@@ -33,9 +33,14 @@ class BookingController extends Controller
 
         $booking = $this->bookings->create($request->user(), $session, $data);
 
-        return redirect()
-            ->route('account.bookings')
-            ->with('success', 'Запись '.$booking->number.' подтверждена. Оплата — в студии.');
+        $message = 'Запись '.$booking->number.' подтверждена. Оплата — в студии.';
+
+        // Авторизованные клиенты видят запись в личном кабинете, гости — на
+        // странице мастер-класса, где была заполнена форма.
+        return ($request->user()
+            ? redirect()->route('account.bookings')
+            : redirect()->to(route('masterclasses.show', $masterclass->slug).'#booking'))
+            ->with('success', $message);
     }
 
     public function cancel(Request $request, Booking $booking): RedirectResponse

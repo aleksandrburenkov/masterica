@@ -52,12 +52,111 @@ class BookingTest extends TestCase
         ];
     }
 
-    public function test_guest_is_redirected_to_login(): void
+    public function test_guest_sees_editable_booking_form(): void
+    {
+        $this->get(route('masterclasses.show', 'basket'))
+            ->assertOk()
+            ->assertSee('Запись на занятие')
+            ->assertSee('Регистрация не нужна')
+            ->assertSee('name="contact_name"', false)
+            ->assertSee('placeholder="Как к вам обращаться"', false)
+            ->assertSee('placeholder="+7 (___) ___-__-__"', false)
+            ->assertDontSee('Войти и записаться');
+    }
+
+    public function test_authenticated_user_sees_prefilled_booking_form(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Client,
+            'name' => 'Иван Петров',
+            'email' => 'ivan@example.com',
+            'phone' => '+7 900 000-00-00',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('masterclasses.show', 'basket'))
+            ->assertOk()
+            ->assertSee('value="Иван Петров"', false)
+            ->assertSee('value="ivan@example.com"', false);
+    }
+
+    public function test_guest_books_without_account(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', 'basket'), $this->payload($session, 2))
+            ->assertRedirect(route('masterclasses.show', 'basket').'#booking')
+            ->assertSessionHas('success');
+
+        $booking = Booking::firstOrFail();
+        $this->assertNull($booking->user_id);
+        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame('Взрослый', $booking->contact_name);
+        $this->assertSame('adult@example.com', $booking->contact_email);
+        $this->assertSame(2, $booking->participants_count);
+        $this->assertSame($session->priceCents() * 2, $booking->total_cents);
+    }
+
+    public function test_guest_duplicate_booking_is_rejected(): void
     {
         $session = $this->makeSession();
 
         $this->post(route('bookings.store', 'basket'), $this->payload($session))
-            ->assertRedirect(route('login'));
+            ->assertSessionHasNoErrors();
+        $this->post(route('bookings.store', 'basket'), $this->payload($session))
+            ->assertSessionHasErrors('participants_count');
+
+        $this->assertSame(1, Booking::count());
+    }
+
+    public function test_guest_booking_requires_contact_fields(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', 'basket'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => '',
+            'contact_name' => '',
+            'contact_phone' => '',
+            'contact_email' => '',
+            'consent_data' => '1',
+        ])->assertSessionHasErrors(['participants_count', 'contact_name', 'contact_phone', 'contact_email']);
+
+        $this->assertSame(0, Booking::count());
+    }
+
+    public function test_guest_booking_is_visible_in_admin(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', 'basket'), $this->payload($session));
+
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+
+        $this->actingAs($owner)
+            ->get('/admin/bookings')
+            ->assertOk()
+            ->assertSee('adult@example.com');
+    }
+
+    public function test_registered_user_name_is_visible_in_admin(): void
+    {
+        $user = User::factory()->create([
+            'role' => UserRole::Client,
+            'name' => 'Мария Иванова',
+            'email' => 'maria@example.com',
+        ]);
+        $session = $this->makeSession();
+
+        $this->actingAs($user)->post(route('bookings.store', 'basket'), $this->payload($session));
+
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+
+        $this->actingAs($owner)
+            ->get('/admin/bookings')
+            ->assertOk()
+            ->assertSee('Мария Иванова')
+            ->assertSee('maria@example.com');
     }
 
     public function test_authenticated_user_creates_confirmed_booking(): void

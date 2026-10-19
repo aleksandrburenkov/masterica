@@ -23,11 +23,13 @@ class BookingService
     /**
      * Atomically reserve a seat and confirm a local booking.
      *
-     * The session row is locked for the duration of the transaction so two
-     * concurrent requests for the last seat cannot both succeed. Server-side
-     * data (price, capacity, publication) is always re-read and re-checked.
+     * A null user means a guest booking made without an account: contact
+     * details are stored on the booking itself. The session row is locked for
+     * the duration of the transaction so two concurrent requests for the last
+     * seat cannot both succeed. Server-side data (price, capacity,
+     * publication) is always re-read and re-checked.
      */
-    public function create(User $user, WorkshopSession $session, array $data): Booking
+    public function create(?User $user, WorkshopSession $session, array $data): Booking
     {
         return DB::transaction(function () use ($user, $session, $data) {
             $this->expireStaleHolds();
@@ -42,7 +44,7 @@ class BookingService
 
             $participants = max(1, (int) $data['participants_count']);
 
-            if ($this->hasActiveBooking($user, $locked)) {
+            if ($this->hasActiveBooking($user, $locked, $data['contact_email'])) {
                 throw ValidationException::withMessages([
                     'participants_count' => 'На этот сеанс у вас уже есть активная запись.',
                 ]);
@@ -58,33 +60,46 @@ class BookingService
             $unit = $locked->priceCents();
             $holdMinutes = Settings::int('rules.hold_minutes', 15);
 
-            // A cancelled booking may be reused so the same user can re-book
-            // the same session without violating the unique (user, session) index.
-            $booking = Booking::query()->updateOrCreate(
-                [
-                    'user_id' => $user->id,
+            $attributes = [
+                'number' => NumberGenerator::booking(),
+                'status' => BookingStatus::Held,
+                'payment_status' => PaymentStatus::Unpaid,
+                'participants_count' => $participants,
+                'contact_name' => $data['contact_name'],
+                'contact_phone' => $data['contact_phone'],
+                'contact_email' => $data['contact_email'],
+                'child_age' => $data['child_age'] ?? null,
+                'unit_price_cents' => $unit,
+                'total_cents' => $unit * $participants,
+                'currency' => $locked->masterclass->currency ?? 'RUB',
+                'hold_expires_at' => now()->addMinutes($holdMinutes),
+                'confirmed_at' => null,
+                'attended_at' => null,
+                'canceled_at' => null,
+                'cancel_reason' => null,
+                'notes' => $data['notes'] ?? null,
+            ];
+
+            if ($user !== null) {
+                // A cancelled booking may be reused so the same user can
+                // re-book the same session without violating the unique
+                // (user, session) index.
+                $booking = Booking::query()->updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'workshop_session_id' => $locked->id,
+                    ],
+                    $attributes,
+                );
+            } else {
+                // Guests have no account, so every accepted request creates a
+                // new record. Duplicate active bookings are already blocked
+                // above by contact e-mail.
+                $booking = Booking::query()->create($attributes + [
+                    'user_id' => null,
                     'workshop_session_id' => $locked->id,
-                ],
-                [
-                    'number' => NumberGenerator::booking(),
-                    'status' => BookingStatus::Held,
-                    'payment_status' => PaymentStatus::Unpaid,
-                    'participants_count' => $participants,
-                    'contact_name' => $data['contact_name'],
-                    'contact_phone' => $data['contact_phone'],
-                    'contact_email' => $data['contact_email'],
-                    'child_age' => $data['child_age'] ?? null,
-                    'unit_price_cents' => $unit,
-                    'total_cents' => $unit * $participants,
-                    'currency' => $locked->masterclass->currency ?? 'RUB',
-                    'hold_expires_at' => now()->addMinutes($holdMinutes),
-                    'confirmed_at' => null,
-                    'attended_at' => null,
-                    'canceled_at' => null,
-                    'cancel_reason' => null,
-                    'notes' => $data['notes'] ?? null,
-                ],
-            );
+                ]);
+            }
 
             // Local flow: the booking is confirmed immediately, payment is
             // collected at the studio. No real charge is performed.
@@ -160,10 +175,13 @@ class BookingService
         }
     }
 
-    private function hasActiveBooking(User $user, WorkshopSession $session): bool
+    /**
+     * An authenticated user is matched by account; a guest is matched by the
+     * contact e-mail so the same person cannot double-book a session.
+     */
+    private function hasActiveBooking(?User $user, WorkshopSession $session, ?string $email): bool
     {
         return Booking::query()
-            ->where('user_id', $user->id)
             ->where('workshop_session_id', $session->id)
             ->whereIn('status', [
                 BookingStatus::Held->value,
@@ -171,6 +189,11 @@ class BookingService
                 BookingStatus::Confirmed->value,
                 BookingStatus::Attended->value,
             ])
+            ->when(
+                $user !== null,
+                fn ($q) => $q->where('user_id', $user->id),
+                fn ($q) => $q->whereNull('user_id')->where('contact_email', $email),
+            )
             ->exists();
     }
 

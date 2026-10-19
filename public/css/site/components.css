@@ -305,7 +305,7 @@
 
 .hero--home .hero__media {
     position: absolute;
-    right: 0;
+    right: 170px;
     top: 0;
     bottom: 0;
     border-radius: var(--radius-lg);

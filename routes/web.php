@@ -36,6 +36,10 @@ Route::get('/master-klassy-v-bryanske', [MasterclassController::class, 'bryansk'
 Route::get('/master-klassy', [MasterclassController::class, 'index'])->name('masterclasses.index');
 Route::get('/master-klassy/{masterclass:slug}', [MasterclassController::class, 'show'])->name('masterclasses.show');
 
+// Запись на мастер-класс доступна без регистрации и входа.
+Route::post('/master-klassy/{masterclass:slug}/zapis', [BookingController::class, 'store'])
+    ->middleware('throttle:10,1')->name('bookings.store');
+
 // Выездные мастер-классы
 Route::get('/vyezdnye-master-klassy', [OutreachController::class, 'index'])->name('outreach.index');
 Route::post('/vyezdnye-master-klassy', [OutreachController::class, 'store'])
@@ -94,8 +98,7 @@ Route::post('/vyhod', [LoginController::class, 'destroy'])->middleware('auth')->
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    // Запись на мастер-класс
-    Route::post('/master-klassy/{masterclass:slug}/zapis', [BookingController::class, 'store'])->name('bookings.store');
+    // Отмена записи доступна только владельцу записи в личном кабинете.
     Route::post('/zapisi/{booking:number}/otmena', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
     // Оформление заказа

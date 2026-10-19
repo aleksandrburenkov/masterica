@@ -17,7 +17,7 @@ class BookingForm
         return $schema->components([
             Section::make('Запись')->schema([
                 TextInput::make('number')->label('Номер')->disabled()->dehydrated(),
-                Select::make('user_id')->label('Пользователь')->relationship('user', 'email')->searchable()->preload()->required(),
+                Select::make('user_id')->label('Пользователь')->relationship('user', 'email')->searchable()->preload()->nullable()->placeholder('Гость (без аккаунта)'),
                 Select::make('workshop_session_id')->label('Сеанс')->relationship('session', 'id')->getOptionLabelFromRecordUsing(fn ($record) => $record->masterclass->title.' — '.$record->starts_at->format('d.m.Y H:i'))->searchable()->preload()->required(),
                 Select::make('status')->label('Статус записи')->options(self::statusOptions())->required(),
                 Select::make('payment_status')->label('Статус оплаты')->options(self::paymentOptions())->required(),

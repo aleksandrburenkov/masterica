@@ -13,6 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingsTable
 {
@@ -21,7 +22,20 @@ class BookingsTable
         return $table
             ->columns([
                 TextColumn::make('number')->label('Номер')->searchable(),
-                TextColumn::make('user.email')->label('Клиент')->searchable(),
+                TextColumn::make('client')
+                    ->label('Клиент')
+                    ->state(fn (Booking $record) => $record->user?->name ?? $record->contact_name)
+                    ->description(fn (Booking $record) => $record->user
+                        ? $record->user->email
+                        : 'Гость · '.$record->contact_email)
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function (Builder $q) use ($search): void {
+                            $q->where('contact_name', 'like', "%{$search}%")
+                                ->orWhere('contact_email', 'like', "%{$search}%")
+                                ->orWhereHas('user', fn (Builder $user) => $user->where('email', 'like', "%{$search}%")
+                                    ->orWhere('name', 'like', "%{$search}%"));
+                        });
+                    }),
                 TextColumn::make('session.masterclass.title')->label('Мастер-класс')->wrap(),
                 TextColumn::make('session.starts_at')->label('Сеанс')->dateTime('d.m.Y H:i')->timezone('Europe/Moscow')->sortable(),
                 TextColumn::make('status')->label('Запись')->badge()->formatStateUsing(fn ($state) => $state->label()),
