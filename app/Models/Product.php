@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'technique_id', 'title', 'slug', 'short_description', 'description',
@@ -49,5 +50,63 @@ class Product extends Model
     public function totalStock(): int
     {
         return (int) $this->variants()->sum('stock');
+    }
+
+    public static function uniqueSlug(string $title, ?int $ignoreId = null): string
+    {
+        $base = Str::limit(Str::slug($title), 180, '');
+        $base = $base !== '' ? $base : 'tovar';
+
+        if (! static::slugExists($base, $ignoreId)) {
+            return $base;
+        }
+
+        $token = static::slugToken($title);
+        $candidate = "{$base}-{$token}";
+
+        if (! static::slugExists($candidate, $ignoreId)) {
+            return $candidate;
+        }
+
+        $index = 1;
+
+        do {
+            $candidate = "{$base}-{$token}-".static::alphabeticIndex($index++);
+        } while (static::slugExists($candidate, $ignoreId));
+
+        return $candidate;
+    }
+
+    private static function slugExists(string $slug, ?int $ignoreId): bool
+    {
+        return static::query()
+            ->where('slug', $slug)
+            ->when($ignoreId !== null, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->exists();
+    }
+
+    private static function slugToken(string $title): string
+    {
+        $words = array_filter(explode('-', Str::slug($title)));
+        $token = '';
+
+        foreach (array_slice($words, 0, 4) as $word) {
+            $token .= Str::substr($word, 0, 1);
+        }
+
+        return $token !== '' ? $token : 'tovar';
+    }
+
+    private static function alphabeticIndex(int $index): string
+    {
+        $suffix = '';
+
+        while ($index > 0) {
+            $index--;
+            $suffix = chr(97 + ($index % 26)).$suffix;
+            $index = intdiv($index, 26);
+        }
+
+        return $suffix;
     }
 }
