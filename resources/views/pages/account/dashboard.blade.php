@@ -59,7 +59,12 @@
                                 <div class="fact__value">{{ $activeEnrollment->course->title }}</div>
                                 <div class="progress-bar" style="margin:14px 0 8px"><span style="width:{{ $progress }}%"></span></div>
                                 <div class="muted" style="font-size:13px;margin-bottom:14px">Прогресс: {{ $progress }}%</div>
-                                <a class="btn btn--sm" href="{{ route('courses.learn', [$activeEnrollment->course->slug, $activeEnrollment->course->modules()->first()?->lessons()->first()?->id]) }}">Открыть курс</a>
+                                @if ($activeLesson)
+                                    <a class="btn btn--sm" href="{{ route('courses.learn', [$activeEnrollment->course->slug, $activeLesson->id]) }}">Открыть курс</a>
+                                @else
+                                    <p class="muted" style="font-size:13px">Материалы курса ещё не опубликованы.</p>
+                                    <a class="btn btn--ghost btn--sm" href="{{ route('courses.show', $activeEnrollment->course->slug) }}">О курсе</a>
+                                @endif
                             @else
                                 <p class="muted">Купленные курсы появятся в этом блоке с прогрессом и ссылкой на следующий урок.</p>
                                 <a class="btn btn--ghost btn--sm" href="{{ route('courses.index') }}">Смотреть курсы</a>

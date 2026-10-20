@@ -32,8 +32,9 @@ class CourseController extends Controller
             : null;
 
         $progress = $enrollment ? $this->courses->progressPercent($enrollment) : 0;
+        $firstLesson = $course->modules->flatMap->lessons->first();
 
-        return view('pages.course-detail', compact('course', 'enrollment', 'progress'));
+        return view('pages.course-detail', compact('course', 'enrollment', 'progress', 'firstLesson'));
     }
 
     public function enroll(Request $request, Course $course): RedirectResponse

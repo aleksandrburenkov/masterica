@@ -43,7 +43,11 @@
                                     @if ($enrollment->hasActiveAccess())
                                         <div class="progress-bar" style="margin:16px 0 8px"><span style="width:{{ $row['progress'] }}%"></span></div>
                                         <div class="muted" style="font-size:13px;margin-bottom:14px">Прогресс: {{ $row['progress'] }}%</div>
-                                        <a class="btn btn--sm" href="{{ route('courses.learn', [$course->slug, $course->modules()->first()?->lessons()->first()?->id]) }}">Продолжить обучение</a>
+                                        @if ($row['firstLesson'])
+                                            <a class="btn btn--sm" href="{{ route('courses.learn', [$course->slug, $row['firstLesson']->id]) }}">Продолжить обучение</a>
+                                        @else
+                                            <p class="muted" style="font-size:13px">Материалы курса ещё не опубликованы.</p>
+                                        @endif
                                     @elseif ($enrollment->status->value === 'pending_payment')
                                         <div class="note-strip" style="margin-top:14px">Ожидает подтверждения оплаты администратором. Реальное списание не выполняется.</div>
                                     @else

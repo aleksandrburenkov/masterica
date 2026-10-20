@@ -35,7 +35,11 @@ class AccountController extends Controller
 
         $activeEnrollment = $user->enrollments()
             ->where('status', 'active')
-            ->with('course')
+            ->with(['course.modules.lessons' => fn ($q) => $q->where('is_published', true)])
+            ->first();
+
+        $activeLesson = $activeEnrollment?->course?->modules
+            ->flatMap(fn ($module) => $module->lessons)
             ->first();
 
         $progress = $activeEnrollment ? $this->courses->progressPercent($activeEnrollment) : 0;
@@ -48,7 +52,7 @@ class AccountController extends Controller
 
         $notifications = $user->appNotifications()->latest()->take(5)->get();
 
-        return view('pages.account.dashboard', compact('user', 'upcoming', 'activeEnrollment', 'progress', 'counts', 'notifications'));
+        return view('pages.account.dashboard', compact('user', 'upcoming', 'activeEnrollment', 'activeLesson', 'progress', 'counts', 'notifications'));
     }
 
     public function bookings(Request $request): View
@@ -64,12 +68,15 @@ class AccountController extends Controller
     public function courses(Request $request): View
     {
         $enrollments = $request->user()->enrollments()
-            ->with('course')
+            ->with(['course.modules.lessons' => fn ($q) => $q->where('is_published', true)])
             ->latest()
             ->get()
             ->map(fn ($enrollment) => [
                 'enrollment' => $enrollment,
                 'progress' => $this->courses->progressPercent($enrollment),
+                'firstLesson' => $enrollment->course?->modules
+                    ->flatMap(fn ($module) => $module->lessons)
+                    ->first(),
             ]);
 
         return view('pages.account.courses', compact('enrollments'));

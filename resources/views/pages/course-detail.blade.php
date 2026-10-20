@@ -55,9 +55,13 @@
                     <div style="margin-top:22px">
                         @auth
                             @if ($enrollment && $enrollment->hasActiveAccess())
-                                <a class="btn btn--block" href="{{ route('courses.learn', [$course->slug, $course->modules->first()?->lessons->first()?->id]) }}">Продолжить обучение</a>
-                                <div class="progress-bar" style="margin-top:14px"><span style="width:{{ $progress }}%"></span></div>
-                                <p class="muted" style="font-size:13px;margin-top:6px">Прогресс: {{ $progress }}%</p>
+                                @if ($firstLesson)
+                                    <a class="btn btn--block" href="{{ route('courses.learn', [$course->slug, $firstLesson->id]) }}">Продолжить обучение</a>
+                                    <div class="progress-bar" style="margin-top:14px"><span style="width:{{ $progress }}%"></span></div>
+                                    <p class="muted" style="font-size:13px;margin-top:6px">Прогресс: {{ $progress }}%</p>
+                                @else
+                                    <div class="note-strip">Материалы курса ещё не опубликованы.</div>
+                                @endif
                             @elseif ($enrollment)
                                 <div class="note-strip" style="margin-bottom:14px">Заявка создана, доступ ожидает подтверждения оплаты администратором.</div>
                                 <a class="btn btn--ghost btn--block" href="{{ route('account.courses') }}">Мои курсы</a>
