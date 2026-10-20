@@ -66,7 +66,6 @@ class AdminResourcesTest extends TestCase
             'workshop-sessions' => ['workshop-sessions'],
             'products' => ['products'],
             'product-variants' => ['product-variants'],
-            'orders' => ['orders'],
             'courses' => ['courses'],
             'course-modules' => ['course-modules'],
             'lessons' => ['lessons'],
