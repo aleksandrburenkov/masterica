@@ -638,11 +638,40 @@
     }
 
     function dismissFlashToast(toast) {
-        if (!toast || !toast.parentNode) return;
+        if (!toast || !toast.parentNode || toast.classList.contains('is-hiding')) return;
         toast.classList.add('is-hiding');
         window.setTimeout(function () {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
         }, 200);
+    }
+
+    /* Автозакрытие: через 3,5 с уведомление плавно уходит так же, как при клике на крестик.
+       Ручное закрытие отменяет таймер, чтобы не было повторного срабатывания. */
+    var FLASH_TOAST_TIMEOUT = 3500;
+
+    function registerFlashToast(toast) {
+        if (!toast || toast.getAttribute('data-flash-bound') === '1') return;
+        toast.setAttribute('data-flash-bound', '1');
+
+        var timer = window.setTimeout(function () {
+            timer = null;
+            dismissFlashToast(toast);
+        }, FLASH_TOAST_TIMEOUT);
+
+        function cancelTimer() {
+            if (timer) {
+                window.clearTimeout(timer);
+                timer = null;
+            }
+        }
+
+        var close = toast.querySelector('[data-flash-close]');
+        if (close) {
+            close.addEventListener('click', function () {
+                cancelTimer();
+                dismissFlashToast(toast);
+            });
+        }
     }
 
     function initFlashToasts() {
@@ -655,12 +684,7 @@
         }
 
         document.querySelectorAll('[data-flash-toast]').forEach(function (toast) {
-            var close = toast.querySelector('[data-flash-close]');
-            if (close) {
-                close.addEventListener('click', function () {
-                    dismissFlashToast(toast);
-                });
-            }
+            registerFlashToast(toast);
         });
     }
 
@@ -687,14 +711,7 @@
 
         stack.appendChild(toast);
 
-        var timer = window.setTimeout(function () {
-            dismissFlashToast(toast);
-        }, 7000);
-
-        close.addEventListener('click', function () {
-            window.clearTimeout(timer);
-            dismissFlashToast(toast);
-        });
+        registerFlashToast(toast);
     }
 
     /* --- Тень шапки при прокрутке --- */

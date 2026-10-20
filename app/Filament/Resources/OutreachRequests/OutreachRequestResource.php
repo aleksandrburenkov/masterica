@@ -20,11 +20,11 @@ class OutreachRequestResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static ?string $navigationLabel = 'Заявки на выезд';
+    protected static ?string $navigationLabel = 'Заявки на выездные мастер-классы';
 
-    protected static ?string $modelLabel = 'Заявка на выезд';
+    protected static ?string $modelLabel = 'Заявка на выездной мастер-класс';
 
-    protected static ?string $pluralModelLabel = 'Выездные заявки';
+    protected static ?string $pluralModelLabel = 'Заявки на выездные мастер-классы';
 
     public static function form(Schema $schema): Schema
     {

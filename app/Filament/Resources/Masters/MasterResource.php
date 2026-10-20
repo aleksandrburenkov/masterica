@@ -20,6 +20,10 @@ class MasterResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Мастера студии';
+    protected static ?string $modelLabel = 'Мастер студии';
+    protected static ?string $pluralModelLabel = 'Мастера студии';
+
     public static function form(Schema $schema): Schema
     {
         return MasterForm::configure($schema);

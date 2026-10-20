@@ -20,6 +20,9 @@ class TechniqueResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Техники исполнения';
+    protected static ?string $modelLabel = 'Техника исполнения';
+    protected static ?string $pluralModelLabel = 'Техники исполнения';
     public static function form(Schema $schema): Schema
     {
         return TechniqueForm::configure($schema);
