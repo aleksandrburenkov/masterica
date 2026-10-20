@@ -21,6 +21,8 @@ class LessonResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Блок курсы';
+
     protected static ?string $navigationLabel = 'Материаллы курсов';
     protected static ?string $modelLabel = 'Материаллы курса';
     protected static ?string $pluralModelLabel = 'Материаллы курсов';
