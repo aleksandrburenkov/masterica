@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class ProductForm
 {
@@ -24,10 +25,14 @@ class ProductForm
                 TextInput::make('price_cents')->label('Базовая цена, ₽')->numeric()->required()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 FileUpload::make('image')->label('Изображение')->image()->disk('public')->visibility('public')->directory('products'),
                 FileUpload::make('gallery')
-                    ->label('Карусель изображений товара')
+                    ->label(new HtmlString('Карусель изображений товара <span style="color: #8b93a1; font-weight: 400;">(макс. 6 фото)</span>'))
                     ->image()
                     ->multiple()
                     ->reorderable()
+                    ->maxFiles(6)
+                    ->validationMessages([
+                        'max' => 'Превышен лимит загрузок фото',
+                    ])
                     ->disk('public')
                     ->visibility('public')
                     ->directory('products/gallery')

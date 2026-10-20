@@ -1,7 +1,8 @@
 @extends('layouts.site')
 
 @php
-    $gallery = collect($product->gallery ?? [])->filter()->values();
+    $gallery = collect($product->gallery ?? [])->filter()->take(6)->values();
+    $galleryCount = $gallery->count();
 @endphp
 
 @section('title', $product->seo_title ?: ($product->title.' — купить'))
@@ -53,7 +54,8 @@
                     <img src="{{ media_url($product->image, 'images/photo-1.jpg') }}" alt="{{ $product->title }}" data-product-gallery-main>
 
                     @if ($gallery->isNotEmpty())
-                        <div class="product-gallery" data-product-gallery>
+                        <div class="product-gallery product-gallery--{{ $galleryCount > 4 ? 'fill' : 'compact' }} product-gallery--count-{{ $galleryCount }}"
+                            data-product-gallery>
                             <div class="swiper product-gallery__swiper">
                                 <div class="swiper-wrapper">
                                     @foreach ($gallery as $index => $image)

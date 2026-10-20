@@ -11,10 +11,30 @@
 
 .product-gallery__swiper {
     overflow: hidden;
+    padding-top: 8px;
+    margin-top: -8px;
 }
 
 .product-gallery .swiper-slide {
     width: 82px;
+}
+
+/* 5–6 фото занимают всю ширину блока. */
+.product-gallery--count-5 .swiper-slide {
+    width: calc((100% - 40px) / 5);
+}
+
+.product-gallery--count-6 .swiper-slide {
+    width: calc((100% - 50px) / 6);
+}
+
+/* 4 фото и меньше — по центру блока. */
+.product-gallery--compact .swiper-wrapper {
+    justify-content: center;
+}
+
+.product-gallery--compact .swiper-slide:last-child {
+    margin-right: 0 !important;
 }
 
 .product-gallery__thumb {
@@ -63,17 +83,21 @@
 }
 
 .product-gallery:not(.is-ready) .swiper-slide {
-    flex: 0 0 82px;
-    width: 82px;
+    flex: 0 0 auto;
 }
 
 @media (max-width: 560px) {
-    .product-gallery .swiper-slide,
-    .product-gallery:not(.is-ready) .swiper-slide {
-        width: 68px;
+    .product-gallery {
+        padding: 8px;
     }
 
-    .product-gallery:not(.is-ready) .swiper-slide {
-        flex-basis: 68px;
+    .product-gallery--compact .swiper-slide {
+        width: 58px;
+    }
+}
+
+@media (max-width: 380px) {
+    .product-gallery--compact .swiper-slide {
+        width: 50px;
     }
 }
