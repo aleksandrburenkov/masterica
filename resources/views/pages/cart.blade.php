@@ -24,7 +24,7 @@
                     <div class="stack">
                         @foreach ($items as $variantId => $item)
                             <div class="cart-item">
-                                <img src="{{ asset($item['product']->image ?? 'images/photo-1.jpg') }}" alt="{{ $item['product']->title }}">
+                                <img src="{{ media_url($item['product']->image, 'images/photo-1.jpg') }}" alt="{{ $item['product']->title }}">
                                 <div>
                                     <div style="font-weight:700;color:var(--ink)"><a href="{{ route('shop.show', $item['product']->slug) }}">{{ $item['product']->title }}</a></div>
                                     <div class="muted" style="font-size:14px">{{ $item['variant']->name }} · арт. {{ $item['variant']->sku }}</div>

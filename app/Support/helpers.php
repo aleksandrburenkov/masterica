@@ -36,6 +36,36 @@ if (! function_exists('currency_symbol')) {
     }
 }
 
+if (! function_exists('media_url')) {
+    /**
+     * Build a public URL for an image path.
+     *
+     * Legacy images live directly in the public directory (images/...), while
+     * images uploaded through the admin panel are stored on the "public"
+     * filesystem disk and served through the /storage symlink.
+     */
+    function media_url(?string $path, string $fallback = ''): string
+    {
+        $path = $path ?: $fallback;
+
+        if ($path === '') {
+            return '';
+        }
+
+        if (preg_match('#^(https?:)?//#i', $path) === 1) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'images/') || str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return asset('storage/'.$path);
+    }
+}
+
 if (! function_exists('money')) {
     /**
      * Format an integer amount in the smallest currency unit (kopecks)

@@ -24,7 +24,7 @@
                     @foreach ($guides as $guide)
                         <article class="card card--pad-0" data-reveal>
                             @if ($guide->image)
-                                <a href="{{ route('guides.show', $guide->slug) }}"><img src="{{ asset($guide->image) }}" alt="{{ $guide->title }}" loading="lazy" style="aspect-ratio:16/9;object-fit:cover"></a>
+                                <a href="{{ route('guides.show', $guide->slug) }}"><img src="{{ media_url($guide->image) }}" alt="{{ $guide->title }}" loading="lazy" style="aspect-ratio:16/9;object-fit:cover"></a>
                             @endif
                             <div style="padding:22px">
                                 <span class="chip">{{ $guide->type === 'guide' ? 'Руководство' : 'Статья' }}</span>

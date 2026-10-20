@@ -24,7 +24,7 @@ class MasterForm
                 TextInput::make('email')->label('Email')->email(),
                 TextInput::make('phone')->label('Телефон')->tel(),
                 Select::make('techniques')->label('Направления (техники)')->relationship('techniques', 'name')->multiple()->preload(),
-                FileUpload::make('photo')->label('Фото')->image()->directory('masters'),
+                FileUpload::make('photo')->label('Фото')->image()->disk('public')->visibility('public')->directory('masters'),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
                 Toggle::make('is_active')->label('Активен')->default(true),
             ])->columns(2),

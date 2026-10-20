@@ -2,7 +2,7 @@
 
 <article class="card card--pad-0 catalog-card" data-reveal>
     <a class="catalog-card__media" href="{{ route('courses.show', $course->slug) }}">
-        <img src="{{ asset($course->image ?? 'images/hero-masterclass.png') }}" alt="{{ $course->title }}" loading="lazy">
+        <img src="{{ media_url($course->image, 'images/hero-masterclass.png') }}" alt="{{ $course->title }}" loading="lazy">
         <span class="catalog-card__badge">Онлайн-курс</span>
     </a>
     <div class="catalog-card__body">

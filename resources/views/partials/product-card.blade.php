@@ -8,7 +8,7 @@
 
 <article class="card card--pad-0 catalog-card" data-reveal>
     <a class="catalog-card__media" href="{{ route('shop.show', $product->slug) }}">
-        <img src="{{ asset($product->image ?? 'images/photo-1.jpg') }}" alt="{{ $product->title }}" loading="lazy">
+        <img src="{{ media_url($product->image, 'images/photo-1.jpg') }}" alt="{{ $product->title }}" loading="lazy">
         @if ($stock <= 0)
             <span class="catalog-card__badge" style="color:#b0323e">Нет в наличии</span>
         @endif

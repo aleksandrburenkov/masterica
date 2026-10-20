@@ -41,7 +41,7 @@ class MasterclassForm
             ])->columns(2),
 
             Section::make('Медиа и SEO')->schema([
-                FileUpload::make('image')->label('Изображение')->image()->directory('masterclasses'),
+                FileUpload::make('image')->label('Изображение')->image()->disk('public')->visibility('public')->directory('masterclasses'),
                 TextInput::make('seo_title')->label('SEO title')->maxLength(255),
                 Textarea::make('seo_description')->label('SEO description')->rows(2),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),

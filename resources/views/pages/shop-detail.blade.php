@@ -4,7 +4,7 @@
 @section('meta_description', $product->seo_description ?: $product->short_description)
 @section('canonical', route('shop.show', $product->slug))
 @section('og_type', 'product')
-@section('og_image', asset($product->image ?? 'images/photo-1.jpg'))
+@section('og_image', media_url($product->image, 'images/photo-1.jpg'))
 
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Магазин', 'url' => route('shop.index')], ['label' => $product->title]]" />
@@ -17,7 +17,7 @@
             '@type' => 'Product',
             'name' => $product->title,
             'description' => $product->short_description,
-            'image' => asset($product->image ?? 'images/photo-1.jpg'),
+            'image' => media_url($product->image, 'images/photo-1.jpg'),
             'offers' => [
                 '@type' => 'Offer',
                 'price' => (string) ($product->minPriceCents() / 100),
@@ -34,7 +34,7 @@
         <div class="container">
             <div class="detail">
                 <div class="detail__media">
-                    <img src="{{ asset($product->image ?? 'images/photo-1.jpg') }}" alt="{{ $product->title }}">
+                    <img src="{{ media_url($product->image, 'images/photo-1.jpg') }}" alt="{{ $product->title }}">
                 </div>
 
                 <div data-reveal>

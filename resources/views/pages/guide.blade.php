@@ -4,7 +4,7 @@
 @section('meta_description', $page->seo_description ?: $page->excerpt)
 @section('canonical', route('guides.show', $page->slug))
 @if ($page->image)
-    @section('og_image', asset($page->image))
+    @section('og_image', media_url($page->image))
 @endif
 
 @section('breadcrumbs')
@@ -29,7 +29,7 @@
         <div class="container" style="max-width:900px">
             <article class="card">
                 @if ($page->image)
-                    <img src="{{ asset($page->image) }}" alt="{{ $page->title }}" style="border-radius:var(--radius);margin-bottom:22px;aspect-ratio:16/9;object-fit:cover">
+                    <img src="{{ media_url($page->image) }}" alt="{{ $page->title }}" style="border-radius:var(--radius);margin-bottom:22px;aspect-ratio:16/9;object-fit:cover">
                 @endif
                 <span class="chip">{{ $page->type === 'guide' ? 'Руководство' : 'Материал' }}</span>
                 <h1 style="margin-top:12px">{{ $page->title }}</h1>

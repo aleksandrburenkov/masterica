@@ -6,7 +6,7 @@
 @section('meta_description', $masterclass->seo_description ?: $masterclass->short_description)
 @section('canonical', route('masterclasses.show', $masterclass->slug))
 @section('og_type', 'article')
-@section('og_image', asset($masterclass->image ?? 'images/hero-masterclass.png'))
+@section('og_image', media_url($masterclass->image, 'images/hero-masterclass.png'))
 
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Мастер-классы', 'url' => route('masterclasses.index')], ['label' => $masterclass->title]]" />
@@ -19,7 +19,7 @@
             '@type' => 'Product',
             'name' => $masterclass->title,
             'description' => $masterclass->short_description,
-            'image' => asset($masterclass->image ?? 'images/hero-masterclass.png'),
+            'image' => media_url($masterclass->image, 'images/hero-masterclass.png'),
             'offers' => [
                 '@type' => 'Offer',
                 'price' => (string) ($masterclass->price_cents / 100),
@@ -37,7 +37,7 @@
             <div class="detail">
                 <div>
                     <div class="detail__media">
-                        <img src="{{ asset($masterclass->image ?? 'images/hero-masterclass.png') }}" alt="{{ $masterclass->title }}">
+                        <img src="{{ media_url($masterclass->image, 'images/hero-masterclass.png') }}" alt="{{ $masterclass->title }}">
                     </div>
                 </div>
 

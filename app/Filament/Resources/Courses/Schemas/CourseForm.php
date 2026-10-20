@@ -29,7 +29,7 @@ class CourseForm
                 Select::make('level')->label('Уровень')->options(['beginner' => 'Начинающий', 'advanced' => 'Продолжающий'])->default('beginner'),
                 TextInput::make('price_cents')->label('Цена, ₽')->numeric()->required()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 TextInput::make('access_days')->label('Срок доступа, дней')->numeric()->default(365),
-                FileUpload::make('image')->label('Обложка')->image()->directory('courses'),
+                FileUpload::make('image')->label('Обложка')->image()->disk('public')->visibility('public')->directory('courses'),
                 Toggle::make('is_published')->label('Опубликован')->default(true),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
                 TextInput::make('seo_title')->label('SEO title')->maxLength(255),

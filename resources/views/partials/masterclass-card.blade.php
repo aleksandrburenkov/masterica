@@ -9,7 +9,7 @@
     data-level="{{ $masterclass->level }}"
     data-format="{{ $masterclass->format }}">
     <a class="catalog-card__media" href="{{ route('masterclasses.show', $masterclass->slug) }}">
-        <img src="{{ asset($masterclass->image ?? 'images/hero-masterclass.png') }}" alt="{{ $masterclass->title }}" loading="lazy">
+        <img src="{{ media_url($masterclass->image, 'images/hero-masterclass.png') }}" alt="{{ $masterclass->title }}" loading="lazy">
         @if ($masterclass->technique)
             <span class="catalog-card__badge">{{ $masterclass->technique->name }}</span>
         @endif

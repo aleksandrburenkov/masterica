@@ -22,7 +22,7 @@ class ProductForm
                 TextInput::make('short_description')->label('Краткое описание')->required()->columnSpanFull(),
                 Textarea::make('description')->label('Описание')->rows(4)->columnSpanFull(),
                 TextInput::make('price_cents')->label('Базовая цена, ₽')->numeric()->required()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
-                FileUpload::make('image')->label('Изображение')->image()->directory('products'),
+                FileUpload::make('image')->label('Изображение')->image()->disk('public')->visibility('public')->directory('products'),
                 Toggle::make('is_published')->label('Опубликовано')->default(true),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
                 TextInput::make('seo_title')->label('SEO title')->maxLength(255),

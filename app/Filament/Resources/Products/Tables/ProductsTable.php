@@ -16,7 +16,7 @@ class ProductsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image')->label('Фото')->height(40),
+                ImageColumn::make('image')->label('Фото')->height(40)->getStateUsing(fn ($record) => media_url($record->image, 'images/photo-1.jpg')),
                 TextColumn::make('title')->label('Название')->searchable()->sortable()->wrap(),
                 TextColumn::make('technique.name')->label('Техника')->badge(),
                 TextColumn::make('price_cents')->label('Цена')->money('RUB', divideBy: 100)->sortable(),

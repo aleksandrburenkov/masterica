@@ -20,7 +20,7 @@ class ContentPageForm
                 TextInput::make('type')->label('Тип')->default('guide'),
                 Textarea::make('excerpt')->label('Краткое описание')->rows(2)->columnSpanFull(),
                 Textarea::make('body')->label('Содержимое')->rows(8)->columnSpanFull(),
-                FileUpload::make('image')->label('Изображение')->image()->directory('content'),
+                FileUpload::make('image')->label('Изображение')->image()->disk('public')->visibility('public')->directory('content'),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
                 Toggle::make('is_published')->label('Опубликовано')->default(true),
                 TextInput::make('seo_title')->label('SEO title')->maxLength(255),

@@ -3,7 +3,7 @@
 @section('title', $course->seo_title ?: $course->title)
 @section('meta_description', $course->seo_description ?: $course->short_description)
 @section('canonical', route('courses.show', $course->slug))
-@section('og_image', asset($course->image ?? 'images/hero-masterclass.png'))
+@section('og_image', media_url($course->image, 'images/hero-masterclass.png'))
 
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Онлайн-курсы', 'url' => route('courses.index')], ['label' => $course->title]]" />
@@ -27,7 +27,7 @@
         <div class="container">
             <div class="detail">
                 <div class="detail__media">
-                    <img src="{{ asset($course->image ?? 'images/hero-masterclass.png') }}" alt="{{ $course->title }}">
+                    <img src="{{ media_url($course->image, 'images/hero-masterclass.png') }}" alt="{{ $course->title }}">
                 </div>
 
                 <div data-reveal>

@@ -38,7 +38,7 @@
             <div class="grid grid-2">
                 @foreach ($masters as $master)
                     <div class="card master-card" data-reveal>
-                        <img src="{{ asset($master->photo ?? 'images/photo-1.jpg') }}" alt="{{ $master->name }}">
+                        <img src="{{ media_url($master->photo, 'images/photo-1.jpg') }}" alt="{{ $master->name }}">
                         <div>
                             <h3 style="margin-bottom:6px">{{ $master->name }}</h3>
                             <p class="lead-muted" style="margin-bottom:8px">{{ $master->title }}</p>
