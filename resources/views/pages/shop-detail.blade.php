@@ -1,5 +1,9 @@
 @extends('layouts.site')
 
+@php
+    $gallery = collect($product->gallery ?? [])->filter()->values();
+@endphp
+
 @section('title', $product->seo_title ?: ($product->title.' — купить'))
 @section('meta_description', $product->seo_description ?: $product->short_description)
 @section('canonical', route('shop.show', $product->slug))
@@ -9,6 +13,18 @@
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Магазин', 'url' => route('shop.index')], ['label' => $product->title]]" />
 @endsection
+
+@if ($gallery->isNotEmpty())
+    @push('head')
+        <link rel="stylesheet" href="{{ asset('vendor/swiper/swiper-bundle.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/site/modules/product-gallery.css') }}">
+    @endpush
+
+    @push('scripts')
+        <script src="{{ asset('vendor/swiper/swiper-bundle.min.js') }}"></script>
+        <script src="{{ asset('js/site/modules/product-gallery.js') }}" defer></script>
+    @endpush
+@endif
 
 @push('structured')
     <script type="application/ld+json">
@@ -34,7 +50,26 @@
         <div class="container">
             <div class="detail">
                 <div class="detail__media">
-                    <img src="{{ media_url($product->image, 'images/photo-1.jpg') }}" alt="{{ $product->title }}">
+                    <img src="{{ media_url($product->image, 'images/photo-1.jpg') }}" alt="{{ $product->title }}" data-product-gallery-main>
+
+                    @if ($gallery->isNotEmpty())
+                        <div class="product-gallery" data-product-gallery>
+                            <div class="swiper product-gallery__swiper">
+                                <div class="swiper-wrapper">
+                                    @foreach ($gallery as $index => $image)
+                                        <div class="swiper-slide">
+                                            <button type="button" class="product-gallery__thumb"
+                                                data-gallery-src="{{ media_url($image) }}"
+                                                data-gallery-alt="{{ $product->title }} — фото {{ $index + 1 }}"
+                                                aria-label="Показать фото {{ $index + 1 }}">
+                                                <img src="{{ media_url($image) }}" alt="" loading="lazy">
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div data-reveal>

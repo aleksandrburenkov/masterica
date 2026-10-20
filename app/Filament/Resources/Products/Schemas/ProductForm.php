@@ -23,6 +23,15 @@ class ProductForm
                 Textarea::make('description')->label('Описание')->rows(4)->columnSpanFull(),
                 TextInput::make('price_cents')->label('Базовая цена, ₽')->numeric()->required()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 FileUpload::make('image')->label('Изображение')->image()->disk('public')->visibility('public')->directory('products'),
+                FileUpload::make('gallery')
+                    ->label('Карусель изображений товара')
+                    ->image()
+                    ->multiple()
+                    ->reorderable()
+                    ->disk('public')
+                    ->visibility('public')
+                    ->directory('products/gallery')
+                    ->columnSpanFull(),
                 Toggle::make('is_published')->label('Опубликовано')->default(true),
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
                 TextInput::make('seo_title')->label('SEO title')->maxLength(255),

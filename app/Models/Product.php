@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'technique_id', 'title', 'slug', 'short_description', 'description',
-    'price_cents', 'currency', 'image', 'sort', 'is_published',
+    'price_cents', 'currency', 'image', 'gallery', 'sort', 'is_published',
     'seo_title', 'seo_description',
 ])]
 class Product extends Model
@@ -19,6 +19,7 @@ class Product extends Model
         return [
             'is_published' => 'boolean',
             'price_cents' => 'integer',
+            'gallery' => 'array',
             'sort' => 'integer',
         ];
     }

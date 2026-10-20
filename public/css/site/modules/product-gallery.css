@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Корни — «Карусель изображений товара» (на базе Swiper)
+   Подключается только вместе с галереей на странице товара.
+   ========================================================================== */
+
+.product-gallery {
+    padding: 12px;
+    background: #fff;
+    border-top: 1px solid var(--line-2, #e6e8f5);
+}
+
+.product-gallery__swiper {
+    overflow: hidden;
+}
+
+.product-gallery .swiper-slide {
+    width: 82px;
+}
+
+.product-gallery__thumb {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-2, #f4f6ff);
+    cursor: pointer;
+    opacity: 0.65;
+    transition:
+        opacity var(--speed, 0.2s) var(--ease, ease),
+        border-color var(--speed, 0.2s) var(--ease, ease),
+        transform var(--speed, 0.2s) var(--ease, ease);
+}
+
+.product-gallery__thumb:hover,
+.product-gallery__thumb:focus-visible,
+.product-gallery__thumb.is-active {
+    opacity: 1;
+    border-color: var(--primary, #7c5cf6);
+    transform: translateY(-2px);
+}
+
+.product-gallery__thumb:focus-visible {
+    outline: 3px solid rgba(124, 92, 246, 0.5);
+    outline-offset: 2px;
+}
+
+.product-gallery .product-gallery__thumb img,
+.detail__media .product-gallery__thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+/* Резервный вид, если Swiper не загрузился. */
+.product-gallery:not(.is-ready) .swiper-wrapper {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.product-gallery:not(.is-ready) .swiper-slide {
+    flex: 0 0 82px;
+    width: 82px;
+}
+
+@media (max-width: 560px) {
+    .product-gallery .swiper-slide,
+    .product-gallery:not(.is-ready) .swiper-slide {
+        width: 68px;
+    }
+
+    .product-gallery:not(.is-ready) .swiper-slide {
+        flex-basis: 68px;
+    }
+}
