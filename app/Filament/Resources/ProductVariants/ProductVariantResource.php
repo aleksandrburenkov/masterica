@@ -23,11 +23,11 @@ class ProductVariantResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Магазин';
 
-    protected static ?string $navigationLabel = 'Варианты и склад';
+    protected static ?string $navigationLabel = 'Остатки и склад';
 
-    protected static ?string $modelLabel = 'Вариант товара';
+    protected static ?string $modelLabel = 'Номенклатуру товара';
 
-    protected static ?string $pluralModelLabel = 'Варианты товаров';
+    protected static ?string $pluralModelLabel = 'Движения товара';
 
     public static function form(Schema $schema): Schema
     {
