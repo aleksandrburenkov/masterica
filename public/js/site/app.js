@@ -16,6 +16,7 @@
         initPasswordToggles();
         initSelects();
         initDatepickers();
+        initCheckoutDelivery();
         initOutreachCalculator();
         initOutreachForm();
         initAjaxForms();
@@ -448,6 +449,23 @@
         });
     }
 
+    /* --- Адрес доставки обязателен только для доставки по городу --- */
+    function initCheckoutDelivery() {
+        var radios = document.querySelectorAll('input[name="delivery_method"]');
+        var address = document.getElementById('c-address');
+        if (!radios.length || !address) return;
+
+        function sync() {
+            var selected = document.querySelector('input[name="delivery_method"]:checked');
+            address.required = !!selected && selected.value === 'city_delivery';
+        }
+
+        radios.forEach(function (radio) {
+            radio.addEventListener('change', sync);
+        });
+        sync();
+    }
+
     /* --- Калькулятор выездного мастер-класса (предпросмотр; сервер считает итог) --- */
     function initOutreachCalculator() {
         var form = document.querySelector('[data-outreach]');
@@ -520,6 +538,12 @@
         forms.forEach(function (form) {
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
+
+                if (form.checkValidity && !form.checkValidity()) {
+                    if (form.reportValidity) form.reportValidity();
+                    return;
+                }
+
                 submitFormWithoutReload(form, {
                     successMessage: 'Готово.',
                     errorMessage: 'Не удалось отправить форму. Попробуйте ещё раз.',

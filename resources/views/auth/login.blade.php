@@ -32,7 +32,7 @@
                     <h3 class="center" style="margin-bottom:4px">Личный кабинет</h3>
                     <p class="muted center">Записи, курсы и заказы в одном месте.</p>
 
-                    <form action="{{ route('login.store') }}" method="post" novalidate>
+                    <form action="{{ route('login.store') }}" method="post">
                         @csrf
                         @if ($intended)
                             <input type="hidden" name="redirect" value="{{ $intended }}">

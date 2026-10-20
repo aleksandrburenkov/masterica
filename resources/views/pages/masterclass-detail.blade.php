@@ -106,7 +106,7 @@
                         @guest
                             <p class="muted">Регистрация не нужна: заполните контактные данные, и мы подтвердим запись.</p>
                         @endguest
-                        <form action="{{ route('bookings.store', $masterclass->slug) }}" method="post" data-ajax-form novalidate>
+                        <form action="{{ route('bookings.store', $masterclass->slug) }}" method="post" data-ajax-form>
                             @csrf
                             <div class="field">
                                 <label for="session">Сеанс</label>

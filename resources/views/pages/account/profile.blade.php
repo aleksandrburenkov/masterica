@@ -17,7 +17,7 @@
                     <h2>Профиль</h2>
                     <p class="muted">Контактные данные взрослого пользователя.</p>
 
-                    <form class="card" action="{{ route('account.profile.update') }}" method="post" novalidate style="max-width:640px">
+                    <form class="card" action="{{ route('account.profile.update') }}" method="post" style="max-width:640px">
                         @csrf
                         @method('PATCH')
                         <div class="field">

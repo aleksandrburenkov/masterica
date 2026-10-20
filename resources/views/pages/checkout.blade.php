@@ -14,7 +14,7 @@
             <p class="lead-muted">Контакт взрослого получателя. Итоговая сумма пересчитывается на сервере.</p>
 
             <div class="cart-layout" style="margin-top:24px">
-                <form class="card" method="post" action="{{ route('checkout.store') }}" data-ajax-form novalidate>
+                <form class="card" method="post" action="{{ route('checkout.store') }}" data-ajax-form>
                     @csrf
                     <h3>Контактные данные</h3>
                     <div class="field">
@@ -35,7 +35,7 @@
                     <h3 style="margin-top:10px">Получение</h3>
                     @foreach ($deliveryOptions as $option)
                         <label class="checkbox" style="margin-bottom:10px">
-                            <input type="radio" name="delivery_method" value="{{ $option['value'] }}" @checked(old('delivery_method', 'pickup') === $option['value'])>
+                            <input type="radio" name="delivery_method" value="{{ $option['value'] }}" @checked(old('delivery_method', 'pickup') === $option['value']) required>
                             <span>{{ $option['label'] }} — {{ $option['price_cents'] > 0 ? money($option['price_cents']) : 'бесплатно' }}</span>
                         </label>
                     @endforeach

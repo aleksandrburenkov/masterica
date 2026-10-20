@@ -18,7 +18,7 @@
                         <a class="is-active" href="{{ route('register') }}">Создать аккаунт</a>
                     </div>
 
-                    <form action="{{ route('register.store') }}" method="post" novalidate>
+                    <form action="{{ route('register.store') }}" method="post">
                         @csrf
                         <div class="field">
                             <label for="name">Имя</label>
@@ -40,7 +40,7 @@
                             <div class="field">
                                 <label for="password">Пароль</label>
                                 <div class="password-field">
-                                    <input id="password" class="input @error('password') is-invalid @enderror" type="password" name="password" autocomplete="new-password" required>
+                                    <input id="password" class="input @error('password') is-invalid @enderror" type="password" name="password" autocomplete="new-password" minlength="8" required>
                                     <button type="button" class="password-toggle" data-password-toggle aria-label="Показать пароль" aria-pressed="false">
                                         <x-ico name="eye" class="password-toggle__show" />
                                         <x-ico name="eye-off" class="password-toggle__hide" />

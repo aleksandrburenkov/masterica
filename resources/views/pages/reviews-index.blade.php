@@ -44,12 +44,12 @@
             <div class="section-head"><h2>Оставить отзыв</h2><p>Текст или видео. Все отзывы проверяются модератором.</p></div>
 
             @auth
-                <form class="card" action="{{ route('reviews.store') }}" method="post" data-ajax-form novalidate>
+                <form class="card" action="{{ route('reviews.store') }}" method="post" data-ajax-form>
                     @csrf
                     <div class="grid grid-2" style="gap:14px">
                         <div class="field">
                             <label for="r-type">Тип отзыва</label>
-                            <select id="r-type" class="select" name="type">
+                            <select id="r-type" class="select" name="type" required>
                                 <option value="text">Текстовый</option>
                                 <option value="video">Видео (ссылка)</option>
                             </select>
@@ -82,7 +82,7 @@
                     </div>
                     <div class="field">
                         <label for="r-body">Текст отзыва</label>
-                        <textarea id="r-body" class="textarea @error('body') is-invalid @enderror" name="body" required>{{ old('body') }}</textarea>
+                        <textarea id="r-body" class="textarea @error('body') is-invalid @enderror" name="body" minlength="10" required>{{ old('body') }}</textarea>
                     </div>
                     <div class="field">
                         <label for="r-video">Ссылка на видео (для видеоотзыва)</label>
