@@ -1,14 +1,7 @@
 @extends('layouts.site')
 
 @section('title', 'Выездные мастер-классы в ' . setting('studio.city', 'Брянске') . ' — запрос и расчёт')
-<<<<<<< HEAD
-@section('meta_description', 'Выездной мастер-класс для группы: расчёт стоимости, форма запроса на дату и место. ' .
-    money((int) setting('pricing.outreach_base_cents', 800000)) . ' за группу до ' . setting('pricing.outreach_included', 8)
-    . ' участников.')
-=======
-@section('meta_description', 'Выездной мастер-класс для группы: расчёт стоимости по выбранному мастер-классу и
-    количеству участников, форма запроса на дату и место.')
->>>>>>> rem-form
+@section('meta_description', 'Выездной мастер-класс для группы: расчёт стоимости по выбранному мастер-классу и количеству участников, форма запроса на дату и место.')
 @section('canonical', route('outreach.index'))
 
 @section('breadcrumbs')
@@ -33,39 +26,17 @@
         <div class="container">
             <div class="section-head">
                 <h2>Расчёт стоимости</h2>
-<<<<<<< HEAD
-                <p>{{ money((int) setting('pricing.outreach_base_cents', 800000)) }} за группу до
-                    {{ setting('pricing.outreach_included', 8) }} участников; каждый дополнительный участник —
-                    {{ money((int) setting('pricing.outreach_extra_cents', 70000)) }}. Продолжительность —
-                    {{ (int) (setting('pricing.outreach_duration_minutes', 120) / 60) }} часа.</p>
-=======
                 <p>Выберите мастер-класс и количество участников — стоимость пересчитается автоматически. Продолжительность
                     указана в карточке мастер-класса.</p>
->>>>>>> rem-form
             </div>
 
             <div class="calc">
                 <form class="card" action="{{ route('outreach.store') }}" method="post" data-outreach
-<<<<<<< HEAD
-                    data-base="{{ (int) setting('pricing.outreach_base_cents', 800000) }}"
-                    data-included="{{ (int) setting('pricing.outreach_included', 8) }}"
-                    data-extra="{{ (int) setting('pricing.outreach_extra_cents', 70000) }}"
-=======
->>>>>>> rem-form
                     data-currency="{{ currency_symbol(setting('rules.currency', 'RUB')) }}" novalidate>
                     @csrf
                     <h3>Параметры занятия</h3>
 
                     <div class="field">
-<<<<<<< HEAD
-                        <label for="o-direction">Направление</label>
-                        <select id="o-direction" class="select @error('direction') is-invalid @enderror" name="direction"
-                            required>
-                            <option value="">Выберите направление</option>
-                            @foreach ($directions as $direction)
-                                <option value="{{ $direction }}" @selected(old('direction') === $direction)>{{ $direction }}
-                                </option>
-=======
                         <label for="o-direction">Мастер-класс</label>
                         <select id="o-direction" class="select @error('direction') is-invalid @enderror" name="direction"
                             data-outreach-direction required>
@@ -77,7 +48,6 @@
                                     data-duration="{{ (int) $masterclass->duration_minutes }}"
                                     data-surcharges="{{ json_encode($masterclass->participant_surcharges ?? []) }}"
                                     @selected(old('direction') === $masterclass->slug)>{{ $masterclass->title }}</option>
->>>>>>> rem-form
                             @endforeach
                             <option value="Свободная тема" @selected(old('direction') === 'Свободная тема')>Свободная тема</option>
                         </select>
@@ -105,14 +75,12 @@
                         <div class="field">
                             <label for="o-location">Место проведения</label>
                             <input id="o-location" class="input" type="text" name="location"
-                                value="{{ old('location', setting('studio.city', 'Брянск')) }}" required>
                                 value="{{ old('location') }}" placeholder="Введите город или район проведения мероприятия"
                                 required>
                         </div>
                         <div class="field">
                             <label for="o-age">Возрастная группа</label>
                             <input id="o-age" class="input" type="text" name="age_group"
-                                value="{{ old('age_group', 'Дети 7–12 лет') }}">
                                 value="{{ old('age_group') }}" placeholder="Введите возраст, например: Дети 7-12 лет">
                         </div>
                     </div>
@@ -161,18 +129,7 @@
                     <div style="opacity:.9">Предварительная стоимость</div>
                     <div class="amount" data-outreach-total>{{ money(0) }}</div>
                     <div class="calc__breakdown">
-<<<<<<< HEAD
-                        <div><span>Группа до {{ $calc['included_participants'] }}
-                                участников</span><span>{{ money($calc['base_price_cents']) }}</span></div>
-                        <div><span>Дополнительные участники</span><span data-outreach-extra>0
-                                {{ currency_symbol(setting('rules.currency', 'RUB')) }}</span></div>
-                        <div><span>Продолжительность</span><span>{{ (int) (setting('pricing.outreach_duration_minutes', 120) / 60) }}
-                                часа</span></div>
-                    </div>
-                    <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении числа участников.
-                    </p>
-=======
-                        <div><span data-outreach-group-label>Группа 0 участников</span><span
+                        <div><span data-outreach-group-label>Группа до 0 участников</span><span
                                 data-outreach-base>{{ money(0) }}</span></div>
                         <div><span data-outreach-percent-label>% за увеличенное количество участников</span><span
                                 data-outreach-percent>0 %</span></div>
@@ -180,7 +137,6 @@
                     </div>
                     <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении мастер-класса и
                         числа участников.</p>
->>>>>>> rem-form
                 </div>
             </div>
         </div>
@@ -195,14 +151,7 @@
                 <x-faq :items="[
                     [
                         'q' => 'Сколько участников можно пригласить?',
-                        'a' =>
-<<<<<<< HEAD
-                            'От 1 до 60. Базовая стоимость — за группу до ' .
-                            setting('pricing.outreach_included', 8) .
-                            ' участников, далее — за каждого дополнительного.',
-=======
-                            'От 1 до 60. В карточке мастер-класса указано количество участников, входящее в базовую стоимость; за превышение начисляется процент, указанный в карточке.',
->>>>>>> rem-form
+                        'a' => 'От 1 до 60. В карточке мастер-класса указано количество участников, входящее в базовую стоимость; за превышение начисляется процент, указанный в карточке.',
                     ],
                     [
                         'q' => 'Вы выезжаете за пределы города?',
