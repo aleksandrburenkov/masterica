@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Masterclass;
-use App\Services\OutreachCalculator;
 use App\Services\OutreachService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -13,17 +12,15 @@ use Illuminate\Http\Request;
 class OutreachController extends Controller
 {
     public function __construct(
-        private readonly OutreachCalculator $calculator,
         private readonly OutreachService $service,
     ) {}
 
     public function index(): View
     {
-        $directions = Masterclass::query()->published()->orderBy('sort')->pluck('title');
+        $masterclasses = Masterclass::query()->published()->orderBy('sort')->get();
 
         return view('pages.outreach', [
-            'directions' => $directions,
-            'calc' => $this->calculator->calculate(8),
+            'masterclasses' => $masterclasses,
         ]);
     }
 

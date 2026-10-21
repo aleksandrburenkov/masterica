@@ -36,7 +36,7 @@ class OutreachRequestForm
                 TextInput::make('base_price_cents')->label('Базовая цена, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 TextInput::make('included_participants')->label('Включено участников')->numeric(),
                 TextInput::make('extra_count')->label('Доп. участников')->numeric(),
-                TextInput::make('extra_price_cents')->label('Цена доп. участника, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
+                TextInput::make('extra_price_cents')->label('Надбавка за доп. участников, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 TextInput::make('calc_total_cents')->label('Итог, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
             ])->columns(2),
         ]);

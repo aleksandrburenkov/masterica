@@ -41,13 +41,13 @@
                         @endforeach
                     </ul>
                 @endif
-                {{-- @php($privacy = $footerDocs->get('privacy_policy')) --}}
-                {{-- @if ($privacy)
+                @php($privacy = $footerDocs->get('privacy_policy'))
+                @if ($privacy)
                     <p class="footer-legal-note" style="font-size:13px;margin-top:10px;opacity:.85">
                         Персональные данные обрабатываются в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».
                         <a href="{{ route('legal.show', $privacy->slug) }}">Подробнее</a>.
                     </p>
-                @endif --}}
+                @endif
             </div>
         </div>
 

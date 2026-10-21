@@ -145,10 +145,6 @@ class StudioSettings extends Page
             'workshop_price_cents' => ['pricing.workshop_price_cents', 'Обычный МК: цена, ₽'],
             'workshop_duration_minutes' => ['pricing.workshop_duration_minutes', 'Обычный МК: длительность, мин'],
             'workshop_capacity' => ['pricing.workshop_capacity', 'Обычный МК: мест в сеансе'],
-            'outreach_base_cents' => ['pricing.outreach_base_cents', 'Выезд: база, ₽'],
-            'outreach_included' => ['pricing.outreach_included', 'Выезд: участников включено'],
-            'outreach_extra_cents' => ['pricing.outreach_extra_cents', 'Выезд: доп. участник, ₽'],
-            'outreach_duration_minutes' => ['pricing.outreach_duration_minutes', 'Выезд: длительность, мин'],
             'delivery_pickup_cents' => ['pricing.delivery_pickup_cents', 'Самовывоз, ₽'],
             'delivery_city_cents' => ['pricing.delivery_city_cents', 'Доставка по городу, ₽'],
 

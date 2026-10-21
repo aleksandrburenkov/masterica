@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\OutreachStatus;
+use App\Models\Masterclass;
 use App\Models\OutreachRequest;
 use App\Models\User;
 use App\Support\NumberGenerator;
@@ -22,12 +23,13 @@ class OutreachService
     public function create(?User $user, array $data): OutreachRequest
     {
         $participants = (int) $data['participants_count'];
-        $calc = $this->calculator->calculate($participants);
+        $masterclass = $this->resolveMasterclass($data['direction']);
+        $calc = $this->calculator->calculate($participants, $masterclass);
 
         $request = OutreachRequest::create([
             'number' => NumberGenerator::outreach(),
             'user_id' => $user?->id,
-            'direction' => $data['direction'],
+            'direction' => $masterclass?->title ?? $data['direction'],
             'requested_date' => $data['requested_date'],
             'location' => $data['location'],
             'participants_count' => $participants,
@@ -38,7 +40,7 @@ class OutreachService
             'base_price_cents' => $calc['base_price_cents'],
             'included_participants' => $calc['included_participants'],
             'extra_count' => $calc['extra_count'],
-            'extra_price_cents' => $calc['extra_price_cents'],
+            'extra_price_cents' => $calc['surcharge_cents'],
             'calc_total_cents' => $calc['total_cents'],
             'currency' => $calc['currency'],
             'status' => OutreachStatus::New,
@@ -47,6 +49,7 @@ class OutreachService
 
         $this->audit->log($user, 'outreach.requested', $request, null, [
             'total_cents' => $request->calc_total_cents,
+            'percent' => $calc['percent'],
         ]);
         $this->notifications->notify(
             $user,
@@ -55,5 +58,16 @@ class OutreachService
         );
 
         return $request;
+    }
+
+    /**
+     * Направление приходит слагом (калькулятор) или названием (общая форма).
+     */
+    private function resolveMasterclass(string $direction): ?Masterclass
+    {
+        return Masterclass::query()
+            ->published()
+            ->where(fn ($query) => $query->where('slug', $direction)->orWhere('title', $direction))
+            ->first();
     }
 }
