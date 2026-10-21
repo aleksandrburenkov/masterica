@@ -62,9 +62,21 @@ class StudioSettings extends Page
         $rules = [];
 
         foreach (self::fields() as $name => $meta) {
-            $component = $meta['textarea']
-                ? Textarea::make($name)->label($meta['label'])->rows(2)
-                : TextInput::make($name)->label($meta['label']);
+            if ($meta['money']) {
+                $component = TextInput::make($name)
+                    ->label($meta['label'])
+                    ->inputMode('decimal')
+                    ->formatStateUsing(fn ($state) => self::formatMoneyState($state))
+                    ->dehydrateStateUsing(fn ($state) => self::parseMoneyState($state))
+                    ->rule('regex:/^\d+(?:[ \x{00A0}]\d{3})*(?:[.,]\d{1,2})?$/u')
+                    ->validationMessages([
+                        'regex' => 'Укажите сумму в рублях, например 1 500,00',
+                    ]);
+            } else {
+                $component = $meta['textarea']
+                    ? Textarea::make($name)->label($meta['label'])->rows(2)
+                    : TextInput::make($name)->label($meta['label']);
+            }
 
             match ($meta['group']) {
                 'pricing' => $pricing[] = $component,
@@ -114,7 +126,7 @@ class StudioSettings extends Page
     /**
      * Field map: form field name => setting key and metadata.
      *
-     * @return array<string, array{key:string,label:string,group:string,type:string,textarea?:bool}>
+     * @return array<string, array{key:string,label:string,group:string,type:string,textarea?:bool,money:bool}>
      */
     private static function fields(): array
     {
@@ -130,15 +142,15 @@ class StudioSettings extends Page
             'og_description' => ['studio.og_description', 'Описание для SEO (OG)', true],
             'legal_note' => ['studio.legal_note', 'Примечание в футере', true],
 
-            'workshop_price_cents' => ['pricing.workshop_price_cents', 'Обычный МК: цена, коп.'],
+            'workshop_price_cents' => ['pricing.workshop_price_cents', 'Обычный МК: цена, ₽'],
             'workshop_duration_minutes' => ['pricing.workshop_duration_minutes', 'Обычный МК: длительность, мин'],
             'workshop_capacity' => ['pricing.workshop_capacity', 'Обычный МК: мест в сеансе'],
-            'outreach_base_cents' => ['pricing.outreach_base_cents', 'Выезд: база, коп.'],
+            'outreach_base_cents' => ['pricing.outreach_base_cents', 'Выезд: база, ₽'],
             'outreach_included' => ['pricing.outreach_included', 'Выезд: участников включено'],
-            'outreach_extra_cents' => ['pricing.outreach_extra_cents', 'Выезд: доп. участник, коп.'],
+            'outreach_extra_cents' => ['pricing.outreach_extra_cents', 'Выезд: доп. участник, ₽'],
             'outreach_duration_minutes' => ['pricing.outreach_duration_minutes', 'Выезд: длительность, мин'],
-            'delivery_pickup_cents' => ['pricing.delivery_pickup_cents', 'Самовывоз, коп.'],
-            'delivery_city_cents' => ['pricing.delivery_city_cents', 'Доставка по городу, коп.'],
+            'delivery_pickup_cents' => ['pricing.delivery_pickup_cents', 'Самовывоз, ₽'],
+            'delivery_city_cents' => ['pricing.delivery_city_cents', 'Доставка по городу, ₽'],
 
             'currency' => ['rules.currency', 'Валюта (ISO)'],
             'hold_minutes' => ['rules.hold_minutes', 'Резерв места, мин'],
@@ -158,9 +170,27 @@ class StudioSettings extends Page
                 'group' => explode('.', $key)[0],
                 'type' => str_ends_with($key, '_cents') || str_ends_with($key, '_minutes') || str_ends_with($key, '_hours') || str_ends_with($key, '_days') || str_ends_with($key, '_included') || str_ends_with($key, '_capacity') ? 'int' : 'string',
                 'textarea' => (bool) ($info[2] ?? false),
+                'money' => str_ends_with($key, '_cents'),
             ];
         }
 
         return $fields;
+    }
+
+    private static function formatMoneyState(mixed $state): ?string
+    {
+        if ($state === null || $state === '') {
+            return null;
+        }
+
+        return number_format(((int) $state) / 100, 2, ',', ' ');
+    }
+
+    private static function parseMoneyState(mixed $state): int
+    {
+        $value = str_replace([' ', "\u{00A0}"], '', (string) $state);
+        $value = str_replace(',', '.', $value);
+
+        return (int) round(((float) $value) * 100);
     }
 }
