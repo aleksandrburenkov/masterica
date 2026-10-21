@@ -24,11 +24,7 @@
                 <h3 style="margin-top:12px">Оставить заявку</h3>
                 <p class="lead-muted" style="font-size:14px">Контакт взрослого участника.</p>
 
-                <form action="{{ route('outreach.store') }}" method="post" data-outreach
-                      data-base="{{ (int) setting('pricing.outreach_base_cents', 800000) }}"
-                      data-included="{{ (int) setting('pricing.outreach_included', 8) }}"
-                      data-extra="{{ (int) setting('pricing.outreach_extra_cents', 70000) }}"
-                      data-currency="{{ currency_symbol(setting('rules.currency', 'RUB')) }}">
+                <form action="{{ route('outreach.store') }}" method="post" data-outreach>
                     @csrf
                     <input type="hidden" name="source" value="{{ request()->path() }}">
 

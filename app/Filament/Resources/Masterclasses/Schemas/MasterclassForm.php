@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Masterclasses\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -30,12 +31,23 @@ class MasterclassForm
                 TextInput::make('age_min')->label('Возраст от')->numeric()->default(12),
                 TextInput::make('age_max')->label('Возраст до (необязательно)')->numeric(),
                 TextInput::make('duration_minutes')->label('Длительность, мин')->numeric()->default(120),
-                TextInput::make('price_cents')
-                    ->label('Цена, ₽')
+                self::moneyInput('price_cents', 'Цена в студии, руб.')->required(),
+                self::moneyInput('outreach_price_cents', 'Цена выездного мастер-класса, руб. (за человека)'),
+                TextInput::make('included_participants')
+                    ->label('Количество участников (чел.)')
                     ->numeric()
-                    ->required()
-                    ->formatStateUsing(fn ($state) => $state ? $state / 100 : null)
-                    ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
+                    ->minValue(1)
+                    ->default(10)
+                    ->required(),
+                KeyValue::make('participant_surcharges')
+                    ->label('% за кол-во человек (чел.)')
+                    ->keyLabel('Количество человек')
+                    ->valueLabel('Процент, %')
+                    ->keyPlaceholder('Например, 3')
+                    ->valuePlaceholder('Например, 5')
+                    ->helperText('Процент применяется, когда участников больше, чем указано в поле «Количество участников». Ступени: до 3 — 5%, до 5 — 7%.')
+                    ->addActionLabel('Добавить')
+                    ->columnSpanFull(),
                 Toggle::make('materials_included')->label('Материалы включены')->default(true),
                 Toggle::make('is_published')->label('Опубликовано')->default(true),
             ])->columns(2),
@@ -47,5 +59,26 @@ class MasterclassForm
                 TextInput::make('sort')->label('Порядок')->numeric()->default(0),
             ])->columns(2),
         ]);
+    }
+
+    private static function moneyInput(string $name, string $label): TextInput
+    {
+        return TextInput::make($name)
+            ->label($label)
+            ->inputMode('decimal')
+            ->formatStateUsing(fn ($state) => $state ? number_format($state / 100, 2, ',', ' ') : null)
+            ->rule('regex:/^\d+(?:[ \x{00A0}]\d{3})*(?:[.,]\d{1,2})?$/u')
+            ->validationMessages([
+                'regex' => 'Укажите сумму в рублях, например 1 500,00',
+            ])
+            ->dehydrateStateUsing(function ($state) {
+                if ($state === null || trim((string) $state) === '') {
+                    return null;
+                }
+
+                $value = str_replace([' ', "\u{00A0}"], '', (string) $state);
+
+                return (int) round(((float) str_replace(',', '.', $value)) * 100);
+            });
     }
 }

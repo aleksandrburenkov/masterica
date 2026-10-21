@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'technique_id', 'title', 'slug', 'short_description', 'description', 'outcome',
-    'level', 'age_min', 'age_max', 'duration_minutes', 'price_cents', 'currency',
+    'level', 'age_min', 'age_max', 'duration_minutes', 'price_cents',
+    'outreach_price_cents', 'included_participants', 'participant_surcharges', 'currency',
     'materials_included', 'format', 'image', 'sort', 'is_published',
     'seo_title', 'seo_description',
 ])]
@@ -24,6 +25,9 @@ class Masterclass extends Model
             'age_max' => 'integer',
             'duration_minutes' => 'integer',
             'price_cents' => 'integer',
+            'outreach_price_cents' => 'integer',
+            'included_participants' => 'integer',
+            'participant_surcharges' => 'array',
             'sort' => 'integer',
         ];
     }
@@ -51,6 +55,15 @@ class Masterclass extends Model
     public function priceRub(): float
     {
         return $this->price_cents / 100;
+    }
+
+    /**
+     * Цена выездного мастер-класса за человека. Если отдельная цена не задана,
+     * используется обычная цена мастер-класса.
+     */
+    public function outreachPriceCents(): int
+    {
+        return (int) ($this->outreach_price_cents ?? $this->price_cents);
     }
 
     public function durationLabel(): string

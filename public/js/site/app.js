@@ -471,31 +471,85 @@
         var form = document.querySelector('[data-outreach]');
         if (!form) return;
 
+        var direction = form.querySelector('[data-outreach-direction]');
         var input = form.querySelector('[data-outreach-participants]');
-        if (!input) return;
+        if (!direction || !input) return;
 
-        var base = parseInt(form.getAttribute('data-base'), 10) || 0;
-        var included = parseInt(form.getAttribute('data-included'), 10) || 8;
-        var extra = parseInt(form.getAttribute('data-extra'), 10) || 0;
+        var root = form.closest('.calc') || form;
         var currency = form.getAttribute('data-currency') || '₽';
 
-        var outTotal = form.querySelector('[data-outreach-total]');
-        var outExtra = form.querySelector('[data-outreach-extra]');
-        var outIncluded = form.querySelector('[data-outreach-included]');
+        var outTotal = root.querySelector('[data-outreach-total]');
+        var outBase = root.querySelector('[data-outreach-base]');
+        var outGroupLabel = root.querySelector('[data-outreach-group-label]');
+        var outPercent = root.querySelector('[data-outreach-percent]');
+        var outPercentLabel = root.querySelector('[data-outreach-percent-label]');
+        var outDuration = root.querySelector('[data-outreach-duration]');
 
-        function format(value) {
-            return new Intl.NumberFormat('ru-RU').format(Math.round(value)) + ' ' + currency;
+        function format(cents) {
+            return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(cents / 100) + ' ' + currency;
+        }
+
+        function parseSurcharges(raw) {
+            var tiers = [];
+
+            try {
+                var parsed = JSON.parse(raw || '{}');
+                Object.keys(parsed).forEach(function (key) {
+                    var count = parseInt(key, 10);
+                    var percent = parseFloat(String(parsed[key]).replace(',', '.'));
+
+                    if (count > 0 && percent > 0) {
+                        tiers.push({ count: count, percent: percent });
+                    }
+                });
+            } catch (e) {
+                return [];
+            }
+
+            return tiers.sort(function (a, b) { return a.count - b.count; });
+        }
+
+        function pickPercent(tiers, extra) {
+            for (var i = 0; i < tiers.length; i++) {
+                if (extra <= tiers[i].count) return tiers[i].percent;
+            }
+
+            return tiers.length ? tiers[tiers.length - 1].percent : 0;
+        }
+
+        function selectedMasterclass() {
+            var option = direction.options[direction.selectedIndex];
+            if (!option || option.value === '' || option.value === 'Свободная тема') return null;
+
+            return {
+                price: parseInt(option.getAttribute('data-price'), 10) || 0,
+                included: parseInt(option.getAttribute('data-included'), 10) || 0,
+                duration: parseInt(option.getAttribute('data-duration'), 10) || 0,
+                surcharges: parseSurcharges(option.getAttribute('data-surcharges'))
+            };
         }
 
         function recalc() {
-            var participants = Math.max(1, parseInt(input.value, 10) || 1);
-            var extraCount = Math.max(0, participants - included);
-            var total = base + extraCount * extra;
+            var participants = parseInt(input.value, 10);
+            if (isNaN(participants) || participants < 0) participants = 0;
+
+            var masterclass = selectedMasterclass();
+            var base = masterclass ? masterclass.price * participants : 0;
+            var included = masterclass ? masterclass.included : 0;
+            var extra = masterclass ? Math.max(0, participants - included) : 0;
+            var percent = extra > 0 ? pickPercent(masterclass.surcharges, extra) : 0;
+            var total = base + Math.round(base * percent / 100);
+            var hours = Math.floor((masterclass ? masterclass.duration : 0) / 60);
+
             if (outTotal) outTotal.textContent = format(total);
-            if (outExtra) outExtra.textContent = extraCount > 0 ? format(extraCount * extra) : '0 ' + currency;
-            if (outIncluded) outIncluded.textContent = String(extraCount);
+            if (outBase) outBase.textContent = format(base);
+            if (outGroupLabel) outGroupLabel.textContent = 'Группа до ' + participants + ' участников';
+            if (outPercent) outPercent.textContent = (percent > 0 ? String(percent).replace('.', ',') : '0') + ' %';
+            if (outPercentLabel) outPercentLabel.textContent = '% за увеличенное количество участников' + (extra > 0 ? ' ' + extra : '');
+            if (outDuration) outDuration.textContent = hours + ' часа';
         }
 
+        direction.addEventListener('change', recalc);
         input.addEventListener('input', recalc);
         input.addEventListener('change', recalc);
         recalc();
