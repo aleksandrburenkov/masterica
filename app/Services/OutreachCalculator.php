@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\DistanceTariff;
 use App\Models\Masterclass;
 
 /**
@@ -11,9 +12,9 @@ use App\Models\Masterclass;
 class OutreachCalculator
 {
     /**
-     * @return array{base_price_cents:int,included_participants:int,extra_count:int,percent:float,surcharge_cents:int,total_cents:int,duration_minutes:int,currency:string}
+     * @return array{base_price_cents:int,included_participants:int,extra_count:int,percent:float,surcharge_cents:int,distance_km:float|null,distance_surcharge_per_participant_cents:int,distance_surcharge_cents:int,total_cents:int,duration_minutes:int,currency:string}
      */
-    public function calculate(int $participants, ?Masterclass $masterclass = null): array
+    public function calculate(int $participants, ?Masterclass $masterclass = null, ?float $distanceKm = null): array
     {
         $participants = max(0, $participants);
         $included = $masterclass ? max(0, (int) $masterclass->included_participants) : 0;
@@ -22,13 +23,20 @@ class OutreachCalculator
         $percent = $extraCount > 0 ? $this->surchargePercent($masterclass, $extraCount) : 0.0;
         $surcharge = (int) round($base * $percent / 100);
 
+        $tariff = DistanceTariff::forDistance($distanceKm);
+        $distancePerParticipant = $tariff?->surchargeCents() ?? 0;
+        $distanceSurcharge = $distancePerParticipant * $participants;
+
         return [
             'base_price_cents' => $base,
             'included_participants' => $included,
             'extra_count' => $extraCount,
             'percent' => $percent,
             'surcharge_cents' => $surcharge,
-            'total_cents' => $base + $surcharge,
+            'distance_km' => $distanceKm,
+            'distance_surcharge_per_participant_cents' => $distancePerParticipant,
+            'distance_surcharge_cents' => $distanceSurcharge,
+            'total_cents' => $base + $surcharge + $distanceSurcharge,
             'duration_minutes' => (int) ($masterclass?->duration_minutes ?? 0),
             'currency' => setting('rules.currency', 'RUB'),
         ];

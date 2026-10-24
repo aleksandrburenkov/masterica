@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'number', 'user_id', 'direction', 'requested_date', 'location',
+    'number', 'user_id', 'direction', 'requested_date', 'location', 'distance_km',
     'participants_count', 'age_group', 'contact_name', 'contact_phone',
     'contact_email', 'base_price_cents', 'included_participants', 'extra_count',
-    'extra_price_cents', 'calc_total_cents', 'currency', 'status', 'comment',
+    'extra_price_cents', 'distance_surcharge_cents', 'calc_total_cents', 'currency', 'status', 'comment',
 ])]
 class OutreachRequest extends Model
 {
@@ -20,6 +20,8 @@ class OutreachRequest extends Model
         return [
             'requested_date' => 'date',
             'status' => OutreachStatus::class,
+            'distance_km' => 'float',
+            'distance_surcharge_cents' => 'integer',
             'participants_count' => 'integer',
             'base_price_cents' => 'integer',
             'included_participants' => 'integer',

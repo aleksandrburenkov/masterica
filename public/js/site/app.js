@@ -610,6 +610,12 @@
             "[data-outreach-percent-label]",
         );
         var outDuration = root.querySelector("[data-outreach-duration]");
+        var outDistanceRow = root.querySelector("[data-outreach-distance-row]");
+        var outDistanceKm = root.querySelector("[data-outreach-distance-km]");
+        var outDistanceSurcharge = root.querySelector(
+            "[data-outreach-distance-surcharge]",
+        );
+        var distanceInput = form.querySelector("[data-outreach-distance]");
 
         function format(cents) {
             return (
@@ -674,6 +680,35 @@
             };
         }
 
+        function distanceState(participants) {
+            var raw = distanceInput ? String(distanceInput.value) : "";
+            var km = parseFloat(raw.replace(",", "."));
+            var perParticipant = parseInt(
+                form.getAttribute("data-distance-per-participant") || "0",
+                10,
+            );
+
+            if (isNaN(perParticipant) || perParticipant < 0) perParticipant = 0;
+
+            if (raw.trim() === "" || isNaN(km) || km < 0) {
+                return { known: false, km: 0, cents: 0 };
+            }
+
+            return {
+                known: true,
+                km: km,
+                cents: perParticipant * 100 * participants,
+            };
+        }
+
+        function formatKm(km) {
+            return (
+                new Intl.NumberFormat("ru-RU", {
+                    maximumFractionDigits: 1,
+                }).format(km) + " км"
+            );
+        }
+
         function recalc() {
             var participants = parseInt(input.value, 10);
             if (isNaN(participants) || participants < 0) participants = 0;
@@ -684,10 +719,20 @@
             var extra = masterclass ? Math.max(0, participants - included) : 0;
             var percent =
                 extra > 0 ? pickPercent(masterclass.surcharges, extra) : 0;
-            var total = base + Math.round((base * percent) / 100);
+            var distance = distanceState(participants);
+            var total =
+                base +
+                Math.round((base * percent) / 100) +
+                distance.cents;
             var hours = Math.floor(
                 (masterclass ? masterclass.duration : 0) / 60,
             );
+
+            if (outDistanceRow) outDistanceRow.hidden = !distance.known;
+            if (outDistanceKm && distance.known)
+                outDistanceKm.textContent = "(" + formatKm(distance.km) + ")";
+            if (outDistanceSurcharge)
+                outDistanceSurcharge.textContent = format(distance.cents);
 
             if (outTotal) outTotal.textContent = format(total);
             if (outBase) outBase.textContent = format(base);
@@ -708,6 +753,10 @@
         direction.addEventListener("change", recalc);
         input.addEventListener("input", recalc);
         input.addEventListener("change", recalc);
+        form.addEventListener("outreach:distance", recalc);
+        form.addEventListener("reset", function () {
+            window.setTimeout(recalc, 0);
+        });
         recalc();
     }
 

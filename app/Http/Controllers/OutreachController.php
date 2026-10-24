@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DistanceTariff;
 use App\Models\Masterclass;
 use App\Services\OutreachService;
 use Illuminate\Contracts\View\View;
@@ -21,6 +22,8 @@ class OutreachController extends Controller
 
         return view('pages.outreach', [
             'masterclasses' => $masterclasses,
+            'distanceTariffs' => DistanceTariff::frontendRows(),
+            'office' => $this->officeCoordinates(),
         ]);
     }
 
@@ -30,6 +33,7 @@ class OutreachController extends Controller
             'direction' => ['required', 'string', 'max:160'],
             'requested_date' => ['required', 'date', 'after_or_equal:today'],
             'location' => ['required', 'string', 'max:200'],
+            'distance_km' => ['nullable', 'numeric', 'min:0', 'max:20000'],
             'participants_count' => ['required', 'integer', 'min:1', 'max:60'],
             'age_group' => ['nullable', 'string', 'max:120'],
             'contact_name' => ['required', 'string', 'max:120'],
@@ -52,6 +56,31 @@ class OutreachController extends Controller
         }
 
         return redirect()->to($this->redirectTarget($request))->with('success', $message);
+    }
+
+    /**
+     * Координаты офиса из «Настроек студии». Если они не заданы, фронтенд
+     * не сможет рассчитать расстояние и оставит наценку нулевой.
+     *
+     * @return array{lat:float,lng:float}|null
+     */
+    private function officeCoordinates(): ?array
+    {
+        $lat = setting('studio.latitude');
+        $lng = setting('studio.longitude');
+
+        if (! is_numeric($lat) || ! is_numeric($lng)) {
+            return null;
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+
+        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+            return null;
+        }
+
+        return ['lat' => $lat, 'lng' => $lng];
     }
 
     /**

@@ -20,6 +20,7 @@ class OutreachRequestForm
                 TextInput::make('direction')->label('Направление')->required(),
                 DatePicker::make('requested_date')->label('Дата')->required(),
                 TextInput::make('location')->label('Место')->required(),
+                TextInput::make('distance_km')->label('Расстояние от офиса, км')->numeric()->suffix('км'),
                 TextInput::make('participants_count')->label('Участников')->numeric()->required(),
                 TextInput::make('age_group')->label('Возрастная группа'),
                 Select::make('status')->label('Статус')->options(collect(OutreachStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all())->required(),
@@ -37,6 +38,7 @@ class OutreachRequestForm
                 TextInput::make('included_participants')->label('Включено участников')->numeric(),
                 TextInput::make('extra_count')->label('Доп. участников')->numeric(),
                 TextInput::make('extra_price_cents')->label('Надбавка за доп. участников, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
+                TextInput::make('distance_surcharge_cents')->label('Надбавка за удалённость, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 TextInput::make('calc_total_cents')->label('Итог, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
             ])->columns(2),
         ]);

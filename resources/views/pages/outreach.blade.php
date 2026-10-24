@@ -1,5 +1,9 @@
 @extends('layouts.site')
 
+@php
+    $yandexMapsKey = config('services.yandex_maps.key');
+@endphp
+
 @section('title', 'Выездные мастер-классы в ' . setting('studio.city', 'Брянске') . ' — запрос и расчёт')
 @section('meta_description',
     'Выездной мастер-класс для группы: расчёт стоимости по выбранному мастер-классу и
@@ -9,6 +13,10 @@
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Выездные мастер-классы']]" />
 @endsection
+
+@push('head')
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU{{ $yandexMapsKey ? '&apikey='.urlencode($yandexMapsKey) : '' }}" type="text/javascript"></script>
+@endpush
 
 @section('content')
     <section class="hero">
@@ -34,8 +42,13 @@
 
             <div class="calc">
                 <form class="card" action="{{ route('outreach.store') }}" method="post" data-outreach
-                    data-currency="{{ currency_symbol(setting('rules.currency', 'RUB')) }}" novalidate>
+                    data-currency="{{ currency_symbol(setting('rules.currency', 'RUB')) }}"
+                    data-office-lat="{{ $office['lat'] ?? '' }}" data-office-lng="{{ $office['lng'] ?? '' }}"
+                    data-distance-tariffs="{{ json_encode($distanceTariffs) }}"
+                    data-geocode-url="{{ route('geocode') }}"
+                    data-yandex-geocoder="{{ $yandexMapsKey ? '1' : '0' }}" novalidate>
                     @csrf
+                    <input type="hidden" name="distance_km" value="{{ old('distance_km') }}" data-outreach-distance>
                     <h3>Параметры занятия</h3>
 
                     <div class="field">
@@ -78,7 +91,10 @@
                             <label for="o-location">Место проведения</label>
                             <input id="o-location" class="input" type="text" name="location"
                                 value="{{ old('location') }}" placeholder="Введите город или район проведения мероприятия"
-                                required>
+                                list="o-location-suggestions" autocomplete="off" data-outreach-location required>
+                            <datalist id="o-location-suggestions"></datalist>
+                            <div class="hint" data-outreach-distance-status>Укажите населённый пункт — расстояние от
+                                студии рассчитаем автоматически.</div>
                         </div>
                         <div class="field">
                             <label for="o-age">Возрастная группа</label>
@@ -135,11 +151,13 @@
                                 data-outreach-base>{{ money(0) }}</span></div>
                         <div><span data-outreach-percent-label>% за увеличенное количество участников</span><span
                                 data-outreach-percent>0 %</span></div>
+                        <div data-outreach-distance-row hidden><span>Наценка за удалённость <span
+                                    data-outreach-distance-km></span></span><span
+                                data-outreach-distance-surcharge>0 ₽</span></div>
                         <div><span>Продолжительность</span><span data-outreach-duration>0 часа</span></div>
                     </div>
-                    <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении мастер-класса
-                        и
-                        числа участников.</p>
+                    <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении мастер-класса,
+                        места и числа участников.</p>
                 </div>
             </div>
         </div>
@@ -167,3 +185,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/site/modules/outreach-distance.js') }}" defer></script>
+@endpush

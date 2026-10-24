@@ -64,7 +64,7 @@ class MasterclassOutreachPricingTest extends TestCase
         $response->assertSee('placeholder="Введите количество участников"', false)
             ->assertSee('placeholder="Введите город или район проведения мероприятия"', false)
             ->assertSee('placeholder="Введите возраст, например: Дети 7-12 лет"', false)
-            ->assertSee('Группа до 0 участников', false)
+            ->assertSee('Группа из 0 участников', false)
             ->assertSee('data-outreach-total>0 ₽', false);
     }
 

@@ -24,7 +24,10 @@ class OutreachService
     {
         $participants = (int) $data['participants_count'];
         $masterclass = $this->resolveMasterclass($data['direction']);
-        $calc = $this->calculator->calculate($participants, $masterclass);
+        $distanceKm = isset($data['distance_km']) && $data['distance_km'] !== ''
+            ? (float) $data['distance_km']
+            : null;
+        $calc = $this->calculator->calculate($participants, $masterclass, $distanceKm);
 
         $request = OutreachRequest::create([
             'number' => NumberGenerator::outreach(),
@@ -32,6 +35,7 @@ class OutreachService
             'direction' => $masterclass?->title ?? $data['direction'],
             'requested_date' => $data['requested_date'],
             'location' => $data['location'],
+            'distance_km' => $calc['distance_km'],
             'participants_count' => $participants,
             'age_group' => $data['age_group'] ?? null,
             'contact_name' => $data['contact_name'],
@@ -41,6 +45,7 @@ class OutreachService
             'included_participants' => $calc['included_participants'],
             'extra_count' => $calc['extra_count'],
             'extra_price_cents' => $calc['surcharge_cents'],
+            'distance_surcharge_cents' => $calc['distance_surcharge_cents'],
             'calc_total_cents' => $calc['total_cents'],
             'currency' => $calc['currency'],
             'status' => OutreachStatus::New,
@@ -50,6 +55,8 @@ class OutreachService
         $this->audit->log($user, 'outreach.requested', $request, null, [
             'total_cents' => $request->calc_total_cents,
             'percent' => $calc['percent'],
+            'distance_km' => $calc['distance_km'],
+            'distance_surcharge_cents' => $calc['distance_surcharge_cents'],
         ]);
         $this->notifications->notify(
             $user,

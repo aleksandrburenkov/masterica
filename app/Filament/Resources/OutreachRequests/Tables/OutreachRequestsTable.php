@@ -20,6 +20,8 @@ class OutreachRequestsTable
                 TextColumn::make('direction')->label('Направление')->wrap(),
                 TextColumn::make('requested_date')->label('Дата')->date('d.m.Y')->sortable(),
                 TextColumn::make('location')->label('Место')->toggleable(),
+                TextColumn::make('distance_km')->label('Удалённость, км')->suffix(' км')->toggleable(),
+                TextColumn::make('distance_surcharge_cents')->label('Наценка за удалённость')->money('RUB', divideBy: 100)->toggleable(),
                 TextColumn::make('participants_count')->label('Чел.'),
                 TextColumn::make('calc_total_cents')->label('Расчёт')->money('RUB', divideBy: 100),
                 TextColumn::make('status')->label('Статус')->badge()->formatStateUsing(fn ($state) => $state->label()),

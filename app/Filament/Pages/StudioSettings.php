@@ -68,7 +68,7 @@ class StudioSettings extends Page
                 $component = TextInput::make($name)
                     ->label($meta['label'])
                     ->inputMode('decimal')
-                    ->helperText('Используйте точку в качестве десятичного разделителя, например 53.243600')
+                    ->helperText('Используется для карты на «Контактах» и для расчёта удалённости выездных мастер-классов. Десятичный разделитель — точка, например 53.243600')
                     ->nullable()
                     ->numeric()
                     ->rule('between:-'.$limit.','.$limit)
