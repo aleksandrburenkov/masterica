@@ -29,7 +29,7 @@
             <div class="section-head">
                 <h2>Расчёт стоимости</h2>
                 <p>Выберите мастер-класс и количество участников — стоимость пересчитается автоматически. Продолжительность
-                    указана в карточке мастер-класса.</p>
+                    мастер-класса указана в предварительном расчёте.</p>
             </div>
 
             <div class="calc">
@@ -131,13 +131,14 @@
                     <div style="opacity:.9">Предварительная стоимость</div>
                     <div class="amount" data-outreach-total>{{ money(0) }}</div>
                     <div class="calc__breakdown">
-                        <div><span data-outreach-group-label>Группа 0 участников</span><span
+                        <div><span data-outreach-group-label>Группа из 0 участников</span><span
                                 data-outreach-base>{{ money(0) }}</span></div>
                         <div><span data-outreach-percent-label>% за увеличенное количество участников</span><span
                                 data-outreach-percent>0 %</span></div>
                         <div><span>Продолжительность</span><span data-outreach-duration>0 часа</span></div>
                     </div>
-                    <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении мастер-класса и
+                    <p style="margin:16px 0 0;opacity:.9;font-size:14px">Расчёт обновляется при изменении мастер-класса
+                        и
                         числа участников.</p>
                 </div>
             </div>

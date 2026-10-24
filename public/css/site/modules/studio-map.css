@@ -1,0 +1,128 @@
+/* ==========================================================================
+   Корни — модуль «Карта студии» (Яндекс.Карты, JavaScript API 2.1).
+   Подключается только на странице контактов.
+   ========================================================================== */
+
+/* Левая колонка контактов: карточка + карта.
+   Карта занимает всё оставшееся место до нижней границы формы. */
+.contact-side {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2vw, 28px);
+    height: 100%;
+    min-height: 0;
+}
+
+.contact-side > .card:first-child {
+    flex: 0 0 auto;
+}
+
+.contact-side .studio-map {
+    flex: 1 1 auto;
+    min-height: 280px;
+}
+
+.studio-map {
+    position: relative;
+    overflow: hidden;
+    background: #eef1fa;
+}
+
+/* Карта не должна «подпрыгивать» при наведении, как обычная карточка. */
+.studio-map:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+    border-color: var(--line);
+}
+
+.studio-map__canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #eef1fa;
+}
+
+.studio-map__fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    padding: 28px;
+    text-align: center;
+    color: var(--muted);
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(255, 255, 255, 0.9) 0%,
+            transparent 42%
+        ),
+        var(--grad-soft);
+}
+
+.studio-map__fallback-pin {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--violet);
+    box-shadow: var(--shadow);
+}
+
+.studio-map__fallback-pin svg {
+    width: 28px;
+    height: 28px;
+}
+
+.studio-map__fallback span:last-child {
+    max-width: 280px;
+    font-size: 14px;
+}
+
+.studio-map.is-ready .studio-map__fallback {
+    display: none;
+}
+
+/* --- Содержимое стандартного балуна Яндекс.Карт --- */
+.studio-map__balloon p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.studio-map__balloon p + p {
+    margin-top: 6px;
+}
+
+/* --- Аккуратные элементы управления карты --- */
+.studio-map__canvas [class*="ymaps-"][class*="controls__toolbar"] {
+    border-radius: 12px;
+    filter: drop-shadow(0 4px 14px rgba(38, 46, 110, 0.12));
+}
+
+/* Скрываем сервисную подпись и логотип Яндекс.Карт. */
+.studio-map__canvas .ymaps-2-1-79-copyright,
+.studio-map__canvas .ymaps-2-1-79-gototech {
+    display: none !important;
+}
+
+/* --- Мобильный вид карты --- */
+@media (max-width: 960px) {
+    .contact-side {
+        height: auto;
+    }
+
+    .contact-side .studio-map {
+        flex: 0 0 auto;
+        min-height: 0;
+    }
+
+    .studio-map__canvas {
+        position: relative;
+        height: 340px;
+    }
+}

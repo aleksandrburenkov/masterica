@@ -9,7 +9,11 @@
     gap: clamp(24px, 4vw, 56px);
     align-items: start;
 }
-@media (max-width: 960px) { .detail { grid-template-columns: 1fr; } }
+.detail--contacts {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+}
+@media (max-width: 960px) { .detail, .detail--contacts { grid-template-columns: 1fr; } }
 
 .detail__media {
     border-radius: var(--radius-lg);

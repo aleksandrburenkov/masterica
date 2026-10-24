@@ -1,24 +1,50 @@
 @extends('layouts.site')
 
-@section('title', 'Контакты — '.setting('studio.name', 'Корни').', '.setting('studio.city', 'Брянск'))
-@section('meta_description', 'Адрес, телефон и часы работы студии «'.setting('studio.name', 'Корни').'» в '.setting('studio.city', 'Брянске').'.')
+@php
+    $studioName = setting('studio.name', 'Корни');
+    $studioTagline = setting('studio.tagline', 'Арт-студия «Корни»');
+    $studioCity = setting('studio.city', 'Брянск');
+    $studioAddress = setting('studio.address', 'г. Брянск, ул. Московская, д. 23');
+    $studioHours = setting('studio.hours', 'Ежедневно 10:00–19:00');
+    $studioPhone = setting('studio.phone', '+7 (906) 698-31-06');
+    $studioEmail = setting('studio.email', 'info@korni.local');
+    $mapLat = setting('studio.latitude', '53.216894');
+    $mapLng = setting('studio.longitude', '34.348181');
+    $mapZoom = setting('studio.map_zoom', '17');
+    $yandexMapsKey = config('services.yandex_maps.key');
+@endphp
+
+@section('title', 'Контакты — '.$studioName.', '.$studioCity)
+@section('meta_description', 'Адрес, телефон и часы работы студии «'.$studioName.'» в '.$studioCity.'.')
 @section('canonical', route('contacts'))
 
 @section('breadcrumbs')
     <x-breadcrumbs :items="[['label' => 'Контакты']]" />
 @endsection
 
+@push('head')
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU{{ $yandexMapsKey ? '&apikey='.urlencode($yandexMapsKey) : '' }}" type="text/javascript"></script>
+    <link rel="stylesheet" href="{{ asset('css/site/modules/studio-map.css') }}">
+@endpush
+
 @push('structured')
-    <script type="application/ld+json">
-        {!! json_encode([
+    @php
+        $localBusiness = [
             '@context' => 'https://schema.org',
             '@type' => 'LocalBusiness',
-            'name' => setting('studio.name', 'Корни'),
+            'name' => $studioName,
             'telephone' => setting('studio.phone'),
-            'address' => ['@type' => 'PostalAddress', 'streetAddress' => setting('studio.address'), 'addressLocality' => setting('studio.city'), 'addressCountry' => 'RU'],
-            'openingHours' => setting('studio.hours'),
+            'address' => ['@type' => 'PostalAddress', 'streetAddress' => $studioAddress, 'addressLocality' => setting('studio.city'), 'addressCountry' => 'RU'],
+            'openingHours' => $studioHours,
             'url' => route('contacts'),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        ];
+
+        if (is_numeric($mapLat) && is_numeric($mapLng)) {
+            $localBusiness['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => (float) $mapLat, 'longitude' => (float) $mapLng];
+        }
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($localBusiness, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
 @endpush
 
@@ -30,13 +56,28 @@
                 <p>Мы рады ответить на вопросы о занятиях, работах и курсах.</p>
             </div>
 
-            <div class="detail" style="grid-template-columns:1fr 1fr">
-                <div class="card" data-reveal>
-                    <div class="stack">
-                        <div class="feature"><span class="feature__icon"><x-ico name="phone" /></span><div><h4>Телефон</h4><p><a href="tel:{{ preg_replace('/[^0-9+]/', '', setting('studio.phone', '')) }}">{{ setting('studio.phone', '+7 (906) 698-31-06') }}</a></p></div></div>
-                        <div class="feature"><span class="feature__icon"><x-ico name="pin" /></span><div><h4>Адрес</h4><p>{{ setting('studio.address', 'г. Брянск, ул. Московская, д. 23') }}</p></div></div>
-                        <div class="feature"><span class="feature__icon"><x-ico name="clock" /></span><div><h4>Часы работы</h4><p>{{ setting('studio.hours', 'Ежедневно 10:00–19:00') }}</p></div></div>
-                        <div class="feature"><span class="feature__icon"><x-ico name="mail" /></span><div><h4>Почта студии</h4><p>{{ setting('studio.email', 'info@korni.local') }}</p></div></div>
+            <div class="detail detail--contacts">
+                <div class="contact-side">
+                    <div class="card" data-reveal>
+                        <div class="stack">
+                            <div class="feature"><span class="feature__icon"><x-ico name="phone" /></span><div><h4>Телефон</h4><p><a href="tel:{{ preg_replace('/[^0-9+]/', '', $studioPhone) }}">{{ $studioPhone }}</a></p></div></div>
+                            <div class="feature"><span class="feature__icon"><x-ico name="pin" /></span><div><h4>Адрес</h4><p>{{ $studioAddress }}</p></div></div>
+                            <div class="feature"><span class="feature__icon"><x-ico name="clock" /></span><div><h4>Часы работы</h4><p>{{ $studioHours }}</p></div></div>
+                            <div class="feature"><span class="feature__icon"><x-ico name="mail" /></span><div><h4>Почта студии</h4><p>{{ $studioEmail }}</p></div></div>
+                        </div>
+                    </div>
+
+                    <div class="card card--pad-0 studio-map" data-reveal data-studio-map
+                        data-lat="{{ $mapLat }}" data-lng="{{ $mapLng }}" data-zoom="{{ $mapZoom }}"
+                        data-icon="{{ asset('images/studio-map-pin.svg') }}"
+                        data-title="{{ $studioTagline }}" data-address="{{ $studioAddress }}" data-hours="{{ $studioHours }}">
+                        <div class="studio-map__canvas" id="studio-map" data-studio-map-canvas role="region"
+                            aria-label="Карта проезда к студии «{{ $studioName }}» по адресу {{ $studioAddress }}">
+                            <div class="studio-map__fallback" aria-hidden="true">
+                                <span class="studio-map__fallback-pin"><x-ico name="pin" /></span>
+                                <span>{{ $studioAddress }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -68,3 +109,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/site/modules/studio-map.js') }}" defer></script>
+@endpush

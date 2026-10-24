@@ -62,7 +62,33 @@ class StudioSettings extends Page
         $rules = [];
 
         foreach (self::fields() as $name => $meta) {
-            if ($meta['money']) {
+            if ($meta['kind'] === 'latitude' || $meta['kind'] === 'longitude') {
+                $limit = $meta['kind'] === 'latitude' ? 90 : 180;
+
+                $component = TextInput::make($name)
+                    ->label($meta['label'])
+                    ->inputMode('decimal')
+                    ->helperText('Используйте точку в качестве десятичного разделителя, например 53.243600')
+                    ->nullable()
+                    ->numeric()
+                    ->rule('between:-'.$limit.','.$limit)
+                    ->validationMessages([
+                        'numeric' => 'Укажите координату числом',
+                        'between' => 'Координата должна быть от -'.$limit.' до '.$limit,
+                    ]);
+            } elseif ($meta['kind'] === 'zoom') {
+                $component = TextInput::make($name)
+                    ->label($meta['label'])
+                    ->inputMode('numeric')
+                    ->helperText('Масштаб от 1 до 19: чем больше значение, тем ближе карта.')
+                    ->nullable()
+                    ->integer()
+                    ->rule('between:1,19')
+                    ->validationMessages([
+                        'integer' => 'Укажите целое число',
+                        'between' => 'Масштаб должен быть от 1 до 19',
+                    ]);
+            } elseif ($meta['money']) {
                 $component = TextInput::make($name)
                     ->label($meta['label'])
                     ->inputMode('decimal')
@@ -126,7 +152,7 @@ class StudioSettings extends Page
     /**
      * Field map: form field name => setting key and metadata.
      *
-     * @return array<string, array{key:string,label:string,group:string,type:string,textarea?:bool,money:bool}>
+     * @return array<string, array{key:string,label:string,group:string,type:string,textarea?:bool,money:bool,kind?:string}>
      */
     private static function fields(): array
     {
@@ -139,6 +165,9 @@ class StudioSettings extends Page
             'hours' => ['studio.hours', 'Часы работы'],
             'email' => ['studio.email', 'Электронная почта'],
             'timezone' => ['studio.timezone', 'Часовой пояс'],
+            'latitude' => ['studio.latitude', 'Широта на карте', false, 'latitude'],
+            'longitude' => ['studio.longitude', 'Долгота на карте', false, 'longitude'],
+            'map_zoom' => ['studio.map_zoom', 'Масштаб карты', false, 'zoom'],
             'og_description' => ['studio.og_description', 'Описание для SEO (OG)', true],
             'legal_note' => ['studio.legal_note', 'Примечание в футере', true],
 
@@ -164,9 +193,10 @@ class StudioSettings extends Page
                 'key' => $key,
                 'label' => $label,
                 'group' => explode('.', $key)[0],
-                'type' => str_ends_with($key, '_cents') || str_ends_with($key, '_minutes') || str_ends_with($key, '_hours') || str_ends_with($key, '_days') || str_ends_with($key, '_included') || str_ends_with($key, '_capacity') ? 'int' : 'string',
+                'type' => str_ends_with($key, '_cents') || str_ends_with($key, '_minutes') || str_ends_with($key, '_hours') || str_ends_with($key, '_days') || str_ends_with($key, '_included') || str_ends_with($key, '_capacity') || str_ends_with($key, '_zoom') ? 'int' : 'string',
                 'textarea' => (bool) ($info[2] ?? false),
                 'money' => str_ends_with($key, '_cents'),
+                'kind' => $info[3] ?? null,
             ];
         }
 
