@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use App\Support\LegalDocuments;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
 ])]
 class LegalDocument extends Model
 {
+    use HasSlug;
+
     protected function casts(): array
     {
         return [
@@ -48,31 +51,42 @@ class LegalDocument extends Model
     /**
      * Слаг — это последний сегмент публичного адреса (/dokumenty/{slug}).
      * Он же служит ключом маршрута в админке (/{record}/edit), поэтому в нём
-     * недопустим символ «/»: иначе адрес распадается на два сегмента и
-     * Laravel не находит маршрут (404). Приводим значение к безопасному виду
-     * на уровне модели — это защищает и код (сидеры, импорт), и формы.
+     * недопустим символ «/». Нормализацию выполняет трейт HasSlug: она
+     * защищает и код (сидеры, импорт), и формы.
      */
-    protected function slug(): Attribute
-    {
-        return Attribute::make(
-            set: fn (?string $value): string => self::normalizeSlug($value),
-        );
-    }
-
-    public static function normalizeSlug(?string $value): string
-    {
-        $value = trim((string) $value);
-
-        // «/dokumenty/politics» → «politics»: оставляем только последний сегмент пути.
-        $value = Str::afterLast($value, '/');
-
-        // Транслитерация кириллицы, пробелы и подчёркивания → дефисы.
-        return Str::slug($value);
-    }
-
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Для документа допустим только последний сегмент пути:
+     * «dokumenty/politics» → «politics».
+     */
+    public static function normalizeSlug(?string $value, int $maxLength = 180): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        return static::slugify(Str::afterLast($value, '/'), $maxLength);
+    }
+
+    public static function slugRouteName(): ?string
+    {
+        return 'legal.show';
+    }
+
+    public static function slugMaxLength(): int
+    {
+        return 120;
+    }
+
+    public static function slugFallback(): string
+    {
+        return 'dokument';
     }
 
     public function scopeProductionReady($query)

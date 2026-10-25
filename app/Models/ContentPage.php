@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class ContentPage extends Model
 {
+    use HasSlug;
+
     protected function casts(): array
     {
         return [
@@ -23,5 +26,15 @@ class ContentPage extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
+    }
+
+    public static function slugRouteName(): ?string
+    {
+        return 'guides.show';
+    }
+
+    public static function slugFallback(): string
+    {
+        return 'material';
     }
 }

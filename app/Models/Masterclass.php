@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Masterclass extends Model
 {
+    use HasSlug;
+
     protected function casts(): array
     {
         return [
@@ -88,5 +91,15 @@ class Masterclass extends Model
         }
 
         return $this->age_min.'+';
+    }
+
+    public static function slugRouteName(): ?string
+    {
+        return 'masterclasses.show';
+    }
+
+    public static function slugFallback(): string
+    {
+        return 'master-klass';
     }
 }

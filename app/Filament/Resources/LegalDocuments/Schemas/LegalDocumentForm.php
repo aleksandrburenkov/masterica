@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\LegalDocuments\Schemas;
 
+use App\Filament\Support\SlugField;
+use App\Models\LegalDocument;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -33,19 +35,18 @@ class LegalDocumentForm
                     ->validationMessages([
                         'unique' => 'Документ с таким техническим ключом уже существует. Откройте существующий документ для редактирования или укажите другой ключ.',
                     ]),
-                TextInput::make('slug')
-                    ->label('Слаг (URL)')
-                    ->helperText('Публичный адрес документа: /dokumenty/{слаг}. Укажите только последний сегмент (например, politics), без «/dokumenty/» и без «/».')
+                SlugField::make(
+                    LegalDocument::class,
+                    helperText: 'Публичный адрес документа: /dokumenty/{слаг}. Формируется из заголовка; укажите только последний сегмент, без «/».',
+                    normalizeOnBlur: false,
+                ),
+                TextInput::make('title')
+                    ->label('Заголовок')
                     ->required()
-                    ->maxLength(120)
-                    ->trim()
-                    ->rule('regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
-                    ->unique(ignoreRecord: true)
-                    ->validationMessages([
-                        'regex' => 'Слаг может содержать только строчные латинские буквы, цифры и дефисы, без «/». Например: politics.',
-                        'unique' => 'Документ с таким слагом уже существует. Укажите другой слаг.',
-                    ]),
-                TextInput::make('title')->label('Заголовок')->required()->maxLength(255)->columnSpanFull(),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(SlugField::syncFromSource(LegalDocument::class))
+                    ->columnSpanFull(),
                 Textarea::make('lead')
                     ->label('Краткая аннотация')
                     ->helperText('Показывается в футере и как подпись согласия у чекбоксов.')

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Masterclasses\Schemas;
 
+use App\Filament\Support\SlugField;
+use App\Models\Masterclass;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
@@ -17,8 +19,14 @@ class MasterclassForm
     {
         return $schema->components([
             Section::make('Основное')->schema([
-                TextInput::make('title')->label('Название')->required()->maxLength(200)->columnSpanFull(),
-                TextInput::make('slug')->label('Слаг (URL)')->required()->unique(ignoreRecord: true),
+                TextInput::make('title')
+                    ->label('Название')
+                    ->required()
+                    ->maxLength(200)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(SlugField::syncFromSource(Masterclass::class))
+                    ->columnSpanFull(),
+                SlugField::make(Masterclass::class, helperText: 'Публичный адрес: /master-klassy/{слаг}. Формируется из названия, при совпадении добавляется номер.'),
                 Select::make('technique_id')->label('Техника')->relationship('technique', 'name')->searchable()->preload(),
                 TextInput::make('short_description')->label('Краткое описание')->required()->maxLength(255)->columnSpanFull(),
                 Textarea::make('description')->label('Описание')->rows(5)->columnSpanFull(),

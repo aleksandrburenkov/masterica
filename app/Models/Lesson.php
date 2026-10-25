@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Lesson extends Model
 {
+    use HasSlug;
+
     protected function casts(): array
     {
         return [
@@ -36,5 +39,20 @@ class Lesson extends Model
     public function isFree(): bool
     {
         return $this->is_preview;
+    }
+
+    public function slugScope(): array
+    {
+        return ['course_module_id' => $this->course_module_id];
+    }
+
+    public static function slugMaxLength(): int
+    {
+        return 120;
+    }
+
+    public static function slugFallback(): string
+    {
+        return 'urok';
     }
 }

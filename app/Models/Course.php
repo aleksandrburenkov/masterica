@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Course extends Model
 {
+    use HasSlug;
+
     protected function casts(): array
     {
         return [
@@ -57,5 +60,15 @@ class Course extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true)->orderBy('sort');
+    }
+
+    public static function slugRouteName(): ?string
+    {
+        return 'courses.show';
+    }
+
+    public static function slugFallback(): string
+    {
+        return 'kurs';
     }
 }

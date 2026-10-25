@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Filament\Support\SlugField;
 use App\Models\Product;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -9,8 +10,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
@@ -24,15 +23,9 @@ class ProductForm
                     ->label('Название')
                     ->required()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(function (string $state, Get $get, Set $set, $record): void {
-                        if (filled($get('slug'))) {
-                            return;
-                        }
-
-                        $set('slug', Product::uniqueSlug($state, $record?->getKey()));
-                    })
+                    ->afterStateUpdated(SlugField::syncFromSource(Product::class))
                     ->columnSpanFull(),
-                TextInput::make('slug')->label('Слаг (URL)')->required()->maxLength(255)->unique(ignoreRecord: true),
+                SlugField::make(Product::class, helperText: 'Публичный адрес: /magazin/{слаг}. Формируется из названия, при совпадении добавляется номер.'),
                 Select::make('technique_id')->label('Техника')->relationship('technique', 'name')->searchable()->preload(),
                 TextInput::make('short_description')->label('Краткое описание')->required()->columnSpanFull(),
                 Textarea::make('description')->label('Описание')->rows(4)->columnSpanFull(),

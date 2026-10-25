@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Courses\Schemas;
 
+use App\Filament\Support\SlugField;
+use App\Models\Course;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -16,8 +18,13 @@ class CourseForm
     {
         return $schema->components([
             Section::make('Курс')->schema([
-                TextInput::make('title')->label('Название')->required()->columnSpanFull(),
-                TextInput::make('slug')->label('Слаг (URL)')->required()->unique(ignoreRecord: true),
+                TextInput::make('title')
+                    ->label('Название')
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(SlugField::syncFromSource(Course::class))
+                    ->columnSpanFull(),
+                SlugField::make(Course::class, helperText: 'Публичный адрес: /kursy/{слаг}. Формируется из названия, при совпадении добавляется номер.'),
                 Select::make('master_id')->label('Автор')->relationship('master', 'name')->searchable()->preload(),
                 Select::make('technique_id')->label('Техника')->relationship('technique', 'name')->searchable()->preload(),
                 Textarea::make('short_description')->label('Краткое описание')->required()->rows(2)->columnSpanFull(),
