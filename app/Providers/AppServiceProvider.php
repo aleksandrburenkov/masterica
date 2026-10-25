@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\LegalDocuments;
+use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Единый календарь админки: вместо системного виджета браузера
+        // используется календарь Filament, оформленный в стилях проекта.
+        DateTimePicker::configureUsing(fn (DateTimePicker $picker) => $picker->native(false));
+
         Paginator::defaultView('vendor.pagination.site');
         Paginator::defaultSimpleView('vendor.pagination.site');
 

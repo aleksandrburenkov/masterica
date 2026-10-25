@@ -12,6 +12,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -34,6 +35,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Violet,
             ])
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-calendar.css')).'">')
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

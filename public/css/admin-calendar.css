@@ -1,0 +1,494 @@
+/* ==========================================================================
+   Корни — выпадающий календарь в админке.
+   Оформляет встроенный date-time picker Filament в стиле сайта:
+   фиолетово-синяя палитра, шрифт Gotham Pro, мягкие тени и крупные зоны касания.
+   ========================================================================== */
+
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../fonts/gothampro.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../fonts/gothampro_medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Gotham Pro";
+    src: url("../fonts/gothampro_bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+.fi-fo-date-time-picker {
+    --k-cal-primary: #3b6cf5;
+    --k-cal-accent: #7c3aed;
+    --k-cal-ink: #243976;
+    --k-cal-muted: #6d7396;
+    --k-cal-line: #e6e8f6;
+    --k-cal-surface: #ffffff;
+    --k-cal-soft: #f4f5fc;
+    --k-cal-hover: #eef2ff;
+    --k-cal-radius: 18px;
+    --k-cal-font: "Gotham Pro", "Segoe UI", system-ui, sans-serif;
+}
+
+.dark .fi-fo-date-time-picker {
+    --k-cal-ink: #eef0fb;
+    --k-cal-muted: #9aa0c0;
+    --k-cal-line: rgba(255, 255, 255, 0.1);
+    --k-cal-surface: #1c2038;
+    --k-cal-soft: rgba(255, 255, 255, 0.05);
+    --k-cal-hover: rgba(139, 92, 246, 0.16);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel {
+    box-sizing: border-box;
+    z-index: 60;
+    width: 21rem;
+    min-width: 19rem;
+    max-width: calc(100vw - 2rem);
+    padding: 1rem 1rem 1.125rem;
+    border: 1px solid var(--k-cal-line);
+    border-radius: var(--k-cal-radius);
+    background: var(--k-cal-surface);
+    color: var(--k-cal-ink);
+    font-family: var(--k-cal-font);
+    box-shadow:
+        0 26px 70px rgba(38, 46, 110, 0.16),
+        0 4px 14px rgba(38, 46, 110, 0.08);
+    overscroll-behavior: contain;
+}
+
+.dark .fi-fo-date-time-picker .fi-fo-date-time-picker-panel {
+    box-shadow:
+        0 26px 70px rgba(0, 0, 0, 0.42),
+        0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
+/* --- Шапка с навигацией --------------------------------------------------- */
+.fi-fo-date-time-picker-panel .k-dtp-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1875rem;
+    margin-bottom: 0.625rem;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-caption {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-row--month .fi-fo-date-time-picker-month-select {
+    flex: 1 1 auto;
+    max-width: none;
+    text-align: center;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-row--year .fi-fo-date-time-picker-year-input {
+    flex: 0 0 4.25rem;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-nav-btn {
+    display: inline-flex;
+    width: 2.125rem;
+    height: 2.125rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--k-cal-muted);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        color 0.16s ease,
+        background-color 0.16s ease,
+        border-color 0.16s ease,
+        transform 0.12s ease;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-nav-btn svg {
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-nav-btn:hover {
+    background: var(--k-cal-hover);
+    color: var(--k-cal-primary);
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-nav-btn:focus-visible {
+    border-color: var(--k-cal-primary);
+    background: var(--k-cal-hover);
+    color: var(--k-cal-primary);
+    outline: 2px solid rgba(59, 108, 245, 0.35);
+    outline-offset: 1px;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-nav-btn:active {
+    transform: scale(0.94);
+}
+
+/* --- Месяц и год ---------------------------------------------------------- */
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-month-select {
+    min-height: 2.125rem;
+    max-width: 8.75rem;
+    padding: 0.3rem 1.5rem 0.3rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background-color: transparent;
+    color: var(--k-cal-ink);
+    font-family: var(--k-cal-font);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236d7396' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.45rem center;
+    transition:
+        background-color 0.16s ease,
+        border-color 0.16s ease;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-month-select:hover {
+    background-color: var(--k-cal-hover);
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-month-select:focus-visible {
+    border-color: var(--k-cal-primary);
+    outline: 2px solid rgba(59, 108, 245, 0.35);
+    outline-offset: 0;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input {
+    width: 4.25rem;
+    min-height: 2.125rem;
+    padding: 0.3rem 0.35rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--k-cal-ink);
+    font-family: var(--k-cal-font);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: center;
+    appearance: textfield;
+    -moz-appearance: textfield;
+    transition:
+        background-color 0.16s ease,
+        border-color 0.16s ease;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input::-webkit-inner-spin-button,
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input:hover {
+    background: var(--k-cal-hover);
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input:focus-visible {
+    border-color: var(--k-cal-primary);
+    outline: 2px solid rgba(59, 108, 245, 0.35);
+    outline-offset: 0;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-year-suffix {
+    margin-left: -0.1rem;
+    color: var(--k-cal-muted);
+    font-family: var(--k-cal-font);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+
+/* --- Дни недели ----------------------------------------------------------- */
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-header {
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--k-cal-line);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-header-day {
+    color: var(--k-cal-muted);
+    font-family: var(--k-cal-font);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+/* --- Сетка календаря ------------------------------------------------------ */
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day {
+    position: relative;
+    display: grid;
+    min-height: 2.375rem;
+    place-items: center;
+    border-radius: 11px;
+    color: var(--k-cal-ink);
+    font-family: var(--k-cal-font);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.12s ease;
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day:not(.fi-disabled):hover {
+    background: var(--k-cal-hover);
+    color: var(--k-cal-primary);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-focused:not(.fi-selected):not(.fi-disabled) {
+    background: var(--k-cal-hover);
+    box-shadow: inset 0 0 0 1px rgba(59, 108, 245, 0.28);
+    color: var(--k-cal-primary);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-selected {
+    background: linear-gradient(135deg, var(--k-cal-primary) 0%, var(--k-cal-accent) 100%);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 7px 16px rgba(73, 90, 220, 0.32);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-selected:hover {
+    color: #fff;
+    box-shadow: 0 9px 20px rgba(73, 90, 220, 0.4);
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-fo-date-time-picker-calendar-day-today:not(.fi-selected) {
+    color: var(--k-cal-primary);
+    font-weight: 700;
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-fo-date-time-picker-calendar-day-today:not(.fi-selected)::after {
+    content: "";
+    position: absolute;
+    bottom: 0.25rem;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day.fi-disabled {
+    background: transparent;
+    color: var(--k-cal-muted);
+    opacity: 0.38;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    text-decoration-color: rgba(109, 115, 150, 0.45);
+    text-decoration-thickness: 1px;
+}
+
+/* --- Время ---------------------------------------------------------------- */
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-inputs {
+    margin-top: 0.875rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--k-cal-line);
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-inputs input {
+    width: 2.75rem;
+    min-height: 2.375rem;
+    border: 1px solid var(--k-cal-line);
+    border-radius: 10px;
+    background: var(--k-cal-soft);
+    color: var(--k-cal-ink);
+    font-family: var(--k-cal-font);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: center;
+    transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-inputs input:hover {
+    border-color: #c9cff0;
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-inputs input:focus-visible {
+    border-color: var(--k-cal-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 108, 245, 0.2);
+}
+
+.fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-input-separator {
+    color: var(--k-cal-muted);
+    font-family: var(--k-cal-font);
+    font-weight: 600;
+}
+
+/* --- Нижняя панель -------------------------------------------------------- */
+.fi-fo-date-time-picker-panel .k-dtp-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-today {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--k-cal-line);
+    border-radius: 999px;
+    background: var(--k-cal-soft);
+    color: var(--k-cal-primary);
+    font-family: var(--k-cal-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        background-color 0.16s ease,
+        border-color 0.16s ease,
+        color 0.16s ease;
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-today:hover {
+    border-color: rgba(59, 108, 245, 0.35);
+    background: var(--k-cal-hover);
+}
+
+.fi-fo-date-time-picker-panel .k-dtp-today:focus-visible {
+    outline: 2px solid rgba(59, 108, 245, 0.4);
+    outline-offset: 2px;
+}
+
+/* --- Мобильная адаптация -------------------------------------------------- */
+@media (max-width: 640px) {
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel {
+        width: min(22.5rem, calc(100vw - 1.25rem));
+        min-width: 0;
+        max-height: calc(100vh - 1.5rem);
+        max-height: calc(100dvh - 1.5rem);
+        padding: 0.875rem;
+        border-radius: 16px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-header {
+        gap: 0.125rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-nav-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 12px;
+    }
+
+    .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-month-select,
+    .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-year-input {
+        min-height: 2.5rem;
+        font-size: 1rem;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-row {
+        gap: 0.125rem;
+    }
+
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar {
+        gap: 0.1875rem;
+    }
+
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day {
+        min-height: 2.5rem;
+        border-radius: 12px;
+        font-size: 0.9375rem;
+    }
+
+    .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-time-inputs input {
+        width: 3rem;
+        min-height: 2.625rem;
+        font-size: 1rem;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-today {
+        min-height: 2.75rem;
+        padding-inline: 1.1rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel {
+        width: calc(100vw - 0.75rem);
+        padding: 0.75rem;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-nav-btn {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day {
+        min-height: 2.25rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+    }
+
+    .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-month-select {
+        font-size: 0.9375rem;
+    }
+
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-header-day {
+        font-size: 0.5625rem;
+        letter-spacing: 0.04em;
+    }
+}
+
+@media (pointer: coarse) {
+    .fi-fo-date-time-picker .fi-fo-date-time-picker-panel .fi-fo-date-time-picker-calendar-day {
+        min-height: 2.75rem;
+    }
+
+    .fi-fo-date-time-picker-panel .k-dtp-nav-btn {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
