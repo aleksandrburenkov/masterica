@@ -50,6 +50,9 @@ class OutreachService
             'currency' => $calc['currency'],
             'status' => OutreachStatus::New,
             'comment' => $data['comment'] ?? null,
+            'consent_data' => (bool) ($data['consent_data'] ?? false),
+            'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
+            'source' => $data['source'] ?? null,
         ]);
 
         $this->audit->log($user, 'outreach.requested', $request, null, [

@@ -68,6 +68,10 @@
                             </span>
                         </label>
                         @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                        <label class="checkbox" style="margin-top:8px">
+                            <input type="checkbox" name="consent_marketing" value="1">
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                        </label>
                     </div>
 
                     <button class="btn btn--block" type="submit">Подтвердить заказ</button>

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Schemas;
 use App\Enums\UserRole;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -21,6 +22,7 @@ class UserForm
                 TextInput::make('password')->label('Пароль')->password()->revealable()
                     ->dehydrated(fn ($state) => filled($state))
                     ->helperText('Оставьте пустым, чтобы не менять.'),
+                Toggle::make('consent_marketing')->label('Согласие на рассылку'),
             ])->columns(2),
         ]);
     }

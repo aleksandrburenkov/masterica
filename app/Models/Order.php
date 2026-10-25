@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'number', 'user_id', 'status', 'payment_status', 'delivery_method',
     'subtotal_cents', 'delivery_cents', 'total_cents', 'currency',
     'contact_name', 'contact_phone', 'contact_email', 'address', 'comment',
-    'placed_at', 'paid_at', 'completed_at',
+    'consent_marketing', 'placed_at', 'paid_at', 'completed_at',
 ])]
 class Order extends Model
 {
@@ -27,6 +27,7 @@ class Order extends Model
             'subtotal_cents' => 'integer',
             'delivery_cents' => 'integer',
             'total_cents' => 'integer',
+            'consent_marketing' => 'boolean',
             'placed_at' => 'datetime',
             'paid_at' => 'datetime',
             'completed_at' => 'datetime',

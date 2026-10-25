@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -32,6 +33,7 @@ class OrderForm
                 TextInput::make('contact_phone')->label('Телефон'),
                 TextInput::make('contact_email')->label('Email')->email(),
                 Textarea::make('comment')->label('Комментарий')->rows(2)->columnSpanFull(),
+                Toggle::make('consent_marketing')->label('Согласие на рассылку')->disabled()->dehydrated(),
             ])->columns(2),
         ]);
     }

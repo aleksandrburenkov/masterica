@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -42,6 +43,7 @@ class BookingsTable
                 TextColumn::make('payment_status')->label('Оплата')->badge()->formatStateUsing(fn ($state) => $state->label()),
                 TextColumn::make('participants_count')->label('Чел.'),
                 TextColumn::make('total_cents')->label('Сумма')->money('RUB', divideBy: 100),
+                IconColumn::make('consent_marketing')->label('Рассылка')->boolean()->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

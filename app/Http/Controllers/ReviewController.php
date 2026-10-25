@@ -36,6 +36,7 @@ class ReviewController extends Controller
             'body' => ['required', 'string', 'min:10', 'max:2000'],
             'city' => ['nullable', 'string', 'max:120'],
             'video_url' => ['nullable', 'url', 'max:255'],
+            'consent_data' => ['accepted'],
             'consent_publish' => ['accepted'],
             'consent_marketing' => ['nullable', 'boolean'],
         ]);
@@ -50,6 +51,7 @@ class ReviewController extends Controller
             'video_path' => $data['video_url'] ?? null,
             'is_demo' => false,
             'status' => ReviewStatus::Pending,
+            'consent_data' => true,
             'consent_publish' => true,
             'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
             'source' => 'Форма на сайте',

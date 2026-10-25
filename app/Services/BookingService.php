@@ -78,6 +78,8 @@ class BookingService
                 'canceled_at' => null,
                 'cancel_reason' => null,
                 'notes' => $data['notes'] ?? null,
+                'consent_data' => (bool) ($data['consent_data'] ?? false),
+                'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
             ];
 
             if ($user !== null) {

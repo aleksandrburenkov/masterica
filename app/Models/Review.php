@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'user_id', 'masterclass_id', 'type', 'rating', 'body', 'video_path',
-    'city', 'is_demo', 'status', 'consent_publish', 'consent_marketing',
+    'city', 'is_demo', 'status', 'consent_data', 'consent_publish', 'consent_marketing',
     'source', 'published_at', 'moderated_by', 'moderated_at',
 ])]
 class Review extends Model
@@ -21,6 +21,7 @@ class Review extends Model
             'type' => ReviewType::class,
             'status' => ReviewStatus::class,
             'is_demo' => 'boolean',
+            'consent_data' => 'boolean',
             'consent_publish' => 'boolean',
             'consent_marketing' => 'boolean',
             'rating' => 'integer',

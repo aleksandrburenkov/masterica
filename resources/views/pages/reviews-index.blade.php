@@ -90,6 +90,14 @@
                     </div>
                     <div class="field">
                         <label class="checkbox">
+                            <input type="checkbox" name="consent_data" value="1" required>
+                            <span>
+                                {{ legal('consent_review_data', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения и публикации отзыва') }}.
+                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                            </span>
+                        </label>
+                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                        <label class="checkbox" style="margin-top:8px">
                             <input type="checkbox" name="consent_publish" value="1" required>
                             <span>
                                 {{ legal('consent_review', 'lead', 'Даю согласие на публикацию отзыва и использование моего имени, текста, фото- и видеоматериалов') }}.

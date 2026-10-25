@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\GeocodeController;
 use App\Http\Controllers\HomeController;
@@ -45,6 +46,12 @@ Route::post('/master-klassy/{masterclass:slug}/zapis', [BookingController::class
 Route::get('/vyezdnye-master-klassy', [OutreachController::class, 'index'])->name('outreach.index');
 Route::post('/vyezdnye-master-klassy', [OutreachController::class, 'store'])
     ->middleware('throttle:10,1')->name('outreach.store');
+
+// Нижняя форма «Оставить заявку» создаёт запись на выбранный сеанс.
+Route::post('/zayavka-na-master-klass', [BookingController::class, 'storeQuick'])
+    ->middleware('throttle:10,1')->name('bookings.quick-store');
+Route::post('/kontakty', [ContactController::class, 'store'])
+    ->middleware('throttle:10,1')->name('contacts.store');
 
 // Координаты адреса для калькулятора удалённости (Яндекс.Геокодер / OSM).
 Route::get('/geokod', [GeocodeController::class, 'show'])

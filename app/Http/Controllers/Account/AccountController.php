@@ -119,8 +119,10 @@ class AccountController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'phone' => ['nullable', 'string', 'max:32'],
             'email' => ['required', 'email', 'max:160', Rule::unique('users', 'email')->ignore($user->id)],
+            'consent_marketing' => ['nullable', 'boolean'],
         ]);
 
+        $data['consent_marketing'] = (bool) ($data['consent_marketing'] ?? false);
         $user->update($data);
 
         return back()->with('success', 'Профиль обновлён.');

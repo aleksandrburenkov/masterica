@@ -108,6 +108,21 @@ class LegalDocumentsTest extends TestCase
             ->assertSee('name="consent_data"', false)
             ->assertSee('name="consent_marketing"', false)
             ->assertSee('target="_blank"', false);
+
+        $this->get(route('contacts'))
+            ->assertOk()
+            ->assertSee('name="consent_data"', false)
+            ->assertSee('name="consent_marketing"', false);
+
+        $this->get(route('masterclasses.show', 'basket'))
+            ->assertOk()
+            ->assertSee('name="consent_data"', false)
+            ->assertSee('name="consent_marketing"', false);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('name="consent_data"', false)
+            ->assertSee('name="consent_marketing"', false);
     }
 
     public function test_footer_links_to_all_key_documents(): void

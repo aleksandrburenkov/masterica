@@ -84,23 +84,24 @@
                 <div class="card" data-reveal>
                     <h3>Напишите нам</h3>
                     <p class="muted">Оставьте заявку — студия ответит удобным способом.</p>
-                    <form action="{{ route('outreach.store') }}" method="post" data-ajax-form>
+                    <form action="{{ route('contacts.store') }}" method="post" data-ajax-form>
                         @csrf
-                        <input type="hidden" name="direction" value="Вопрос со страницы контактов">
-                        <input type="hidden" name="requested_date" value="{{ now()->addWeek()->toDateString() }}">
-                        <input type="hidden" name="location" value="{{ setting('studio.address') }}">
-                        <input type="hidden" name="age_group" value="Взрослый">
-                        <input type="hidden" name="participants_count" value="1">
+                        <input type="hidden" name="source" value="{{ request()->path() }}">
                         <div class="field"><label for="ct-name">Имя</label><input id="ct-name" class="input" type="text" name="contact_name" value="{{ old('contact_name', auth()->user()?->name) }}" required></div>
                         <div class="field"><label for="ct-phone">Телефон</label><input id="ct-phone" class="input" type="text" name="contact_phone" value="{{ old('contact_phone', auth()->user()?->phone) }}" required></div>
                         <div class="field"><label for="ct-email">Электронная почта</label><input id="ct-email" class="input" type="email" name="contact_email" value="{{ old('contact_email', auth()->user()?->email) }}" required></div>
-                        <div class="field"><label for="ct-comment">Сообщение</label><textarea id="ct-comment" class="textarea" name="comment" required>{{ old('comment') }}</textarea></div>
-                        <label class="checkbox" style="margin-bottom:14px">
+                        <div class="field"><label for="ct-comment">Сообщение</label><textarea id="ct-comment" class="textarea @error('message') is-invalid @enderror" name="message" required>{{ old('message') }}</textarea>@error('message')<div class="error-text">{{ $message }}</div>@enderror</div>
+                        <label class="checkbox" style="margin-bottom:8px">
                             <input type="checkbox" name="consent_data" value="1" required>
                             <span>
                                 {{ legal('consent_contacts', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения обращения и направления ответа') }}.
                                 <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
                             </span>
+                        </label>
+                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                        <label class="checkbox" style="margin-bottom:14px">
+                            <input type="checkbox" name="consent_marketing" value="1">
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
                         </label>
                         <button class="btn btn--block" type="submit">Отправить</button>
                     </form>

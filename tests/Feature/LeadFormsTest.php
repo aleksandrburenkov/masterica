@@ -1,0 +1,285 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\UserRole;
+use App\Filament\Resources\Bookings\BookingResource;
+use App\Filament\Resources\ContactRequests\ContactRequestResource;
+use App\Filament\Resources\ContactRequests\Pages\CreateContactRequest;
+use App\Filament\Resources\Masterclasses\MasterclassResource;
+use App\Filament\Resources\OutreachRequests\OutreachRequestResource;
+use App\Models\Booking;
+use App\Models\ContactRequest;
+use App\Models\Masterclass;
+use App\Models\OutreachRequest;
+use App\Models\User;
+use App\Models\WorkshopSession;
+use Database\Seeders\CatalogSeeder;
+use Database\Seeders\SettingsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class LeadFormsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed([SettingsSeeder::class, CatalogSeeder::class]);
+    }
+
+    private function makeSession(?Masterclass $masterclass = null, int $capacity = 8): WorkshopSession
+    {
+        $masterclass ??= Masterclass::query()->firstOrFail();
+
+        return WorkshopSession::create([
+            'masterclass_id' => $masterclass->id,
+            'starts_at' => now()->addDays(5)->setTime(15, 0),
+            'timezone' => 'Europe/Moscow',
+            'capacity' => $capacity,
+            'location_name' => 'Студия',
+            'address' => 'Брянск',
+            'status' => 'scheduled',
+            'is_published' => true,
+        ]);
+    }
+
+    public function test_footer_form_creates_booking_not_outreach_request(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.quick-store'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => 2,
+            'contact_name' => 'Организатор',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'lead@example.com',
+            'child_age' => 9,
+            'notes' => 'Хотим занятие на праздник',
+            'consent_data' => '1',
+            'consent_marketing' => '1',
+            'source' => '/o-nas',
+        ])->assertRedirect(url('/o-nas'));
+
+        $booking = Booking::firstOrFail();
+
+        $this->assertSame($session->id, $booking->workshop_session_id);
+        $this->assertSame(2, $booking->participants_count);
+        $this->assertSame('lead@example.com', $booking->contact_email);
+        $this->assertSame('Хотим занятие на праздник', $booking->notes);
+        $this->assertTrue($booking->consent_data);
+        $this->assertTrue($booking->consent_marketing);
+        $this->assertSame($session->priceCents() * 2, $booking->total_cents);
+        $this->assertSame(0, OutreachRequest::count());
+    }
+
+    public function test_footer_form_requires_data_consent(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.quick-store'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => 1,
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'guest@example.com',
+        ])->assertSessionHasErrors('consent_data');
+
+        $this->assertSame(0, Booking::count());
+    }
+
+    public function test_footer_form_returns_json_for_ajax(): void
+    {
+        $session = $this->makeSession();
+
+        $this->postJson(route('bookings.quick-store'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => 1,
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'guest@example.com',
+            'consent_data' => '1',
+        ])->assertCreated()->assertJsonStructure(['message', 'number']);
+    }
+
+    public function test_footer_form_rejects_session_without_free_seats(): void
+    {
+        $session = $this->makeSession(capacity: 1);
+
+        Booking::create([
+            'number' => 'BK-OCCUPIED-1',
+            'workshop_session_id' => $session->id,
+            'status' => 'confirmed',
+            'payment_status' => 'unpaid',
+            'participants_count' => 1,
+            'contact_name' => 'Занято',
+            'contact_phone' => '1',
+            'contact_email' => 'busy@example.com',
+            'unit_price_cents' => 100,
+            'total_cents' => 100,
+        ]);
+
+        $this->postJson(route('bookings.quick-store'), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => 1,
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'guest@example.com',
+            'consent_data' => '1',
+        ])->assertStatus(422)->assertJsonValidationErrors('workshop_session_id');
+
+        $this->assertSame(1, Booking::count());
+    }
+
+    public function test_contacts_form_creates_contact_request_with_all_fields(): void
+    {
+        $this->post(route('contacts.store'), [
+            'contact_name' => 'Ирина',
+            'contact_phone' => '+7 906 698-31-06',
+            'contact_email' => 'irina@example.com',
+            'message' => 'Можно ли прийти с ребёнком 5 лет?',
+            'consent_data' => '1',
+            'consent_marketing' => '1',
+            'source' => 'kontakty',
+        ])->assertRedirect(route('contacts'));
+
+        $request = ContactRequest::firstOrFail();
+
+        $this->assertSame('Ирина', $request->contact_name);
+        $this->assertSame('+7 906 698-31-06', $request->contact_phone);
+        $this->assertSame('irina@example.com', $request->contact_email);
+        $this->assertSame('Можно ли прийти с ребёнком 5 лет?', $request->message);
+        $this->assertTrue($request->consent_data);
+        $this->assertTrue($request->consent_marketing);
+        $this->assertSame('kontakty', $request->source);
+        $this->assertSame(0, OutreachRequest::count());
+    }
+
+    public function test_contacts_form_requires_data_consent_and_message(): void
+    {
+        $this->post(route('contacts.store'), [
+            'contact_name' => 'Ирина',
+            'contact_phone' => '+7 906 698-31-06',
+            'contact_email' => 'irina@example.com',
+            'message' => '',
+        ])->assertSessionHasErrors(['message', 'consent_data']);
+
+        $this->assertSame(0, ContactRequest::count());
+    }
+
+    public function test_masterclass_page_booking_stores_marketing_consent_without_duplicates(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', $session->masterclass->slug), [
+            'workshop_session_id' => $session->id,
+            'participants_count' => 2,
+            'contact_name' => 'Взрослый',
+            'contact_phone' => '+7 900 111-22-33',
+            'contact_email' => 'adult@example.com',
+            'child_age' => 9,
+            'notes' => 'Нужен фартук',
+            'consent_data' => '1',
+            'consent_marketing' => '1',
+        ])->assertRedirect(route('masterclasses.show', $session->masterclass->slug));
+
+        $booking = Booking::firstOrFail();
+
+        $this->assertTrue($booking->consent_data);
+        $this->assertTrue($booking->consent_marketing);
+        $this->assertSame(1, Booking::count());
+        $this->assertSame(0, OutreachRequest::count());
+    }
+
+    public function test_outreach_request_stores_consents_and_source(): void
+    {
+        $this->post(route('outreach.store'), [
+            'direction' => 'basket',
+            'requested_date' => now()->addWeek()->toDateString(),
+            'location' => 'г. Брянск',
+            'participants_count' => 8,
+            'contact_name' => 'Школа',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'school@example.com',
+            'consent_data' => '1',
+            'consent_marketing' => '1',
+            'source' => 'vyezdnye-master-klassy',
+        ])->assertRedirect(route('outreach.index'));
+
+        $request = OutreachRequest::firstOrFail();
+
+        $this->assertTrue($request->consent_data);
+        $this->assertTrue($request->consent_marketing);
+        $this->assertSame('vyezdnye-master-klassy', $request->source);
+    }
+
+    public function test_lead_forms_are_visible_in_their_admin_sections(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+        $session = $this->makeSession();
+
+        $booking = Booking::create([
+            'number' => 'BK-TEST-0001',
+            'workshop_session_id' => $session->id,
+            'status' => 'confirmed',
+            'payment_status' => 'unpaid',
+            'participants_count' => 2,
+            'contact_name' => 'Тест',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'booking-lead@example.com',
+            'unit_price_cents' => 100,
+            'total_cents' => 200,
+        ]);
+
+        ContactRequest::create([
+            'number' => 'CT-TEST-0001',
+            'contact_name' => 'Тест',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'contact-lead@example.com',
+            'message' => 'Проверка формы контактов',
+            'consent_data' => true,
+        ]);
+
+        $this->actingAs($owner)
+            ->get('/admin/bookings')
+            ->assertOk()
+            ->assertSee($booking->number);
+
+        $this->actingAs($owner)
+            ->get('/admin/contact-requests')
+            ->assertOk()
+            ->assertSee('Проверка формы контактов');
+    }
+
+    public function test_admin_navigation_groups_and_labels(): void
+    {
+        $this->assertSame('Заявки', BookingResource::getNavigationGroup());
+        $this->assertSame('Заявки', OutreachRequestResource::getNavigationGroup());
+        $this->assertSame('Мастер-классы', BookingResource::getNavigationLabel());
+        $this->assertSame('Создание мастер-класса', MasterclassResource::getNavigationLabel());
+        $this->assertSame('Выездные мастер-классы', OutreachRequestResource::getNavigationLabel());
+        $this->assertSame('Форма контакты', ContactRequestResource::getNavigationLabel());
+        $this->assertNull(ContactRequestResource::getNavigationGroup());
+    }
+
+    public function test_admin_can_create_contact_request(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+        $this->actingAs($owner);
+
+        Livewire::test(CreateContactRequest::class)
+            ->fillForm([
+                'contact_name' => 'Менеджер',
+                'contact_phone' => '+7 900 000-00-00',
+                'contact_email' => 'manual-contact@example.com',
+                'message' => 'Ручное обращение',
+                'status' => 'new',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertStringStartsWith('CT-', ContactRequest::firstOrFail()->number);
+    }
+}

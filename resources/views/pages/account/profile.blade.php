@@ -34,6 +34,10 @@
                             <input id="p-email" class="input @error('email') is-invalid @enderror" type="email" name="email" value="{{ old('email', $user->email) }}" required>
                             @error('email')<div class="error-text">{{ $message }}</div>@enderror
                         </div>
+                        <label class="checkbox" style="margin-bottom:14px">
+                            <input type="checkbox" name="consent_marketing" value="1" @checked(old('consent_marketing', $user->consent_marketing))>
+                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                        </label>
                         <button class="btn" type="submit">Сохранить</button>
                     </form>
 

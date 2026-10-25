@@ -25,6 +25,7 @@ class RegisterController extends Controller
             'phone' => ['nullable', 'string', 'max:32'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'consent_data' => ['accepted'],
+            'consent_marketing' => ['nullable', 'boolean'],
         ]);
 
         $user = User::create([
@@ -33,6 +34,7 @@ class RegisterController extends Controller
             'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
             'role' => UserRole::Client,
+            'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
         ]);
 
         Auth::login($user);

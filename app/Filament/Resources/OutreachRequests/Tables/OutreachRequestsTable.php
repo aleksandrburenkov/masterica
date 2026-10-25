@@ -6,6 +6,7 @@ use App\Enums\OutreachStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -26,6 +27,8 @@ class OutreachRequestsTable
                 TextColumn::make('calc_total_cents')->label('Расчёт')->money('RUB', divideBy: 100),
                 TextColumn::make('status')->label('Статус')->badge()->formatStateUsing(fn ($state) => $state->label()),
                 TextColumn::make('contact_phone')->label('Телефон')->toggleable(),
+                IconColumn::make('consent_marketing')->label('Рассылка')->boolean()->toggleable(),
+                TextColumn::make('source')->label('Источник')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

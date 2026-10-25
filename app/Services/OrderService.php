@@ -122,6 +122,7 @@ class OrderService
                 'contact_email' => $data['contact_email'],
                 'address' => $method === DeliveryMethod::CityDelivery ? ($data['address'] ?? null) : null,
                 'comment' => $data['comment'] ?? null,
+                'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
                 'placed_at' => now(),
             ]);
 

@@ -29,10 +29,11 @@ class ReviewForm
             ])->columns(2),
 
             Section::make('Согласия')->schema([
+                Toggle::make('consent_data')->label('Согласие на обработку персональных данных')->default(false),
                 Toggle::make('consent_publish')->label('Согласие на публикацию')->default(false),
                 Toggle::make('consent_marketing')->label('Согласие на маркетинг')->default(false),
                 Toggle::make('is_demo')->label('Демонстрационный (demo)')->default(false)->helperText('Демо-отзывы не выдаются за отзывы реальных клиентов и исключаются из production.'),
-            ])->columns(3),
+            ])->columns(4),
         ]);
     }
 }

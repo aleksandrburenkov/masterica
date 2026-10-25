@@ -156,6 +156,10 @@
                                     </span>
                                 </label>
                                 @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
+                                <label class="checkbox" style="margin-top:8px">
+                                    <input type="checkbox" name="consent_marketing" value="1">
+                                    <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                                </label>
                             </div>
                             <button class="btn btn--block" type="submit">Записаться</button>
                             <p class="form-note" style="margin-top:14px">После отправки запись подтверждается; оплата — в студии. Порядок отмены и переноса — в <a href="{{ route('legal.show', legal('booking_rules', 'slug', 'pravila-zapisi-i-zakaza')) }}" target="_blank" rel="noopener">Правилах записи и заказа</a>. Данные ребёнка обрабатываются на основании согласия законного представителя.</p>

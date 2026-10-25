@@ -42,6 +42,7 @@ class OutreachController extends Controller
             'comment' => ['nullable', 'string', 'max:1000'],
             'consent_data' => ['accepted'],
             'consent_marketing' => ['nullable', 'boolean'],
+            'source' => ['nullable', 'string', 'max:255'],
         ]);
 
         $outreach = $this->service->create($request->user(), $data);

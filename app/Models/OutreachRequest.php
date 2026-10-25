@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'participants_count', 'age_group', 'contact_name', 'contact_phone',
     'contact_email', 'base_price_cents', 'included_participants', 'extra_count',
     'extra_price_cents', 'distance_surcharge_cents', 'calc_total_cents', 'currency', 'status', 'comment',
+    'consent_data', 'consent_marketing', 'source',
 ])]
 class OutreachRequest extends Model
 {
@@ -28,6 +29,8 @@ class OutreachRequest extends Model
             'extra_count' => 'integer',
             'extra_price_cents' => 'integer',
             'calc_total_cents' => 'integer',
+            'consent_data' => 'boolean',
+            'consent_marketing' => 'boolean',
         ];
     }
 

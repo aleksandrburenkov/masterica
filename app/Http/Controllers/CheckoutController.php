@@ -46,6 +46,7 @@ class CheckoutController extends Controller
             // Акцепт Публичной оферты (договора купли-продажи) — обязателен.
             'accept_offer' => ['accepted'],
             'consent_data' => ['accepted'],
+            'consent_marketing' => ['nullable', 'boolean'],
         ]);
 
         $order = $this->orders->place($request->user(), $data);

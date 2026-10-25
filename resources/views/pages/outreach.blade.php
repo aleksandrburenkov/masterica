@@ -48,6 +48,7 @@
                     data-geocode-url="{{ route('geocode') }}"
                     data-yandex-geocoder="{{ $yandexMapsKey ? '1' : '0' }}" novalidate>
                     @csrf
+                    <input type="hidden" name="source" value="vyezdnye-master-klassy">
                     <input type="hidden" name="distance_km" value="{{ old('distance_km') }}" data-outreach-distance>
                     <h3>Параметры занятия</h3>
 

@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -31,6 +32,11 @@ class BookingForm
                 TextInput::make('contact_email')->label('Email')->email()->required(),
                 TextInput::make('total_cents')->label('Сумма, ₽')->numeric()->formatStateUsing(fn ($state) => $state ? $state / 100 : null)->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100)),
                 Textarea::make('notes')->label('Заметки')->rows(2)->columnSpanFull(),
+            ])->columns(2),
+
+            Section::make('Согласия')->schema([
+                Toggle::make('consent_data')->label('Согласие на обработку персональных данных')->disabled()->dehydrated(),
+                Toggle::make('consent_marketing')->label('Согласие на рассылку')->disabled()->dehydrated(),
             ])->columns(2),
         ]);
     }

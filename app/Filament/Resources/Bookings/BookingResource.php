@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class BookingResource extends Resource
 {
@@ -20,11 +21,15 @@ class BookingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static ?string $navigationLabel = 'Записи';
+    protected static string|UnitEnum|null $navigationGroup = 'Заявки';
 
-    protected static ?string $modelLabel = 'Запись';
+    protected static ?string $navigationLabel = 'Мастер-классы';
 
-    protected static ?string $pluralModelLabel = 'Записи на занятия';
+    protected static ?string $modelLabel = 'Запись на мастер-класс';
+
+    protected static ?string $pluralModelLabel = 'Мастер-классы';
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {

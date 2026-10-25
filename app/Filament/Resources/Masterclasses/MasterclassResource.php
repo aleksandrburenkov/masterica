@@ -20,9 +20,11 @@ class MasterclassResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $navigationLabel = 'Мастер-классы';
+    protected static ?string $navigationLabel = 'Создание мастер-класса';
+
     protected static ?string $modelLabel = 'Мастер-класс';
-    protected static ?string $pluralModelLabel = 'Мастер-классы';
+
+    protected static ?string $pluralModelLabel = 'Создание мастер-класса';
 
     public static function form(Schema $schema): Schema
     {
