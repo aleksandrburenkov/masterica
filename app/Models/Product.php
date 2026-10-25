@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMediaFiles;
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Product extends Model
 {
-    use HasSlug;
+    use HasMediaFiles, HasSlug;
+
+    public function mediaAttributes(): array
+    {
+        return ['image', 'gallery'];
+    }
 
     protected function casts(): array
     {
