@@ -47,7 +47,7 @@
 
                     <div class="field">
                         <label for="req-name">Ваше имя</label>
-                        <input id="req-name" class="input @error('contact_name') is-invalid @enderror" type="text" name="contact_name" value="{{ old('contact_name') }}" required>
+                        <input id="req-name" class="input @error('contact_name') is-invalid @enderror" type="text" name="contact_name" value="{{ old('contact_name', auth()->user()?->name) }}" required>
                         @error('contact_name')<div class="error-text">{{ $message }}</div>@enderror
                     </div>
 

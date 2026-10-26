@@ -246,6 +246,38 @@ class LeadFormsTest extends TestCase
             ->assertSee(route('bookings.request-store'), false);
     }
 
+    public function test_request_form_prefills_authenticated_client_name(): void
+    {
+        WorkshopSession::query()->delete();
+        $masterclass = Masterclass::query()->where('slug', 'basket')->firstOrFail();
+        $user = User::factory()->create([
+            'role' => UserRole::Client,
+            'name' => 'Иван Петров',
+            'email' => 'ivan@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('masterclasses.index', ['request' => $masterclass->slug]))
+            ->assertOk()
+            ->assertSee('value="Иван Петров"', false)
+            ->assertSee('value="ivan@example.com"', false);
+    }
+
+    public function test_quick_form_prefills_authenticated_client_name(): void
+    {
+        $this->makeSession();
+        $user = User::factory()->create([
+            'role' => UserRole::Client,
+            'name' => 'Мария Иванова',
+            'email' => 'maria@example.com',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('masterclasses.index'))
+            ->assertOk()
+            ->assertSee('value="Мария Иванова"', false);
+    }
+
     public function test_index_ignores_request_mode_when_masterclass_has_sessions(): void
     {
         WorkshopSession::query()->delete();
