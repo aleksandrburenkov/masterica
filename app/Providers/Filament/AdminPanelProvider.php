@@ -42,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-calendar.css')).'">')
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-navigation-badges.css')).'">')
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-grouped-requests.css')).'">')
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
             ->navigationGroups([
                 NavigationGroup::make('Блок курсы'),

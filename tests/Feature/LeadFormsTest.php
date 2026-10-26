@@ -467,6 +467,44 @@ class LeadFormsTest extends TestCase
         $this->assertNull(ContactRequestResource::getNavigationGroup());
     }
 
+    public function test_admin_contact_requests_are_grouped_by_source_form(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+
+        ContactRequest::create([
+            'number' => 'CT-CONTACT-0001',
+            'contact_name' => 'Ирина',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'contacts@example.com',
+            'message' => 'Вопрос со страницы контактов',
+            'consent_data' => true,
+        ]);
+
+        ContactRequest::create([
+            'number' => 'CT-REQUEST-0001',
+            'contact_name' => 'Пётр',
+            'contact_phone' => '+7 900 000-00-01',
+            'contact_email' => 'request@example.com',
+            'message' => 'Запрос-Корзина из бумажной лозы',
+            'consent_data' => true,
+        ]);
+
+        $html = $this->actingAs($owner)->get('/admin/contact-requests')
+            ->assertOk()
+            ->assertSee('fi-grouped-requests', false)
+            ->getContent();
+
+        $contactsTitle = 'Форма «Контакты»';
+        $requestTitle = 'Форма «Запрос мастер-класса» (нет активных сеансов)';
+
+        $contactsPosition = strpos($html, $contactsTitle);
+        $requestPosition = strpos($html, $requestTitle);
+
+        $this->assertNotFalse($contactsPosition, 'Блок формы контактов не найден.');
+        $this->assertNotFalse($requestPosition, 'Блок запроса мастер-класса не найден.');
+        $this->assertLessThan($requestPosition, $contactsPosition, 'Блок формы контактов должен находиться выше.');
+    }
+
     public function test_admin_can_create_contact_request(): void
     {
         $owner = User::factory()->create(['role' => UserRole::Owner]);

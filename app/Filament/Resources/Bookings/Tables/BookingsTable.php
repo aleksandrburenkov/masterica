@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Bookings\Tables;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Booking;
+use App\Models\WorkshopSession;
 use App\Services\BookingService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -13,6 +14,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -45,6 +47,23 @@ class BookingsTable
                 TextColumn::make('total_cents')->label('Сумма')->money('RUB', divideBy: 100),
                 IconColumn::make('consent_marketing')->label('Рассылка')->boolean()->toggleable(),
             ])
+            ->groups([
+                Group::make('workshop_session_id')
+                    ->label('Мастер-класс')
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(fn (Booking $record) => $record->session
+                        ? $record->session->masterclass->title.' — '.$record->session->starts_at->copy()->setTimezone($record->session->timezone)->translatedFormat('d.m.Y H:i')
+                        : 'Без сеанса')
+                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderBy(
+                        WorkshopSession::query()->select('starts_at')
+                            ->whereColumn('workshop_sessions.id', 'bookings.workshop_session_id'),
+                        $direction,
+                    )),
+            ])
+            ->defaultGroup('workshop_session_id')
+            ->groupingSettingsHidden()
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['session.masterclass']))
+            ->extraAttributes(['class' => 'fi-grouped-requests'])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')->label('Статус')->options(collect(BookingStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all()),

@@ -1,0 +1,50 @@
+/*
+ * Accent styling for grouped request lists in the admin panel.
+ *
+ * Sections "Заявки → Мастер-классы" (bookings) and "Форма: Контакты"
+ * (contact requests) render each group as a .fi-ta-group-header banner.
+ * These rules turn every group header into a highlighted block that stands out
+ * from the surrounding rows, using the panel accent palette (Color::Violet),
+ * exposed by Filament as --primary-* CSS variables.
+ *
+ * The heading text and date/time formats are left untouched: only the
+ * presentation changes, and both sections share the exact same look through
+ * the .fi-grouped-requests scope.
+ */
+
+.fi-grouped-requests .fi-ta-group-header {
+    padding: 0.7rem 1rem;
+    margin-block: 0.85rem 0.35rem;
+    border-inline-start: 0.25rem solid var(--primary-500, #8b5cf6);
+    border-radius: 0.75rem;
+    background-image: linear-gradient(
+        90deg,
+        var(--primary-50, #f5f3ff) 0%,
+        var(--primary-100, #ede9fe) 55%,
+        var(--primary-50, #f5f3ff) 100%
+    );
+    box-shadow: 0 1px 3px rgba(76, 29, 149, 0.12);
+}
+
+.fi-grouped-requests .fi-ta-group-header .fi-ta-group-heading {
+    color: var(--primary-800, #5b21b6);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* Dark theme: keep the accent, but on a dark violet surface. */
+.dark .fi-grouped-requests .fi-ta-group-header {
+    border-inline-start-color: var(--primary-400, #a78bfa);
+    background-image: linear-gradient(
+        90deg,
+        var(--primary-950, #2e1065) 0%,
+        var(--primary-900, #4c1d95) 55%,
+        var(--primary-950, #2e1065) 100%
+    );
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.dark .fi-grouped-requests .fi-ta-group-header .fi-ta-group-heading {
+    color: var(--primary-100, #ede9fe);
+}

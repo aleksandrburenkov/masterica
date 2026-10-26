@@ -345,4 +345,64 @@ class BookingTest extends TestCase
         $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
         $this->assertNull(BookingResource::getNavigationBadge());
     }
+
+    public function test_admin_bookings_are_grouped_by_masterclass_and_ordered_by_session_date(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+
+        $earlier = WorkshopSession::create([
+            'masterclass_id' => Masterclass::query()->where('slug', 'macrame')->firstOrFail()->id,
+            'starts_at' => now()->addDays(2)->setTime(12, 0),
+            'timezone' => 'Europe/Moscow',
+            'capacity' => 8,
+            'location_name' => 'Студия',
+            'address' => 'Брянск',
+            'status' => 'scheduled',
+            'is_published' => true,
+        ]);
+
+        $later = WorkshopSession::create([
+            'masterclass_id' => Masterclass::query()->where('slug', 'brooch')->firstOrFail()->id,
+            'starts_at' => now()->addDays(10)->setTime(15, 0),
+            'timezone' => 'Europe/Moscow',
+            'capacity' => 8,
+            'location_name' => 'Студия',
+            'address' => 'Брянск',
+            'status' => 'scheduled',
+            'is_published' => true,
+        ]);
+
+        $this->makeBooking($later, 'BK-LATER-0001');
+        $this->makeBooking($earlier, 'BK-EARLIER-0001');
+
+        $html = $this->actingAs($owner)->get('/admin/bookings')
+            ->assertOk()
+            ->assertSee('fi-grouped-requests', false)
+            ->getContent();
+
+        $earlierTitle = $earlier->masterclass->title.' — '.$earlier->starts_at->copy()->setTimezone($earlier->timezone)->translatedFormat('d.m.Y H:i');
+        $laterTitle = $later->masterclass->title.' — '.$later->starts_at->copy()->setTimezone($later->timezone)->translatedFormat('d.m.Y H:i');
+
+        $earlierPosition = strpos($html, $earlierTitle);
+        $laterPosition = strpos($html, $laterTitle);
+
+        $this->assertNotFalse($earlierPosition, 'Блок ближайшего мастер-класса не найден.');
+        $this->assertNotFalse($laterPosition, 'Блок отдалённого мастер-класса не найден.');
+        $this->assertLessThan($laterPosition, $earlierPosition, 'Ближайший по дате блок должен находиться выше.');
+    }
+
+    private function makeBooking(WorkshopSession $session, string $number): Booking
+    {
+        return Booking::create([
+            'number' => $number,
+            'workshop_session_id' => $session->id,
+            'status' => BookingStatus::New,
+            'participants_count' => 1,
+            'contact_name' => 'Заявитель',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => strtolower($number).'@example.com',
+            'unit_price_cents' => 100,
+            'total_cents' => 100,
+        ]);
+    }
 }
