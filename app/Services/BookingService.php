@@ -9,7 +9,6 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\WorkshopSession;
 use App\Support\NumberGenerator;
-use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,13 +20,15 @@ class BookingService
     ) {}
 
     /**
-     * Atomically reserve a seat and confirm a local booking.
+     * Atomically reserve a seat and register a new local booking.
      *
-     * A null user means a guest booking made without an account: contact
-     * details are stored on the booking itself. The session row is locked for
-     * the duration of the transaction so two concurrent requests for the last
-     * seat cannot both succeed. Server-side data (price, capacity,
-     * publication) is always re-read and re-checked.
+     * The request arrives with the «Новая» status: the administrator reviews
+     * and confirms it later in the panel. A null user means a guest booking
+     * made without an account: contact details are stored on the booking
+     * itself. The session row is locked for the duration of the transaction so
+     * two concurrent requests for the last seat cannot both succeed.
+     * Server-side data (price, capacity, publication) is always re-read and
+     * re-checked.
      */
     public function create(?User $user, WorkshopSession $session, array $data): Booking
     {
@@ -58,11 +59,10 @@ class BookingService
             }
 
             $unit = $locked->priceCents();
-            $holdMinutes = Settings::int('rules.hold_minutes', 15);
 
             $attributes = [
                 'number' => NumberGenerator::booking(),
-                'status' => BookingStatus::Held,
+                'status' => BookingStatus::New,
                 'payment_status' => PaymentStatus::Unpaid,
                 'participants_count' => $participants,
                 'contact_name' => $data['contact_name'],
@@ -72,7 +72,7 @@ class BookingService
                 'unit_price_cents' => $unit,
                 'total_cents' => $unit * $participants,
                 'currency' => $locked->masterclass->currency ?? 'RUB',
-                'hold_expires_at' => now()->addMinutes($holdMinutes),
+                'hold_expires_at' => null,
                 'confirmed_at' => null,
                 'attended_at' => null,
                 'canceled_at' => null,
@@ -103,9 +103,10 @@ class BookingService
                 ]);
             }
 
-            // Local flow: the booking is confirmed immediately, payment is
-            // collected at the studio. No real charge is performed.
-            $this->confirm($booking, 'Подтверждение записи (оплата в студии)');
+            // Заявка поступает в админку со статусом «Новая». Подтверждение и
+            // приём оплаты выполняет сотрудник студии; пользователь получает
+            // уведомление о принятой записи (текст уведомления не меняется).
+            $this->notifySubmission($booking);
 
             return $booking->refresh();
         });
@@ -122,13 +123,26 @@ class BookingService
         $this->audit->log($booking->user, 'booking.confirmed', $booking, $reason, [
             'status' => BookingStatus::Confirmed->value,
         ]);
+
+        return $booking;
+    }
+
+    /**
+     * Registration side effects for a freshly submitted request: an audit
+     * entry and the user notification. The notification text is intentionally
+     * unchanged from the previous auto-confirmation flow.
+     */
+    private function notifySubmission(Booking $booking): void
+    {
+        $this->audit->log($booking->user, 'booking.created', $booking, 'Заявка на мастер-класс', [
+            'status' => BookingStatus::New->value,
+        ]);
+
         $this->notifications->notify(
             $booking->user,
             'Запись подтверждена',
             'Запись '.$booking->number.' подтверждена. Оплата — в студии.',
         );
-
-        return $booking;
     }
 
     public function cancel(Booking $booking, ?string $reason = null): Booking
@@ -186,6 +200,7 @@ class BookingService
         return Booking::query()
             ->where('workshop_session_id', $session->id)
             ->whereIn('status', [
+                BookingStatus::New->value,
                 BookingStatus::Held->value,
                 BookingStatus::PendingPayment->value,
                 BookingStatus::Confirmed->value,
@@ -205,6 +220,7 @@ class BookingService
             ->where('workshop_session_id', $session->id)
             ->where(function ($q) {
                 $q->whereIn('status', [
+                    BookingStatus::New->value,
                     BookingStatus::PendingPayment->value,
                     BookingStatus::Confirmed->value,
                     BookingStatus::Attended->value,

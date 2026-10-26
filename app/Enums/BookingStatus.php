@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum BookingStatus: string
 {
+    case New = 'new';
     case Held = 'held';
     case PendingPayment = 'pending_payment';
     case Confirmed = 'confirmed';
@@ -15,6 +16,7 @@ enum BookingStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::New => 'Новая',
             self::Held => 'Место удерживается',
             self::PendingPayment => 'Ожидает оплаты',
             self::Confirmed => 'Подтверждена',
@@ -27,12 +29,12 @@ enum BookingStatus: string
 
     public function isActive(): bool
     {
-        return in_array($this, [self::Held, self::PendingPayment, self::Confirmed], true);
+        return in_array($this, [self::New, self::Held, self::PendingPayment, self::Confirmed], true);
     }
 
     /** Statuses that still occupy a seat in a session. */
     public function occupiesSeat(): bool
     {
-        return in_array($this, [self::Held, self::PendingPayment, self::Confirmed, self::Attended], true);
+        return in_array($this, [self::New, self::Held, self::PendingPayment, self::Confirmed, self::Attended], true);
     }
 }

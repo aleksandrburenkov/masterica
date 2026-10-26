@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
 use App\Enums\UserRole;
+use App\Filament\Resources\Bookings\BookingResource;
 use App\Models\Booking;
 use App\Models\Masterclass;
 use App\Models\User;
@@ -91,7 +92,7 @@ class BookingTest extends TestCase
 
         $booking = Booking::firstOrFail();
         $this->assertNull($booking->user_id);
-        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(BookingStatus::New, $booking->status);
         $this->assertSame('Взрослый', $booking->contact_name);
         $this->assertSame('adult@example.com', $booking->contact_email);
         $this->assertSame(2, $booking->participants_count);
@@ -108,7 +109,7 @@ class BookingTest extends TestCase
 
         $booking = Booking::firstOrFail();
         $this->assertNull($booking->user_id);
-        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(BookingStatus::New, $booking->status);
         $this->assertSame(2, $booking->participants_count);
     }
 
@@ -174,7 +175,7 @@ class BookingTest extends TestCase
             ->assertSee('maria@example.com');
     }
 
-    public function test_authenticated_user_creates_confirmed_booking(): void
+    public function test_authenticated_user_creates_new_booking(): void
     {
         $user = User::factory()->create(['role' => UserRole::Client]);
         $session = $this->makeSession();
@@ -191,7 +192,7 @@ class BookingTest extends TestCase
             ->assertSee('подтверждена', false);
 
         $booking = Booking::firstOrFail();
-        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(BookingStatus::New, $booking->status);
         $this->assertSame('unpaid', $booking->payment_status->value);
         $this->assertSame($user->id, $booking->user_id);
         $this->assertSame(2, $booking->participants_count);
@@ -210,7 +211,7 @@ class BookingTest extends TestCase
 
         $booking = Booking::firstOrFail();
         $this->assertSame($user->id, $booking->user_id);
-        $this->assertSame(BookingStatus::Confirmed, $booking->status);
+        $this->assertSame(BookingStatus::New, $booking->status);
         $this->assertSame(2, $booking->participants_count);
     }
 
@@ -289,7 +290,7 @@ class BookingTest extends TestCase
             ->assertRedirect(route('masterclasses.show', 'basket'));
 
         $this->assertSame(1, Booking::count());
-        $this->assertSame(BookingStatus::Confirmed, Booking::first()->status);
+        $this->assertSame(BookingStatus::New, Booking::first()->status);
         $this->assertNull(Booking::first()->canceled_at);
     }
 
@@ -317,5 +318,31 @@ class BookingTest extends TestCase
         $service->expireStaleHolds();
 
         $this->assertSame(BookingStatus::Expired, $booking->fresh()->status);
+    }
+
+    public function test_new_booking_is_marked_new_and_counted_as_unread_in_admin(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', 'basket'), $this->payload($session))
+            ->assertRedirect(route('masterclasses.show', 'basket'));
+
+        $this->assertSame(BookingStatus::New, Booking::firstOrFail()->status);
+        $this->assertSame('1', BookingResource::getNavigationBadge());
+    }
+
+    public function test_admin_confirmation_clears_the_unread_booking_badge(): void
+    {
+        $session = $this->makeSession();
+
+        $this->post(route('bookings.store', 'basket'), $this->payload($session));
+        $booking = Booking::firstOrFail();
+
+        $this->assertSame('1', BookingResource::getNavigationBadge());
+
+        app(BookingService::class)->confirm($booking, 'Проверка');
+
+        $this->assertSame(BookingStatus::Confirmed, $booking->fresh()->status);
+        $this->assertNull(BookingResource::getNavigationBadge());
     }
 }

@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Filament\Resources\Bookings\BookingResource;
+use App\Filament\Resources\Bookings\Pages\EditBooking;
 use App\Filament\Resources\ContactRequests\ContactRequestResource;
 use App\Filament\Resources\ContactRequests\Pages\CreateContactRequest;
 use App\Filament\Resources\Masterclasses\MasterclassResource;
@@ -44,6 +47,22 @@ class LeadFormsTest extends TestCase
             'status' => 'scheduled',
             'is_published' => true,
         ]);
+    }
+
+    private function makeBooking(WorkshopSession $session, array $attributes = []): Booking
+    {
+        return Booking::create(array_merge([
+            'number' => 'BK-'.uniqid(),
+            'workshop_session_id' => $session->id,
+            'status' => BookingStatus::Held,
+            'payment_status' => PaymentStatus::Unpaid,
+            'participants_count' => 1,
+            'contact_name' => 'Тест',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'booking-'.uniqid().'@example.com',
+            'unit_price_cents' => 100,
+            'total_cents' => 100,
+        ], $attributes));
     }
 
     public function test_footer_form_creates_booking_not_outreach_request(): void
@@ -433,5 +452,50 @@ class LeadFormsTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertStringStartsWith('CT-', ContactRequest::firstOrFail()->number);
+    }
+
+    public function test_booking_badge_counts_unprocessed_bookings(): void
+    {
+        $session = $this->makeSession();
+
+        $this->assertNull(BookingResource::getNavigationBadge());
+
+        $this->makeBooking($session, ['number' => 'BK-NEW', 'status' => BookingStatus::New]);
+        $this->makeBooking($session, ['number' => 'BK-HELD', 'status' => BookingStatus::Held]);
+        $this->makeBooking($session, ['number' => 'BK-PENDING', 'status' => BookingStatus::PendingPayment]);
+        $this->makeBooking($session, ['number' => 'BK-CONFIRMED', 'status' => BookingStatus::Confirmed]);
+
+        $this->assertSame('3', BookingResource::getNavigationBadge());
+    }
+
+    public function test_booking_badge_disappears_when_booking_is_processed(): void
+    {
+        $session = $this->makeSession();
+        $booking = $this->makeBooking($session, ['status' => BookingStatus::Held]);
+
+        $this->assertSame('1', BookingResource::getNavigationBadge());
+
+        $booking->update(['status' => BookingStatus::Confirmed]);
+
+        $this->assertNull(BookingResource::getNavigationBadge());
+    }
+
+    public function test_saving_a_booking_status_change_dispatches_sidebar_refresh(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Owner]);
+        $this->actingAs($owner);
+
+        $session = $this->makeSession();
+        $booking = $this->makeBooking($session, ['status' => BookingStatus::Held]);
+
+        $this->assertSame('1', BookingResource::getNavigationBadge());
+
+        Livewire::test(EditBooking::class, ['record' => $booking->getRouteKey()])
+            ->fillForm(['status' => BookingStatus::Confirmed->value])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-sidebar');
+
+        $this->assertNull(BookingResource::getNavigationBadge());
     }
 }

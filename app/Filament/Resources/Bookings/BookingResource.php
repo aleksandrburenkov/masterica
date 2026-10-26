@@ -49,6 +49,7 @@ class BookingResource extends Resource
     public static function getUnreadBadgeQuery(): Builder
     {
         return static::getEloquentQuery()->whereIn('status', [
+            BookingStatus::New->value,
             BookingStatus::Held->value,
             BookingStatus::PendingPayment->value,
         ]);

@@ -39,7 +39,7 @@ class BookingsTable
                     }),
                 TextColumn::make('session.masterclass.title')->label('Мастер-класс')->wrap(),
                 TextColumn::make('session.starts_at')->label('Сеанс')->dateTime('d.m.Y H:i')->timezone('Europe/Moscow')->sortable(),
-                TextColumn::make('status')->label('Запись')->badge()->formatStateUsing(fn ($state) => $state->label()),
+                TextColumn::make('status')->label('Статус')->badge()->formatStateUsing(fn ($state) => $state->label()),
                 TextColumn::make('payment_status')->label('Оплата')->badge()->formatStateUsing(fn ($state) => $state->label()),
                 TextColumn::make('participants_count')->label('Чел.'),
                 TextColumn::make('total_cents')->label('Сумма')->money('RUB', divideBy: 100),
@@ -55,7 +55,7 @@ class BookingsTable
                     ->label('Подтвердить')
                     ->icon('heroicon-o-check')
                     ->color('success')
-                    ->visible(fn (Booking $record) => $record->status === BookingStatus::Held || $record->status === BookingStatus::PendingPayment)
+                    ->visible(fn (Booking $record) => in_array($record->status, [BookingStatus::New, BookingStatus::Held, BookingStatus::PendingPayment], true))
                     ->action(fn (Booking $record) => app(BookingService::class)->confirm($record, 'Подтверждено администратором')),
                 Action::make('attend')
                     ->label('Посещена')

@@ -20,7 +20,7 @@ class BookingForm
                 TextInput::make('number')->label('Номер')->disabled()->dehydrated(),
                 Select::make('user_id')->label('Пользователь')->relationship('user', 'email')->searchable()->preload()->nullable()->placeholder('Гость (без аккаунта)'),
                 Select::make('workshop_session_id')->label('Сеанс')->relationship('session', 'id')->getOptionLabelFromRecordUsing(fn ($record) => $record->masterclass->title.' — '.$record->starts_at->format('d.m.Y H:i'))->searchable()->preload()->required(),
-                Select::make('status')->label('Статус записи')->options(self::statusOptions())->required(),
+                Select::make('status')->label('Статус')->options(self::statusOptions())->required()->default(BookingStatus::New->value),
                 Select::make('payment_status')->label('Статус оплаты')->options(self::paymentOptions())->required(),
                 TextInput::make('participants_count')->label('Участников')->numeric()->minValue(1)->required(),
                 TextInput::make('child_age')->label('Возраст ребёнка')->numeric(),

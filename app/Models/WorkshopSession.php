@@ -82,6 +82,7 @@ class WorkshopSession extends Model
     private function occupyingStatuses(): array
     {
         return [
+            BookingStatus::New->value,
             BookingStatus::Held->value,
             BookingStatus::PendingPayment->value,
             BookingStatus::Confirmed->value,

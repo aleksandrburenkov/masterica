@@ -26,7 +26,7 @@ class AccountController extends Controller
         $user = $request->user();
 
         $upcoming = $user->bookings()
-            ->whereIn('status', [BookingStatus::Confirmed->value, BookingStatus::PendingPayment->value])
+            ->whereIn('status', [BookingStatus::New->value, BookingStatus::Confirmed->value, BookingStatus::PendingPayment->value])
             ->whereHas('session', fn ($q) => $q->where('starts_at', '>', now()))
             ->with('session.masterclass')
             ->get()
