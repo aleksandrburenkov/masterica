@@ -2,20 +2,25 @@
 
 namespace App\Filament\Resources\ContactRequests;
 
+use App\Enums\OutreachStatus;
 use App\Filament\Resources\ContactRequests\Pages\CreateContactRequest;
 use App\Filament\Resources\ContactRequests\Pages\EditContactRequest;
 use App\Filament\Resources\ContactRequests\Pages\ListContactRequests;
 use App\Filament\Resources\ContactRequests\Schemas\ContactRequestForm;
 use App\Filament\Resources\ContactRequests\Tables\ContactRequestsTable;
+use App\Filament\Support\Concerns\HasUnreadBadge;
 use App\Models\ContactRequest;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ContactRequestResource extends Resource
 {
+    use HasUnreadBadge;
+
     protected static ?string $model = ContactRequest::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
@@ -36,6 +41,11 @@ class ContactRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return ContactRequestsTable::configure($table);
+    }
+
+    public static function getUnreadBadgeQuery(): Builder
+    {
+        return static::getEloquentQuery()->where('status', OutreachStatus::New->value);
     }
 
     public static function getPages(): array

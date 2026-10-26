@@ -1,0 +1,36 @@
+/*
+ * Navigation unread indicators for the studio admin panel.
+ *
+ * Numeric badges on navigation items are rendered natively by Filament
+ * (getNavigationBadge()). Navigation groups have no native badge, so a compact
+ * marker is drawn on the group header whenever NavigationGroupIndicator marks
+ * the group as containing unread records.
+ */
+
+.fi-sidebar-group.fi-nav-group-has-new > .fi-sidebar-group-btn {
+    position: relative;
+}
+
+.fi-sidebar-group.fi-nav-group-has-new > .fi-sidebar-group-btn .fi-sidebar-group-label::after {
+    content: '';
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-inline-start: 0.4rem;
+    border-radius: 9999px;
+    background-color: var(--danger-500, #ef4444);
+    box-shadow: 0 0 0 2px var(--gray-50, #fff);
+    vertical-align: super;
+}
+
+/* The marker is a purely visual hint; the numeric total stays available for
+   assistive technology through the data attribute on the group. */
+.fi-sidebar-group.fi-nav-group-has-new > .fi-sidebar-group-btn .fi-sidebar-group-label {
+    position: relative;
+}
+
+@media (prefers-color-scheme: dark) {
+    .fi-sidebar-group.fi-nav-group-has-new > .fi-sidebar-group-btn .fi-sidebar-group-label::after {
+        box-shadow: 0 0 0 2px var(--gray-900, #111827);
+    }
+}

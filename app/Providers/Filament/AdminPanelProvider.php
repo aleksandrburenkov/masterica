@@ -2,12 +2,17 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\Bookings\BookingResource;
+use App\Filament\Resources\Orders\OrderResource;
+use App\Filament\Resources\OutreachRequests\OutreachRequestResource;
+use App\Filament\Support\NavigationGroupIndicator;
 use App\Filament\Widgets\StudioStats;
 use App\Filament\Widgets\UpcomingSessions;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -36,7 +41,22 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Violet,
             ])
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-calendar.css')).'">')
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-navigation-badges.css')).'">')
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
+            ->navigationGroups([
+                NavigationGroup::make('Блок курсы'),
+                NavigationGroup::make('Магазин')
+                    ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([
+                        OrderResource::class,
+                    ])),
+                NavigationGroup::make('Заявки')
+                    ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([
+                        BookingResource::class,
+                        OutreachRequestResource::class,
+                    ])),
+                NavigationGroup::make('Настройки'),
+                NavigationGroup::make('Правовые документы'),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
