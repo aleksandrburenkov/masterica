@@ -215,6 +215,158 @@ class LeadFormsTest extends TestCase
         $this->assertSame('vyezdnye-master-klassy', $request->source);
     }
 
+    public function test_masterclass_without_sessions_shows_request_input_on_index(): void
+    {
+        WorkshopSession::query()->delete();
+        $masterclass = Masterclass::query()->where('slug', 'basket')->firstOrFail();
+
+        $this->get(route('masterclasses.index', ['request' => $masterclass->slug]))
+            ->assertOk()
+            ->assertSee('name="request_masterclass"', false)
+            ->assertSee('Запрос-Корзина из бумажной лозы')
+            ->assertSee(route('bookings.request-store'), false);
+    }
+
+    public function test_index_ignores_request_mode_when_masterclass_has_sessions(): void
+    {
+        WorkshopSession::query()->delete();
+        $masterclass = Masterclass::query()->where('slug', 'basket')->firstOrFail();
+        $this->makeSession($masterclass);
+
+        $this->get(route('masterclasses.index', ['request' => $masterclass->slug]))
+            ->assertOk()
+            ->assertDontSee('name="request_masterclass"', false);
+    }
+
+    public function test_index_ignores_request_mode_for_unknown_slug(): void
+    {
+        $this->get(route('masterclasses.index', ['request' => 'no-such-masterclass']))
+            ->assertOk()
+            ->assertDontSee('name="request_masterclass"', false);
+    }
+
+    public function test_request_store_creates_contact_request_with_server_side_title(): void
+    {
+        WorkshopSession::query()->delete();
+        $masterclass = Masterclass::query()->where('slug', 'basket')->firstOrFail();
+
+        $this->postJson(route('bookings.request-store'), [
+            'request_masterclass' => $masterclass->slug,
+            'request_title' => 'Запрос-подмена <script>alert(1)</script>',
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+            'consent_data' => '1',
+            'source' => 'master-klassy',
+        ])
+            ->assertCreated()
+            ->assertJson(['message' => 'Ваш запрос принят и обрабатывается, ответ будет отправлен по Email']);
+
+        $request = ContactRequest::firstOrFail();
+
+        $this->assertSame('Запрос-Корзина из бумажной лозы', $request->message);
+        $this->assertSame('request@example.com', $request->contact_email);
+        $this->assertSame('master-klassy', $request->source);
+        $this->assertSame(1, ContactRequest::count());
+        $this->assertSame(0, Booking::count());
+    }
+
+    public function test_request_store_appends_comment_to_message(): void
+    {
+        WorkshopSession::query()->delete();
+
+        $this->postJson(route('bookings.request-store'), [
+            'request_masterclass' => 'basket',
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+            'notes' => 'Интересует суббота',
+            'consent_data' => '1',
+        ])->assertCreated();
+
+        $this->assertSame(
+            "Запрос-Корзина из бумажной лозы\n\nКомментарий: Интересует суббота",
+            ContactRequest::firstOrFail()->message,
+        );
+    }
+
+    public function test_request_label_strips_control_characters_and_blank_titles(): void
+    {
+        $injected = new Masterclass(['title' => "Корзина\r\nBcc: evil@example.com"]);
+        $this->assertSame('Запрос-Корзина Bcc: evil@example.com', $injected->requestLabel());
+
+        $blank = new Masterclass(['title' => '   ']);
+        $this->assertSame('Запрос', $blank->requestLabel());
+    }
+
+    public function test_request_store_redirects_with_success_message(): void
+    {
+        WorkshopSession::query()->delete();
+
+        $this->post(route('bookings.request-store'), [
+            'request_masterclass' => 'basket',
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+            'consent_data' => '1',
+            'source' => 'master-klassy',
+        ])
+            ->assertRedirect(url('master-klassy'))
+            ->assertSessionHas('success', 'Ваш запрос принят и обрабатывается, ответ будет отправлен по Email');
+
+        $this->assertSame(1, ContactRequest::count());
+    }
+
+    public function test_request_store_rejects_masterclass_with_active_sessions(): void
+    {
+        WorkshopSession::query()->delete();
+        $masterclass = Masterclass::query()->where('slug', 'basket')->firstOrFail();
+        $this->makeSession($masterclass);
+
+        $this->postJson(route('bookings.request-store'), [
+            'request_masterclass' => $masterclass->slug,
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+            'consent_data' => '1',
+        ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('request_masterclass');
+
+        $this->assertSame(0, ContactRequest::count());
+    }
+
+    public function test_request_store_rejects_unknown_slug(): void
+    {
+        $this->postJson(route('bookings.request-store'), [
+            'request_masterclass' => 'no-such-masterclass',
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+            'consent_data' => '1',
+        ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('request_masterclass');
+
+        $this->assertSame(0, ContactRequest::count());
+    }
+
+    public function test_request_store_requires_data_consent(): void
+    {
+        WorkshopSession::query()->delete();
+
+        $this->postJson(route('bookings.request-store'), [
+            'request_masterclass' => 'basket',
+            'contact_name' => 'Гость',
+            'contact_phone' => '+7 900 000-00-00',
+            'contact_email' => 'request@example.com',
+        ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('consent_data');
+
+        $this->assertSame(0, ContactRequest::count());
+    }
+
     public function test_lead_forms_are_visible_in_their_admin_sections(): void
     {
         $owner = User::factory()->create(['role' => UserRole::Owner]);

@@ -56,6 +56,32 @@ class Masterclass extends Model
         return $query->where('is_published', true);
     }
 
+    /**
+     * Есть ли у мастер-класса опубликованные будущие сеансы. Условие совпадает
+     * с выборкой сеансов на странице мастер-класса, поэтому кнопка «Оставить
+     * запрос» и режим запроса в форме согласованы.
+     */
+    public function hasActiveSessions(): bool
+    {
+        return $this->sessions()
+            ->where('is_published', true)
+            ->where('starts_at', '>', now())
+            ->exists();
+    }
+
+    /**
+     * Подпись запроса для мастер-класса без активных сеансов. Название берётся
+     * из базы (не из запроса клиента), управляющие символы и переводы строк
+     * удаляются, чтобы значение нельзя было использовать для инъекций.
+     */
+    public function requestLabel(): string
+    {
+        $title = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', (string) $this->title) ?? '';
+        $title = trim(preg_replace('/\s+/u', ' ', $title) ?? '');
+
+        return $title !== '' ? 'Запрос-'.$title : 'Запрос';
+    }
+
     public function priceRub(): float
     {
         return $this->price_cents / 100;

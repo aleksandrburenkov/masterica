@@ -50,6 +50,10 @@ Route::post('/vyezdnye-master-klassy', [OutreachController::class, 'store'])
 // Нижняя форма «Оставить заявку» создаёт запись на выбранный сеанс.
 Route::post('/zayavka-na-master-klass', [BookingController::class, 'storeQuick'])
     ->middleware('throttle:10,1')->name('bookings.quick-store');
+// Запрос на мастер-класс без активных сеансов: сеанс не выбирается, заявка
+// сохраняется как обращение, мастер-класс определяется по слагу на сервере.
+Route::post('/zapros-na-master-klass', [BookingController::class, 'storeRequest'])
+    ->middleware('throttle:10,1')->name('bookings.request-store');
 Route::post('/kontakty', [ContactController::class, 'store'])
     ->middleware('throttle:10,1')->name('contacts.store');
 

@@ -8,6 +8,13 @@
         ->get()
         ->filter(fn ($session) => $session->seatsLeft() > 0)
         ->take(12);
+
+    // Режим запроса включается только когда контроллер подтвердил, что
+    // мастер-класс опубликован и не имеет активных сеансов.
+    $requestMasterclass = ($requestMasterclass ?? null) instanceof \App\Models\Masterclass
+        ? $requestMasterclass
+        : null;
+    $requestMode = $requestMasterclass !== null;
 @endphp
 
 <section class="section" id="request">
@@ -32,7 +39,9 @@
                 <h3 style="margin-top:12px">Оставить заявку</h3>
                 <p class="lead-muted" style="font-size:14px">Контакт взрослого участника.</p>
 
-                <form action="{{ route('bookings.quick-store') }}" method="post" data-ajax-form>
+                <form action="{{ $requestMode ? route('bookings.request-store') : route('bookings.quick-store') }}"
+                    method="post" data-quick-action="{{ route('bookings.quick-store') }}"
+                    @if ($requestMode) data-request-form data-mode="request" @else data-ajax-form @endif>
                     @csrf
                     <input type="hidden" name="source" value="{{ request()->path() }}">
 
@@ -55,9 +64,19 @@
                         </div>
                     </div>
 
-                    <div class="field">
+                    @if ($requestMode)
+                        <div class="field" data-request-field>
+                            <label for="req-request">Мастер-класс</label>
+                            <input id="req-request" class="input @error('request_masterclass') is-invalid @enderror" type="text" name="request_title" value="{{ $requestMasterclass->requestLabel() }}" required>
+                            <input type="hidden" name="request_masterclass" value="{{ $requestMasterclass->slug }}">
+                            @error('request_masterclass')<div class="error-text">{{ $message }}</div>@enderror
+                            <p class="form-note" style="margin-top:8px">Активных сеансов пока нет. Отправьте запрос — студия сообщит о новых датах.</p>
+                        </div>
+                    @endif
+
+                    <div class="field" @if ($requestMode) hidden @endif data-select-field>
                         <label for="req-session">Мастер-класс и дата</label>
-                        <select id="req-session" class="select @error('workshop_session_id') is-invalid @enderror" name="workshop_session_id" required @disabled($ctaSessions->isEmpty())>
+                        <select id="req-session" class="select @error('workshop_session_id') is-invalid @enderror" name="workshop_session_id" required @disabled($requestMode || $ctaSessions->isEmpty())>
                             <option value="">Выберите мастер-класс и удобную дату</option>
                             @foreach ($ctaSessions as $session)
                                 <option value="{{ $session->id }}" @selected((string) old('workshop_session_id') === (string) $session->id)>
@@ -97,7 +116,7 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn--block" @disabled($ctaSessions->isEmpty())>Записаться</button>
+                    <button type="submit" class="btn btn--block" @disabled(! $requestMode && $ctaSessions->isEmpty())>Записаться</button>
                     <p class="form-note" style="margin-top:14px">Заявка не является заключённым договором до её подтверждения студией. Порядок записи и оплаты — в <a href="{{ route('legal.show', legal('booking_rules', 'slug', 'pravila-zapisi-i-zakaza')) }}" target="_blank" rel="noopener">Правилах записи</a>.</p>
                 </form>
             </div>

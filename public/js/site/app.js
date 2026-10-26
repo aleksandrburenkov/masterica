@@ -19,6 +19,7 @@
         initCheckoutDelivery();
         initOutreachCalculator();
         initOutreachForm();
+        initMasterclassRequestForm();
         initAjaxForms();
         initFlashToasts();
         initStickyHeaderShadow();
@@ -795,6 +796,100 @@
         });
     }
 
+    /* --- Запрос на мастер-класс без активных сеансов: после отправки поле
+       очищается и заменяется на обычный выбор активного сеанса. Форма остаётся
+       на AJAX-отправке и после переключения в режим выбора сеанса. --- */
+    function initMasterclassRequestForm() {
+        var forms = document.querySelectorAll("form[data-request-form]");
+        if (!forms.length || !window.fetch || !window.FormData) return;
+
+        forms.forEach(function (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                if (form.checkValidity && !form.checkValidity()) {
+                    if (form.reportValidity) form.reportValidity();
+                    return;
+                }
+
+                var requestMode = form.getAttribute("data-mode") !== "select";
+                var switched = false;
+
+                submitFormWithoutReload(form, {
+                    successMessage: requestMode
+                        ? "Ваш запрос принят и обрабатывается, ответ будет отправлен по Email"
+                        : "Готово.",
+                    errorMessage: requestMode
+                        ? "Не удалось отправить запрос. Попробуйте ещё раз."
+                        : "Не удалось отправить форму. Попробуйте ещё раз.",
+                    networkErrorMessage: requestMode
+                        ? "Не удалось отправить запрос. Проверьте соединение и попробуйте ещё раз."
+                        : "Не удалось отправить форму. Проверьте соединение и попробуйте ещё раз.",
+                    afterSuccess: function (submittedForm) {
+                        if (!requestMode) return;
+                        switched = true;
+                        switchRequestToSelect(submittedForm);
+                    },
+                    finalize: function (submittedForm) {
+                        if (!switched) return;
+
+                        var select = submittedForm.querySelector(
+                            "[data-select-field] select",
+                        );
+                        var button = submittedForm.querySelector(
+                            'button[type="submit"]',
+                        );
+
+                        if (button && select) button.disabled = select.disabled;
+                    },
+                });
+            });
+        });
+    }
+
+    function switchRequestToSelect(form) {
+        var requestField = form.querySelector("[data-request-field]");
+        if (requestField) {
+            requestField.hidden = true;
+
+            var title = requestField.querySelector(
+                'input[name="request_title"]',
+            );
+            if (title) title.value = "";
+
+            // Скрытые поля не должны участвовать в проверке и отправке формы:
+            // обязательное невидимое поле браузер не может сфокусировать и
+            // блокирует отправку ошибкой «not focusable».
+            requestField
+                .querySelectorAll("input, select, textarea")
+                .forEach(function (control) {
+                    control.required = false;
+                    control.disabled = true;
+                });
+        }
+
+        var selectField = form.querySelector("[data-select-field]");
+        if (selectField) selectField.hidden = false;
+
+        var select = selectField ? selectField.querySelector("select") : null;
+        if (select) {
+            var hasOptions = Array.prototype.some.call(
+                select.options,
+                function (option) {
+                    return option.value !== "";
+                },
+            );
+            select.disabled = !hasOptions;
+            select.required = hasOptions;
+            if (hasOptions) select.value = "";
+        }
+
+        var quick = form.getAttribute("data-quick-action");
+        if (quick) form.setAttribute("action", quick);
+
+        form.setAttribute("data-mode", "select");
+    }
+
     /* --- Общая AJAX-отправка форм: страница не перезагружается и не прокручивается --- */
     function initAjaxForms() {
         var forms = document.querySelectorAll("form[data-ajax-form]");
@@ -893,6 +988,10 @@
                 if (button) {
                     button.disabled = false;
                     button.textContent = originalText;
+                }
+
+                if (typeof options.finalize === "function") {
+                    options.finalize(form);
                 }
             });
     }
