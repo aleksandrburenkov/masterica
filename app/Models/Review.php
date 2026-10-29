@@ -7,6 +7,7 @@ use App\Enums\ReviewType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'user_id', 'masterclass_id', 'type', 'rating', 'body', 'video_path',
@@ -30,9 +31,24 @@ class Review extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        // При удалении отзыва удаляем и связанный видеофайл с диска.
+        // Связь удаляется явно, чтобы сработала очистка файлов (FK-каскад
+        // в базе события модели не вызывает).
+        static::deleting(function (Review $review): void {
+            $review->video()->first()?->delete();
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function video(): HasOne
+    {
+        return $this->hasOne(ReviewVideo::class);
     }
 
     public function masterclass(): BelongsTo

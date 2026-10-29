@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Reviews\Schemas;
 
 use App\Enums\ReviewStatus;
 use App\Enums\ReviewType;
+use App\Models\Review;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,7 +24,14 @@ class ReviewForm
                 Select::make('type')->label('Тип')->options(collect(ReviewType::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all())->required(),
                 Select::make('rating')->label('Оценка')->options([5 => '5', 4 => '4', 3 => '3', 2 => '2', 1 => '1']),
                 Textarea::make('body')->label('Текст')->rows(5)->required()->columnSpanFull(),
-                TextInput::make('video_path')->label('Ссылка на видео')->columnSpanFull(),
+                TextInput::make('video_path')->label('Ссылка на видео (внешняя)')->columnSpanFull(),
+                Placeholder::make('review_video_info')
+                    ->label('Загруженное видео')
+                    ->columnSpanFull()
+                    ->visible(fn (?Review $record): bool => $record?->video !== null)
+                    ->content(fn (?Review $record) => $record?->video
+                        ? view('filament.review-video-info', ['video' => $record->video])
+                        : null),
                 TextInput::make('city')->label('Город'),
                 Select::make('status')->label('Статус')->options(collect(ReviewStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all())->required(),
                 TextInput::make('source')->label('Источник'),

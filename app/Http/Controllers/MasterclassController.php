@@ -80,7 +80,7 @@ class MasterclassController extends Controller
             ->take(3)
             ->get();
 
-        $reviews = $masterclass->reviews()->published()->with('user')->orderByDesc('published_at')->take(3)->get();
+        $reviews = $masterclass->reviews()->published()->with(['user', 'video'])->orderByDesc('published_at')->take(3)->get();
 
         return view('pages.masterclass-detail', compact('masterclass', 'sessions', 'related', 'reviews'));
     }

@@ -77,6 +77,9 @@ Route::get('/kursy/{course:slug}', [CourseController::class, 'show'])->name('cou
 
 // Отзывы
 Route::get('/otzyvy', [ReviewController::class, 'index'])->name('reviews.index');
+// Видео и обложка отзыва отдаются только через серверную проверку прав.
+Route::get('/otzyvy/{review}/video', [ReviewController::class, 'video'])->name('reviews.video');
+Route::get('/otzyvy/{review}/poster', [ReviewController::class, 'poster'])->name('reviews.poster');
 
 // Материалы
 Route::get('/materialy', [PageController::class, 'guides'])->name('guides.index');

@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Видеоотзыв — зона загрузки файла (drag-and-drop + выбор по клику)
+   ========================================================================== */
+
+.video-drop {
+    position: relative;
+    border: 1.5px dashed var(--violet);
+    border-radius: var(--radius-sm);
+    background: #f7f8ff;
+    transition:
+        border-color var(--speed) var(--ease),
+        background var(--speed) var(--ease),
+        box-shadow var(--speed) var(--ease);
+}
+.video-drop.is-dragover {
+    border-color: var(--accent);
+    background: #f0f2ff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+}
+.video-drop.is-invalid {
+    border-color: #e88;
+}
+.video-drop__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 26px 18px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: color var(--speed) var(--ease);
+}
+.video-drop__body:hover {
+    color: var(--accent);
+}
+.video-drop__body:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+.video-drop__icon {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+}
+.video-drop__icon svg {
+    width: 24px;
+    height: 24px;
+}
+.video-drop__title {
+    font-weight: 500;
+    font-size: 15px;
+}
+.video-drop__link {
+    color: var(--accent);
+    text-decoration: underline;
+}
+.video-drop__hint {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.video-drop__error {
+    margin: 0 16px 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #fdecec;
+    border: 1px solid #f4c3c3;
+    color: #a12b2b;
+    font-size: 13px;
+}
+
+.video-drop__preview {
+    padding: 16px;
+}
+.video-drop__player {
+    width: 100%;
+    max-height: 320px;
+    border-radius: var(--radius-sm);
+    background: #10142e;
+    display: block;
+}
+.video-drop__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+}
+.video-drop__name {
+    font-size: 14px;
+    color: var(--ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.video-drop__remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--line-2);
+    border-radius: 999px;
+    background: #fff;
+    color: #a12b2b;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+        border-color var(--speed) var(--ease),
+        background var(--speed) var(--ease);
+}
+.video-drop__remove:hover {
+    border-color: #e88;
+    background: #fdecec;
+}
+.video-drop__remove svg {
+    width: 16px;
+    height: 16px;
+}
+.video-drop.is-uploading .video-drop__body {
+    opacity: 0.6;
+    pointer-events: none;
+}

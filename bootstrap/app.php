@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ProcessReviewVideosCommand;
 use App\Exceptions\SlugMovedException;
 use App\Http\Middleware\NoStorePrivate;
 use Illuminate\Foundation\Application;
@@ -13,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        ProcessReviewVideosCommand::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'no-store' => NoStorePrivate::class,

@@ -8,6 +8,10 @@
     <x-breadcrumbs :items="[['label' => 'Отзывы']]" />
 @endsection
 
+@push('head')
+    <link rel="stylesheet" href="{{ asset('css/site/modules/review-video.css') }}">
+@endpush
+
 @section('content')
     <section class="hero">
         <div class="container">
@@ -44,14 +48,14 @@
             <div class="section-head"><h2>Оставить отзыв</h2><p>Текст или видео. Все отзывы проверяются модератором.</p></div>
 
             @auth
-                <form class="card" action="{{ route('reviews.store') }}" method="post" data-ajax-form>
+                <form class="card" action="{{ route('reviews.store') }}" method="post" enctype="multipart/form-data" data-ajax-form>
                     @csrf
                     <div class="grid grid-2" style="gap:14px">
                         <div class="field">
                             <label for="r-type">Тип отзыва</label>
                             <select id="r-type" class="select" name="type" required>
                                 <option value="text">Текстовый</option>
-                                <option value="video">Видео (ссылка)</option>
+                                <option value="video">Видео (файл или ссылка)</option>
                             </select>
                         </div>
                         <div class="field">
@@ -85,8 +89,36 @@
                         <textarea id="r-body" class="textarea @error('body') is-invalid @enderror" name="body" minlength="10" required>{{ old('body') }}</textarea>
                     </div>
                     <div class="field">
-                        <label for="r-video">Ссылка на видео (для видеоотзыва)</label>
+                        <label for="r-video-file">Видеоотзыв (видеофайл)</label>
+                        <div class="video-drop" data-video-drop
+                             data-video-max="{{ (int) config('video.max_size_kb', 204800) }}"
+                             data-video-accept="{{ implode(',', (array) config('video.allowed_extensions', [])) }}">
+                            <button type="button" class="video-drop__body" data-video-drop-body>
+                                <span class="video-drop__icon" aria-hidden="true"><x-ico name="video" /></span>
+                                <span class="video-drop__title">Перетащите видео сюда или <span class="video-drop__link">выберите файл</span></span>
+                                <span class="video-drop__hint">MP4, MOV, WebM, MKV, AVI · до {{ round((int) config('video.max_size_kb', 204800) / 1024) }} МБ</span>
+                            </button>
+                            <div class="video-drop__error" data-video-drop-error hidden></div>
+                            <div class="video-drop__preview" data-video-drop-preview hidden>
+                                <video class="video-drop__player" data-video-drop-player muted playsinline preload="metadata"></video>
+                                <div class="video-drop__meta">
+                                    <span class="video-drop__name" data-video-drop-name></span>
+                                    <button type="button" class="video-drop__remove" data-video-drop-remove>
+                                        <x-ico name="close" /> Удалить
+                                    </button>
+                                </div>
+                            </div>
+                            <input class="video-drop__input" type="file" id="r-video-file" name="video_file"
+                                   accept=".mp4,.mov,.m4v,.webm,.mkv,.avi,.ogv,video/*"
+                                   data-video-drop-input hidden>
+                        </div>
+                        <p class="hint">Файл проверяется на вирусы и вредоносные вложения, затем проходит модерацию. Длительность — до {{ intdiv((int) config('video.max_duration_seconds', 600), 60) }} мин.</p>
+                        @error('video_file')<div class="error-text">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="field">
+                        <label for="r-video">Или ссылка на видео</label>
                         <input id="r-video" class="input" type="url" name="video_url" value="{{ old('video_url') }}" placeholder="https://">
+                        @error('video_url')<div class="error-text">{{ $message }}</div>@enderror
                     </div>
                     <div class="field">
                         <label class="checkbox">
@@ -122,3 +154,7 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/site/modules/review-video-upload.js') }}" defer></script>
+@endpush

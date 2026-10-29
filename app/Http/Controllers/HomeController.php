@@ -30,7 +30,7 @@ class HomeController extends Controller
 
         $reviews = Review::query()
             ->published()
-            ->with('user')
+            ->with(['user', 'video'])
             ->orderByDesc('published_at')
             ->take(6)
             ->get();

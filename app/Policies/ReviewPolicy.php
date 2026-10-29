@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ReviewStatus;
 use App\Models\Review;
 use App\Models\User;
 
@@ -15,6 +16,19 @@ class ReviewPolicy
     public function view(User $user, Review $review): bool
     {
         return $user->isStaff() || $review->user_id === $user->id;
+    }
+
+    /**
+     * Доступ к видеофайлу отзыва. Опубликованное видео доступно публично,
+     * остальное — только автору и сотрудникам студии.
+     */
+    public function viewVideo(?User $user, Review $review): bool
+    {
+        if ($review->status === ReviewStatus::Approved) {
+            return true;
+        }
+
+        return $user !== null && ($user->isStaff() || $review->user_id === $user->id);
     }
 
     /** Only authenticated clients may submit a review. */

@@ -171,6 +171,48 @@
 .review-card__stars { color: #f0a020; letter-spacing: 2px; }
 .review-card .demo-tag { font-size: 11px; }
 .review-media { border-radius: var(--radius-sm); overflow: hidden; background: #eaeefb; aspect-ratio: 16/10; display: grid; place-items: center; }
+.review-card__video { position: relative; border-radius: var(--radius-sm); overflow: hidden; background: #10142e; aspect-ratio: 16/10; }
+.review-card__video-el { width: 100%; height: 100%; display: block; object-fit: cover; background: #10142e; }
+
+/* Обложка с кнопкой воспроизведения */
+.review-card__cover {
+    position: absolute; inset: 0; z-index: 1;
+    display: grid; place-items: center;
+    padding: 0; border: 0; cursor: pointer;
+    background-color: #1a2050; background-size: cover; background-position: center;
+    transition: opacity var(--speed) var(--ease), visibility var(--speed) var(--ease);
+}
+.review-card__cover::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(16, 20, 46, 0) 45%, rgba(16, 20, 46, 0.5));
+}
+.review-card__play {
+    position: relative; z-index: 1;
+    width: clamp(52px, 16%, 68px); aspect-ratio: 1;
+    display: grid; place-items: center;
+    border-radius: 50%; color: #fff;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 22px rgba(16, 20, 46, 0.4);
+    transition: transform var(--speed) var(--ease), background var(--speed) var(--ease);
+}
+.review-card__cover:hover .review-card__play { transform: scale(1.08); background: rgba(255, 255, 255, 0.3); }
+.review-card__play svg { width: 42%; height: 42%; }
+.review-card__cover.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* Тематический прелоадер: плетение лозы («Корни») */
+.review-preloader {
+    position: absolute; inset: 0; z-index: 2;
+    display: grid; place-items: center; align-content: center; gap: 12px;
+    color: #fff; background: linear-gradient(135deg, #1f2757, #3a2f7a);
+    transition: opacity 0.5s var(--ease, ease), visibility 0.5s var(--ease, ease);
+}
+.review-preloader[hidden] { display: none; }
+.review-preloader.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.review-preloader__loom { width: clamp(54px, 22%, 72px); aspect-ratio: 1; color: #cfe0ff; animation: review-loom-spin 1.5s linear infinite; }
+.review-preloader__loom svg { width: 100%; height: 100%; display: block; }
+.review-preloader__text { font-size: 13px; letter-spacing: 0.04em; color: #e7ecff; }
+@keyframes review-loom-spin { to { transform: rotate(360deg); } }
 
 /* --- Калькулятор --- */
 .calc {

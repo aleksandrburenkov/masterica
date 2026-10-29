@@ -20,6 +20,7 @@
         initOutreachCalculator();
         initOutreachForm();
         initMasterclassRequestForm();
+        initReviewVideo();
         initAjaxForms();
         initFlashToasts();
         initStickyHeaderShadow();
@@ -890,6 +891,94 @@
         form.setAttribute("data-mode", "select");
     }
 
+    /* --- Видеоотзывы: ленивая загрузка (preload="none"), тематический
+       прелоадер при старте и автозапуск после загрузки. Одновременно
+       проигрывается только один ролик. --- */
+    function initReviewVideo() {
+        var roots = document.querySelectorAll("[data-review-video]");
+        if (!roots.length) return;
+
+        function pauseOthers(current) {
+            document.querySelectorAll("[data-review-video] video").forEach(function (other) {
+                if (other !== current && !other.paused) other.pause();
+            });
+        }
+
+        roots.forEach(function (root) {
+            var player = root.querySelector("[data-review-player]");
+            if (!player) return;
+
+            var cover = root.querySelector("[data-review-cover]");
+            var preloader = root.querySelector("[data-review-preloader]");
+
+            player.addEventListener("play", function () {
+                pauseOthers(player);
+            });
+
+            function hidePreloader() {
+                if (!preloader || preloader.hidden) return;
+
+                preloader.classList.add("is-hidden");
+                window.setTimeout(function () {
+                    preloader.hidden = true;
+                }, 520);
+            }
+
+            function revealCover() {
+                if (cover) cover.classList.add("is-hidden");
+            }
+
+            var started = false;
+
+            function startPlayback() {
+                if (started) return;
+                started = true;
+
+                revealCover();
+
+                if (preloader) {
+                    preloader.hidden = false;
+                    preloader.classList.remove("is-hidden");
+                }
+
+                var resolved = false;
+                function ready() {
+                    if (resolved) return;
+                    resolved = true;
+
+                    ["canplaythrough", "canplay", "loadeddata", "playing"].forEach(function (eventName) {
+                        player.removeEventListener(eventName, ready);
+                    });
+
+                    hidePreloader();
+                }
+
+                ["canplaythrough", "canplay", "loadeddata", "playing"].forEach(function (eventName) {
+                    player.addEventListener(eventName, ready);
+                });
+
+                /* Страховка: не оставляем прелоадер навсегда, если браузер
+                   не сообщит о готовности. */
+                window.setTimeout(ready, 12000);
+
+                var attempt = player.play();
+                if (attempt && typeof attempt.catch === "function") {
+                    attempt.catch(function () {
+                        /* Автозапуск отклонён: пользователь запустит вручную
+                           через встроенные элементы управления. */
+                    });
+                }
+            }
+
+            if (cover) cover.addEventListener("click", startPlayback);
+
+            player.addEventListener("playing", function () {
+                revealCover();
+                hidePreloader();
+            });
+        });
+    }
+
     /* --- Общая AJAX-отправка форм: страница не перезагружается и не прокручивается --- */
     function initAjaxForms() {
         var forms = document.querySelectorAll("form[data-ajax-form]");
@@ -962,6 +1051,9 @@
                         "success",
                     );
                     form.reset();
+                    /* Программный сброс не вызывает событие reset: сообщаем
+                       виджетам (например, загрузке видео) очистить состояние. */
+                    form.dispatchEvent(new Event("form:reset"));
 
                     if (options.afterSuccess) {
                         options.afterSuccess(form);
