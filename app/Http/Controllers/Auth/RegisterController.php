@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\RedirectIntent;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,9 +13,9 @@ use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
-    public function show(): View
+    public function show(Request $request): View
     {
-        return view('auth.register');
+        return view('auth.register', ['intended' => RedirectIntent::explicit($request)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,7 +41,7 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('account.dashboard')
+        return redirect(RedirectIntent::resolve($request, route('account.dashboard')))
             ->with('success', 'Аккаунт создан. Добро пожаловать!');
     }
 }

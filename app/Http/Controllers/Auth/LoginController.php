@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\RedirectIntent;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class LoginController extends Controller
 {
     public function show(Request $request): View
     {
-        return view('auth.login', ['intended' => $request->query('redirect', $request->input('redirect'))]);
+        return view('auth.login', ['intended' => RedirectIntent::explicit($request)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,12 +46,7 @@ class LoginController extends Controller
         RateLimiter::clear($this->throttleKey($request));
         $request->session()->regenerate();
 
-        $redirect = $request->input('redirect');
-        if (is_string($redirect) && $redirect !== '' && preg_match('#^/(?!/)#', $redirect)) {
-            return redirect($redirect)->with('success', 'Вы вошли в личный кабинет.');
-        }
-
-        return redirect()->intended(route('account.dashboard'))
+        return redirect(RedirectIntent::resolve($request, route('account.dashboard')))
             ->with('success', 'Вы вошли в личный кабинет.');
     }
 

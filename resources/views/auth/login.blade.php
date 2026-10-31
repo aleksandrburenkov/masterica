@@ -26,7 +26,7 @@
                 <div class="card auth-card" data-reveal>
                     <div class="auth-tabs">
                         <a class="is-active" href="{{ route('login') }}">Войти</a>
-                        <a href="{{ route('register') }}">Создать аккаунт</a>
+                        <a href="{{ route('register', $intended ? ['redirect' => $intended] : []) }}">Создать аккаунт</a>
                     </div>
 
                     <h3 class="center" style="margin-bottom:4px">Личный кабинет</h3>
@@ -60,7 +60,7 @@
                     </form>
 
                     <p class="center muted" style="margin:18px 0">или</p>
-                    <a class="btn btn--ghost btn--block" href="{{ route('register') }}">Создать аккаунт</a>
+                    <a class="btn btn--ghost btn--block" href="{{ route('register', $intended ? ['redirect' => $intended] : []) }}">Создать аккаунт</a>
 
                     <p class="form-note" style="margin-top:16px">Аккаунт оформляет взрослый. Для записи ребёнка отдельный аккаунт ребёнка не требуется.</p>
                     <p class="muted" style="font-size:13px;margin-top:10px">Демо-доступ: <strong>demo@korni.local</strong> / <strong>password</strong>.</p>

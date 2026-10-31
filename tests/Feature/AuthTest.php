@@ -30,6 +30,93 @@ class AuthTest extends TestCase
         $this->assertSame(UserRole::Client, $user->role);
     }
 
+    public function test_registration_returns_to_remembered_checkout(): void
+    {
+        $response = $this->withSession(['url.intended' => '/oformlenie'])
+            ->post(route('register.store'), $this->registerPayload());
+
+        $response->assertRedirect('/oformlenie');
+        $this->assertAuthenticated();
+    }
+
+    public function test_registration_honours_local_redirect(): void
+    {
+        $this->post(route('register.store'), $this->registerPayload() + ['redirect' => '/oformlenie'])
+            ->assertRedirect('/oformlenie');
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_registration_rejects_external_redirect(): void
+    {
+        $this->post(route('register.store'), $this->registerPayload() + ['redirect' => 'http://evil.test/phish'])
+            ->assertRedirect(route('account.dashboard'));
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_registration_keeps_guest_cart(): void
+    {
+        $response = $this->withSession(['cart' => [42 => 2]])
+            ->post(route('register.store'), $this->registerPayload());
+
+        $this->assertAuthenticated();
+        $response->assertSessionHas('cart', [42 => 2]);
+    }
+
+    public function test_registration_page_carries_redirect_into_login_link(): void
+    {
+        $this->get(route('register', ['redirect' => '/oformlenie']))
+            ->assertOk()
+            ->assertSee('name="redirect" value="/oformlenie"', false)
+            ->assertSee(route('login', ['redirect' => '/oformlenie']), false);
+    }
+
+    public function test_login_returns_to_remembered_checkout(): void
+    {
+        User::factory()->create([
+            'email' => 'shopper@example.com',
+            'password' => Hash::make('secret-password'),
+        ]);
+
+        $this->withSession(['url.intended' => '/oformlenie'])
+            ->post(route('login.store'), [
+                'login' => 'shopper@example.com',
+                'password' => 'secret-password',
+            ])
+            ->assertRedirect('/oformlenie');
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_login_keeps_guest_cart(): void
+    {
+        User::factory()->create([
+            'email' => 'shopper2@example.com',
+            'password' => Hash::make('secret-password'),
+        ]);
+
+        $response = $this->withSession(['cart' => [42 => 3]])
+            ->post(route('login.store'), [
+                'login' => 'shopper2@example.com',
+                'password' => 'secret-password',
+            ]);
+
+        $this->assertAuthenticated();
+        $response->assertSessionHas('cart', [42 => 3]);
+    }
+
+    private function registerPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'name' => 'Новый Клиент',
+            'email' => 'new-client@example.com',
+            'password' => 'secret-password',
+            'password_confirmation' => 'secret-password',
+            'consent_data' => '1',
+        ], $overrides);
+    }
+
     public function test_registration_requires_consent(): void
     {
         $this->post(route('register.store'), [

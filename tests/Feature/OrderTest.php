@@ -12,6 +12,7 @@ use App\Services\StockService;
 use Database\Seeders\CatalogSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
@@ -108,6 +109,78 @@ class OrderTest extends TestCase
 
         $order = Order::firstOrFail();
         $this->assertSame(route('checkout.success', $order->number), $response->json('redirect'));
+    }
+
+    public function test_registration_from_checkout_returns_to_checkout_with_cart(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+
+        $this->withSession([
+            'cart' => [$variant->id => 2],
+            'url.intended' => route('checkout.index'),
+        ])->post(route('register.store'), [
+            'name' => 'Новый Клиент',
+            'email' => 'checkout-new@example.com',
+            'password' => 'secret-password',
+            'password_confirmation' => 'secret-password',
+            'consent_data' => '1',
+        ])->assertRedirect(route('checkout.index'));
+
+        $this->assertAuthenticated();
+
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertSee($variant->product->title);
+    }
+
+    public function test_login_from_checkout_returns_to_checkout_with_cart(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+        $user = User::factory()->create([
+            'email' => 'checkout-login@example.com',
+            'password' => Hash::make('secret-password'),
+            'role' => UserRole::Client,
+        ]);
+
+        $this->withSession([
+            'cart' => [$variant->id => 3],
+            'url.intended' => route('checkout.index'),
+        ])->post(route('login.store'), [
+            'login' => 'checkout-login@example.com',
+            'password' => 'secret-password',
+        ])->assertRedirect(route('checkout.index'));
+
+        $this->assertAuthenticatedAs($user);
+
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertSee($variant->product->title);
+    }
+
+    public function test_checkout_with_empty_cart_redirects_with_info_without_error(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $this->actingAs($user)
+            ->from(route('checkout.index'))
+            ->post(route('checkout.store'), $this->contact())
+            ->assertRedirect(route('cart.index'))
+            ->assertSessionHas('info');
+
+        $this->assertSame(0, Order::count());
+    }
+
+    public function test_checkout_ajax_with_empty_cart_returns_redirect_without_error(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $this->actingAs($user)
+            ->postJson(route('checkout.store'), $this->contact())
+            ->assertOk()
+            ->assertJsonPath('redirect', route('cart.index'))
+            ->assertJsonMissingValidationErrors(['cart']);
+
+        $this->assertSame(0, Order::count());
     }
 
     public function test_order_cannot_exceed_available_stock(): void

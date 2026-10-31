@@ -49,6 +49,24 @@ class CheckoutController extends Controller
             'consent_marketing' => ['nullable', 'boolean'],
         ]);
 
+        // Пока покупатель заполнял форму, корзину могли очистить — например,
+        // удалив товар из мини-корзины в шапке. Это ожидаемое состояние, а не
+        // ошибка валидации: мягко возвращаем на страницу корзины без 422.
+        if ($this->cart->raw() === []) {
+            $message = 'Корзина пуста. Добавьте товары и оформите заказ заново.';
+
+            if ($request->expectsJson()) {
+                $request->session()->flash('info', $message);
+
+                return response()->json([
+                    'message' => $message,
+                    'redirect' => route('cart.index'),
+                ]);
+            }
+
+            return redirect()->route('cart.index')->with('info', $message);
+        }
+
         $order = $this->orders->place($request->user(), $data);
 
         // Ошибки валидации при AJAX-отправке возвращаются как JSON и

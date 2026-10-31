@@ -14,12 +14,15 @@
             <div class="auth-wrap">
                 <div class="card auth-card" data-reveal>
                     <div class="auth-tabs">
-                        <a href="{{ route('login') }}">Войти</a>
+                        <a href="{{ route('login', $intended ? ['redirect' => $intended] : []) }}">Войти</a>
                         <a class="is-active" href="{{ route('register') }}">Создать аккаунт</a>
                     </div>
 
                     <form action="{{ route('register.store') }}" method="post">
                         @csrf
+                        @if ($intended)
+                            <input type="hidden" name="redirect" value="{{ $intended }}">
+                        @endif
                         <div class="field">
                             <label for="name">Имя</label>
                             <input id="name" class="input @error('name') is-invalid @enderror" type="text" name="name" value="{{ old('name') }}" required autofocus>
