@@ -13,6 +13,7 @@
         initAccordions();
         initReveal();
         initQuantity();
+        initAuthTabs();
         initPasswordToggles();
         initSelects();
         initDatepickers();
@@ -554,6 +555,117 @@
                     input.value = Math.min(max, Math.max(min, value));
                     input.dispatchEvent(new Event("change", { bubbles: true }));
                 });
+            });
+        });
+    }
+
+    /* --- Переключение вкладок «Войти» / «Создать аккаунт» без перезагрузки.
+       Обе формы уже присутствуют в разметке, поэтому переключение сводится к
+       показу нужной панели и обновлению адреса через History API. Без JS
+       вкладки остаются обычными ссылками и ведут на отдельные страницы. --- */
+    function initAuthTabs() {
+        var cards = document.querySelectorAll("[data-auth]");
+        if (!cards.length) return;
+
+        function modeFromLocation(tabs) {
+            var path = window.location.pathname;
+            for (var i = 0; i < tabs.length; i++) {
+                var href = tabs[i].getAttribute("href");
+                if (!href) continue;
+                try {
+                    if (new URL(href, window.location.origin).pathname === path) {
+                        return tabs[i].getAttribute("data-auth-tab");
+                    }
+                } catch (e) {
+                    /* Некорректный href — просто пропускаем вкладку. */
+                }
+            }
+            return tabs[0] ? tabs[0].getAttribute("data-auth-tab") : "login";
+        }
+
+        cards.forEach(function (card) {
+            /* В роли вкладок выступают только ссылки в строке вкладок;
+               кнопки-переключатели внутри панелей — лишь триггеры. */
+            var tabList = card.querySelector(".auth-tabs");
+            var tabs = tabList
+                ? Array.prototype.slice.call(
+                      tabList.querySelectorAll("[data-auth-tab]"),
+                  )
+                : [];
+            var triggers = Array.prototype.slice.call(
+                card.querySelectorAll("[data-auth-tab]"),
+            );
+            var panels = Array.prototype.slice.call(
+                card.querySelectorAll("[data-auth-panel]"),
+            );
+            if (!triggers.length || !panels.length) return;
+
+            function activate(mode, updateUrl) {
+                var activeTab = null;
+
+                tabs.forEach(function (tab) {
+                    var isActive =
+                        tab.getAttribute("data-auth-tab") === mode;
+                    tab.classList.toggle("is-active", isActive);
+                    tab.setAttribute(
+                        "aria-selected",
+                        isActive ? "true" : "false",
+                    );
+                    tab.setAttribute("tabindex", isActive ? "0" : "-1");
+                    if (isActive) activeTab = tab;
+                });
+
+                panels.forEach(function (panel) {
+                    panel.hidden =
+                        panel.getAttribute("data-auth-panel") !== mode;
+                });
+
+                if (updateUrl && activeTab) {
+                    var href = activeTab.getAttribute("href");
+                    if (href && window.history && history.replaceState) {
+                        history.replaceState({ auth: mode }, "", href);
+                    }
+                }
+            }
+
+            triggers.forEach(function (trigger) {
+                trigger.addEventListener("click", function (event) {
+                    /* Не перехватываем открытие в новой вкладке/окне. */
+                    if (
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                    ) {
+                        return;
+                    }
+                    event.preventDefault();
+                    activate(trigger.getAttribute("data-auth-tab"), true);
+                });
+            });
+
+            tabs.forEach(function (tab) {
+                tab.addEventListener("keydown", function (event) {
+                    if (
+                        event.key !== "ArrowLeft" &&
+                        event.key !== "ArrowRight"
+                    ) {
+                        return;
+                    }
+                    event.preventDefault();
+                    var index = tabs.indexOf(tab);
+                    var next =
+                        event.key === "ArrowRight"
+                            ? tabs[(index + 1) % tabs.length]
+                            : tabs[(index - 1 + tabs.length) % tabs.length];
+                    next.focus();
+                    activate(next.getAttribute("data-auth-tab"), true);
+                });
+            });
+
+            /* Навигация «назад/вперёд»: показываем вкладку, соответствующую адресу. */
+            window.addEventListener("popstate", function () {
+                activate(modeFromLocation(tabs), false);
             });
         });
     }

@@ -229,8 +229,20 @@
 .calc__breakdown div { display: flex; justify-content: space-between; gap: 12px; opacity: .95; }
 
 /* --- Аутентификация --- */
-.auth-wrap { display: grid; place-items: center; }
-.auth-card { width: min(560px, 100%); }
+/* Форма входа и регистрации стоит справа от вводного блока с заголовком. */
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+    gap: clamp(28px, 4vw, 72px);
+    align-items: start;
+}
+.auth-intro { max-width: 640px; padding-top: 4px; }
+.auth-intro h1 { margin-bottom: 0.35em; }
+.auth-intro .lead { font-size: clamp(16px, 1.3vw, 20px); color: var(--ink-soft); }
+.auth-intro__sub { font-size: clamp(20px, 1.9vw, 30px); margin-top: clamp(18px, 2.6vw, 36px); }
+.auth-intro p { max-width: 520px; }
+.auth-card { width: 100%; }
+.auth-panel[hidden] { display: none; }
 .auth-tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
 .auth-tabs a, .auth-tabs button {
     background: none; border: 0; cursor: pointer;
@@ -239,6 +251,13 @@
 }
 .auth-tabs .is-active { color: var(--ink); }
 .auth-tabs .is-active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--grad); }
+
+@media (max-width: 900px) {
+    /* На узких экранах форма переносится под заголовок и на всю ширину. */
+    .auth-layout { grid-template-columns: 1fr; }
+    .auth-intro { max-width: none; }
+    .auth-intro p { max-width: none; }
+}
 
 /* --- Служебные блоки --- */
 .note-strip {

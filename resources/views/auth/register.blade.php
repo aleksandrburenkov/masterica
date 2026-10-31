@@ -10,76 +10,15 @@
 @section('content')
     <section class="section section--tight">
         <div class="container">
-            <div class="section-head"><h2>Создайте аккаунт</h2><p>Регистрация по электронной почте и паролю.</p></div>
-            <div class="auth-wrap">
-                <div class="card auth-card" data-reveal>
-                    <div class="auth-tabs">
-                        <a href="{{ route('login', $intended ? ['redirect' => $intended] : []) }}">Войти</a>
-                        <a class="is-active" href="{{ route('register') }}">Создать аккаунт</a>
-                    </div>
-
-                    <form action="{{ route('register.store') }}" method="post">
-                        @csrf
-                        @if ($intended)
-                            <input type="hidden" name="redirect" value="{{ $intended }}">
-                        @endif
-                        <div class="field">
-                            <label for="name">Имя</label>
-                            <input id="name" class="input @error('name') is-invalid @enderror" type="text" name="name" value="{{ old('name') }}" required autofocus>
-                            @error('name')<div class="error-text">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="grid grid-2" style="gap:14px">
-                            <div class="field">
-                                <label for="email">Электронная почта</label>
-                                <input id="email" class="input @error('email') is-invalid @enderror" type="email" name="email" value="{{ old('email') }}" required>
-                                @error('email')<div class="error-text">{{ $message }}</div>@enderror
-                            </div>
-                            <div class="field">
-                                <label for="phone">Телефон</label>
-                                <input id="phone" class="input" type="text" name="phone" value="{{ old('phone') }}">
-                            </div>
-                        </div>
-                        <div class="grid grid-2" style="gap:14px">
-                            <div class="field">
-                                <label for="password">Пароль</label>
-                                <div class="password-field">
-                                    <input id="password" class="input @error('password') is-invalid @enderror" type="password" name="password" autocomplete="new-password" minlength="8" required>
-                                    <button type="button" class="password-toggle" data-password-toggle aria-label="Показать пароль" aria-pressed="false">
-                                        <x-ico name="eye" class="password-toggle__show" />
-                                        <x-ico name="eye-off" class="password-toggle__hide" />
-                                    </button>
-                                </div>
-                                @error('password')<div class="error-text">{{ $message }}</div>@enderror
-                            </div>
-                            <div class="field">
-                                <label for="password_confirmation">Повторите пароль</label>
-                                <div class="password-field">
-                                    <input id="password_confirmation" class="input" type="password" name="password_confirmation" autocomplete="new-password" required>
-                                    <button type="button" class="password-toggle" data-password-toggle aria-label="Показать пароль" aria-pressed="false">
-                                        <x-ico name="eye" class="password-toggle__show" />
-                                        <x-ico name="eye-off" class="password-toggle__hide" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="checkbox">
-                                <input type="checkbox" name="consent_data" value="1" required>
-                                <span>
-                                    {{ legal('consent_registration', 'lead', 'Даю согласие на обработку персональных данных для регистрации и работы личного кабинета') }}.
-                                    <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
-                                </span>
-                            </label>
-                            @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
-                            <label class="checkbox" style="margin-top:8px">
-                                <input type="checkbox" name="consent_marketing" value="1">
-                                <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
-                            </label>
-                        </div>
-                        <button class="btn btn--block" type="submit">Зарегистрироваться</button>
-                        <p class="form-note" style="margin-top:14px">Аккаунт оформляет совершеннолетнее лицо (родитель или законный представитель). Данные участников-несовершеннолетних обрабатываются исключительно в объёме, необходимом для оказания услуги, на основании согласия законного представителя.</p>
-                    </form>
+            <div class="auth-layout">
+                <div class="auth-intro" data-reveal>
+                    <h1>Создайте аккаунт</h1>
+                    <p class="lead">Продолжите пользоваться записями, заказами и доступом к курсам.</p>
+                    <h2 class="auth-intro__sub">Один профиль для всех направлений</h2>
+                    <p class="muted">Регистрация по электронной почте и паролю. Записи, курсы и заказы — в одном личном кабинете.</p>
                 </div>
+
+                @include('auth._card', ['mode' => 'register', 'intended' => $intended])
             </div>
         </div>
     </section>
