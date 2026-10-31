@@ -13,6 +13,10 @@ class CartService
 {
     private const KEY = 'cart';
 
+    public function __construct(
+        private readonly StockService $stock,
+    ) {}
+
     /** @return array<int, int> variant_id => quantity */
     public function raw(): array
     {
@@ -102,6 +106,61 @@ class CartService
         }
 
         return $total;
+    }
+
+    /**
+     * Serialize the resolved cart for the storefront (header mini-cart and JSON
+     * responses). Only items that survive catalogue validation are included, so
+     * the badge count always matches what the shopper can actually see.
+     *
+     * @return array{count:int,subtotal_cents:int,subtotal:string,items:array<int,array<string,mixed>>}
+     */
+    public function state(): array
+    {
+        $detailed = $this->detailed();
+        $available = $this->stock->availableForVariants(array_keys($detailed));
+
+        $items = [];
+
+        foreach ($detailed as $variantId => $item) {
+            /** @var ProductVariant $variant */
+            $variant = $item['variant'];
+            $product = $item['product'];
+            $quantity = (int) $item['quantity'];
+            $variantAvailable = max(0, $available[$variantId] ?? (int) $variant->stock);
+
+            $items[] = [
+                'variant_id' => (int) $variantId,
+                'product_id' => (int) $product->getKey(),
+                'title' => $product->title,
+                'url' => route('shop.show', $product->slug),
+                'variant_name' => $variant->name,
+                'sku' => $variant->sku,
+                'quantity' => $quantity,
+                'price_cents' => (int) $variant->price_cents,
+                'price' => money((int) $variant->price_cents),
+                'line_total_cents' => (int) $item['line_total_cents'],
+                'line_total' => money((int) $item['line_total_cents']),
+                'image' => media_url($product->image, 'images/photo-1.jpg'),
+                // Наличие с учётом резервов по оформленным заказам.
+                'stock' => $variantAvailable,
+                'max' => max(1, min(20, $variantAvailable)),
+            ];
+        }
+
+        $subtotal = 0;
+        $count = 0;
+        foreach ($items as $item) {
+            $subtotal += $item['line_total_cents'];
+            $count += $item['quantity'];
+        }
+
+        return [
+            'count' => $count,
+            'subtotal_cents' => $subtotal,
+            'subtotal' => money($subtotal),
+            'items' => $items,
+        ];
     }
 
     private function put(array $cart): void

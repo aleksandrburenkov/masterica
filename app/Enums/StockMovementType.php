@@ -9,6 +9,7 @@ enum StockMovementType: string
     case Release = 'release';
     case Writeoff = 'writeoff';
     case Adjustment = 'adjustment';
+    case Return = 'return';
 
     public function label(): string
     {
@@ -18,6 +19,18 @@ enum StockMovementType: string
             self::Release => 'Освобождение резерва',
             self::Writeoff => 'Списание',
             self::Adjustment => 'Корректировка',
+            self::Return => 'Возврат',
         };
+    }
+
+    /** Movements that change the physical on-hand figure. */
+    public function isPhysical(): bool
+    {
+        return in_array($this, [
+            self::Receipt,
+            self::Writeoff,
+            self::Adjustment,
+            self::Return,
+        ], true);
     }
 }

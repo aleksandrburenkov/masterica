@@ -39,7 +39,7 @@
                 '@type' => 'Offer',
                 'price' => (string) ($product->minPriceCents() / 100),
                 'priceCurrency' => $product->currency,
-                'availability' => $product->totalStock() > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                'availability' => ($product->available_stock ?? max(0, $product->totalStock())) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
                 'url' => route('shop.show', $product->slug),
             ],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
@@ -89,6 +89,7 @@
                     @else
                         <div class="session-list">
                             @foreach ($product->variants as $variant)
+                                @php($available = $variant->available_stock ?? max(0, $variant->stock))
                                 <form class="session-item" action="{{ route('cart.add') }}" method="post" data-ajax-form>
                                     @csrf
                                     <input type="hidden" name="variant_id" value="{{ $variant->id }}">
@@ -97,8 +98,8 @@
                                         <div class="title">{{ $variant->name }}</div>
                                         <div class="meta">
                                             <span>Артикул: {{ $variant->sku }}</span>
-                                            @if ($variant->stock > 0)
-                                                <span class="badge badge--green">В наличии: {{ $variant->stock }}</span>
+                                            @if ($available > 0)
+                                                <span class="badge badge--green">В наличии: {{ $available }}</span>
                                             @else
                                                 <span class="badge badge--gray">Нет в наличии</span>
                                             @endif
@@ -106,7 +107,7 @@
                                     </div>
                                     <div style="text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end">
                                         <span class="price" style="font-size:20px">{{ money($variant->price_cents) }}</span>
-                                        <button class="btn btn--sm" type="submit" @disabled($variant->stock <= 0)>В корзину</button>
+                                        <button class="btn btn--sm" type="submit" @disabled($available <= 0)>В корзину</button>
                                     </div>
                                 </form>
                             @endforeach

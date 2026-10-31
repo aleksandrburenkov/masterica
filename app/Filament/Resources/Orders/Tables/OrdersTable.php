@@ -58,6 +58,13 @@ class OrdersTable
                     ->requiresConfirmation()
                     ->visible(fn (Order $record) => ! in_array($record->status, [OrderStatus::Completed, OrderStatus::Cancelled], true))
                     ->action(fn (Order $record) => app(OrderService::class)->cancel($record, 'Отменено администратором', auth()->user())),
+                Action::make('refund')
+                    ->label('Возврат')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record) => ! in_array($record->status, [OrderStatus::Cancelled, OrderStatus::Refunded], true))
+                    ->action(fn (Order $record) => app(OrderService::class)->refund($record, 'Возврат администратором', auth()->user())),
                 EditAction::make(),
             ])
             ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);

@@ -23,6 +23,8 @@
         initReviewVideo();
         initAjaxForms();
         initFlashToasts();
+        initHeaderCart();
+        initCartPage();
         initStickyHeaderShadow();
     });
 
@@ -536,7 +538,11 @@
     /* --- Счётчики количества --- */
     function initQuantity() {
         document.querySelectorAll("[data-qty]").forEach(function (wrap) {
-            var input = wrap.querySelector("input");
+            /* Берём именно поле количества, а не скрытое поле _token,
+               которое стоит первым в форме. */
+            var input = wrap.querySelector(
+                'input[type="number"], input[name="quantity"]',
+            );
             if (!input) return;
             wrap.querySelectorAll("[data-qty-step]").forEach(function (btn) {
                 btn.addEventListener("click", function () {
@@ -1050,6 +1056,12 @@
                             "Готово.",
                         "success",
                     );
+                    /* Корзина вернула свежий снапшот — обновляем бейдж, мини-
+                       корзину и страницу корзины, открывая панель после добавления. */
+                    if (result.data.cart) {
+                        cartSeq++;
+                        publishCart(result.data.cart, { open: true });
+                    }
                     form.reset();
                     /* Программный сброс не вызывает событие reset: сообщаем
                        виджетам (например, загрузке видео) очистить состояние. */
@@ -1207,6 +1219,485 @@
         stack.appendChild(toast);
 
         registerFlashToast(toast);
+    }
+
+    /* --- Корзина: мини-виджет в шапке и страница корзины --- */
+    function getCsrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute("content") : "";
+    }
+
+    var CART_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" /></svg>';
+    var TRASH_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>';
+
+    /* Общий счётчик запросов: применяем только ответ последней операции,
+       чтобы при быстрых кликах количество не «откатывалось». */
+    var cartSeq = 0;
+
+    function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(
+            /[&<>"']/g,
+            function (ch) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;",
+                }[ch];
+            },
+        );
+    }
+
+    /* Верхняя граница количества для позиции: не больше фактического остатка
+       (и не больше 20, как допускает серверная валидация). */
+    function cartLimit(item) {
+        var max = parseInt(item && item.max, 10);
+        if (!max || max < 1) max = parseInt(item && item.stock, 10);
+        if (!max || max < 1) max = 1;
+        return Math.min(20, max);
+    }
+
+    /* Единая точка публикации состояния корзины: на неё подписаны и бейдж
+       в шапке, и мини-корзина, и страница корзины. */
+    function publishCart(cart, options) {
+        if (!cart) return;
+        document.dispatchEvent(
+            new CustomEvent("cart:updated", {
+                detail: { cart: cart, open: !!(options && options.open) },
+            }),
+        );
+    }
+
+    function cartApi(method, url, payload) {
+        var id = ++cartSeq;
+        var headers = {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+        };
+        var token = getCsrfToken();
+        if (token) headers["X-CSRF-TOKEN"] = token;
+
+        var options = {
+            method: method,
+            headers: headers,
+            credentials: "same-origin",
+        };
+        if (payload) {
+            headers["Content-Type"] = "application/json";
+            options.body = JSON.stringify(payload);
+        }
+
+        return fetch(url, options)
+            .then(function (response) {
+                return response
+                    .json()
+                    .catch(function () {
+                        return {};
+                    })
+                    .then(function (data) {
+                        return {
+                            id: id,
+                            ok: response.ok,
+                            status: response.status,
+                            data: data,
+                        };
+                    });
+            })
+            .catch(function () {
+                return { id: id, ok: false, status: 0, data: {} };
+            });
+    }
+
+    function cartMutate(method, url, payload, options) {
+        return cartApi(method, url, payload).then(function (result) {
+            if (result.id !== cartSeq) return result;
+            if (result.ok && result.data && result.data.cart) {
+                publishCart(result.data.cart, options);
+            } else if (result.data) {
+                showFlashToast(collectFormErrors(result.data), "error");
+            }
+            return result;
+        });
+    }
+
+    function initHeaderCart() {
+        var root = document.querySelector("[data-cart]");
+        if (!root) return;
+
+        var panel = root.querySelector("[data-cart-panel]");
+        var toggle = root.querySelector("[data-cart-toggle]");
+        var closeBtn = root.querySelector("[data-cart-close]");
+        var body = root.querySelector("[data-cart-body]");
+        var foot = root.querySelector("[data-cart-foot]");
+        var countEl = root.querySelector("[data-cart-count]");
+        var subtotalEl = root.querySelector("[data-cart-subtotal]");
+        if (!panel || !toggle || !body) return;
+
+        var stateUrl = root.getAttribute("data-cart-url");
+        var updateUrl = root.getAttribute("data-cart-update-url");
+        var removeUrl = root.getAttribute("data-cart-remove-url");
+
+        var EMPTY_HTML =
+            '<div class="cart-panel__empty">' +
+            CART_ICON +
+            "<p>Корзина пуста.<br>Добавьте работы из магазина.</p>" +
+            "</div>";
+
+        function lineHtml(item) {
+            var max = cartLimit(item);
+            var quantity = parseInt(item.quantity, 10) || 1;
+            var minusDisabled = quantity <= 1 ? " disabled" : "";
+            var plusDisabled = quantity >= max ? " disabled" : "";
+
+            return (
+                '<div class="cart-line" data-cart-variant="' +
+                escapeHtml(item.variant_id) +
+                '" data-cart-max="' +
+                max +
+                '">' +
+                '<a class="cart-line__media" href="' +
+                escapeHtml(item.url) +
+                '"><img src="' +
+                escapeHtml(item.image) +
+                '" alt="" loading="lazy"></a>' +
+                '<div class="cart-line__info">' +
+                '<a class="cart-line__title" href="' +
+                escapeHtml(item.url) +
+                '">' +
+                escapeHtml(item.title) +
+                "</a>" +
+                '<div class="cart-line__meta">' +
+                escapeHtml(item.variant_name) +
+                " · арт. " +
+                escapeHtml(item.sku) +
+                "</div>" +
+                '<div class="cart-line__controls">' +
+                '<div class="qty qty--sm">' +
+                '<button type="button" data-cart-step="-1" aria-label="Уменьшить количество"' +
+                minusDisabled +
+                ">−</button>" +
+                '<input type="number" min="1" max="' +
+                max +
+                '" value="' +
+                escapeHtml(item.quantity) +
+                '" data-cart-qty aria-label="Количество товара">' +
+                '<button type="button" data-cart-step="1" aria-label="Увеличить количество"' +
+                plusDisabled +
+                ">+</button>" +
+                "</div>" +
+                '<button type="button" class="cart-line__remove" data-cart-remove aria-label="Удалить товар из корзины">' +
+                TRASH_ICON +
+                "</button>" +
+                "</div></div>" +
+                '<div class="cart-line__price">' +
+                escapeHtml(item.line_total) +
+                "</div>" +
+                "</div>"
+            );
+        }
+
+        function render(cart) {
+            if (!cart) return;
+
+            var count = parseInt(cart.count, 10) || 0;
+            if (countEl) {
+                countEl.textContent = count;
+                if (count > 0) countEl.removeAttribute("hidden");
+                else countEl.setAttribute("hidden", "");
+            }
+            toggle.setAttribute("aria-label", "Корзина, товаров: " + count);
+
+            var items = Array.isArray(cart.items) ? cart.items : [];
+            if (!items.length) {
+                body.innerHTML = EMPTY_HTML;
+                if (foot) foot.setAttribute("hidden", "");
+                return;
+            }
+
+            body.innerHTML = items.map(lineHtml).join("");
+            if (subtotalEl) subtotalEl.textContent = cart.subtotal || "";
+            if (foot) foot.removeAttribute("hidden");
+        }
+
+        function openPanel() {
+            root.classList.add("is-open");
+            toggle.setAttribute("aria-expanded", "true");
+        }
+        function closePanel() {
+            root.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+        }
+        function isOpen() {
+            return root.classList.contains("is-open");
+        }
+
+        function updateQuantity(variantId, quantity) {
+            if (!variantId) return;
+            var url = updateUrl.replace(
+                "__VARIANT__",
+                encodeURIComponent(variantId),
+            );
+            cartMutate("PATCH", url, { quantity: quantity });
+        }
+
+        function removeItem(variantId) {
+            if (!variantId) return;
+            var url = removeUrl.replace(
+                "__VARIANT__",
+                encodeURIComponent(variantId),
+            );
+            cartMutate("DELETE", url);
+        }
+
+        function refresh() {
+            cartApi("GET", stateUrl).then(function (result) {
+                if (result.id !== cartSeq) return;
+                if (result.ok && result.data && result.data.cart) {
+                    render(result.data.cart);
+                }
+            });
+        }
+
+        toggle.addEventListener("click", function () {
+            if (isOpen()) {
+                closePanel();
+            } else {
+                openPanel();
+                refresh();
+            }
+        });
+        if (closeBtn) closeBtn.addEventListener("click", closePanel);
+
+        function syncLineButtons(line, quantity) {
+            var max = parseInt(line.getAttribute("data-cart-max"), 10) || 20;
+            var minus = line.querySelector('[data-cart-step="-1"]');
+            var plus = line.querySelector('[data-cart-step="1"]');
+            if (minus) minus.disabled = quantity <= 1;
+            if (plus) plus.disabled = quantity >= max;
+        }
+
+        body.addEventListener("click", function (event) {
+            var step = event.target.closest("[data-cart-step]");
+            if (step) {
+                if (step.disabled) return;
+                var line = step.closest("[data-cart-variant]");
+                if (!line) return;
+                var input = line.querySelector("[data-cart-qty]");
+                if (!input) return;
+                var max = parseInt(line.getAttribute("data-cart-max"), 10) || 20;
+                var value =
+                    (parseInt(input.value, 10) || 1) +
+                    parseInt(step.getAttribute("data-cart-step"), 10);
+                value = Math.min(max, Math.max(1, value));
+                if (String(value) === input.value) return;
+                input.value = value;
+                syncLineButtons(line, value);
+                updateQuantity(line.getAttribute("data-cart-variant"), value);
+                return;
+            }
+
+            var remove = event.target.closest("[data-cart-remove]");
+            if (remove) {
+                var item = remove.closest("[data-cart-variant]");
+                if (item) removeItem(item.getAttribute("data-cart-variant"));
+            }
+        });
+
+        body.addEventListener("change", function (event) {
+            var input = event.target.closest("[data-cart-qty]");
+            if (!input) return;
+            var line = input.closest("[data-cart-variant]");
+            if (!line) return;
+            var max = parseInt(line.getAttribute("data-cart-max"), 10) || 20;
+            var value = Math.min(
+                max,
+                Math.max(1, parseInt(input.value, 10) || 1),
+            );
+            input.value = value;
+            syncLineButtons(line, value);
+            updateQuantity(line.getAttribute("data-cart-variant"), value);
+        });
+
+        document.addEventListener("click", function (event) {
+            if (isOpen() && !root.contains(event.target)) closePanel();
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && isOpen()) {
+                closePanel();
+                toggle.focus();
+            }
+        });
+
+        document.addEventListener("cart:updated", function (event) {
+            var detail = event.detail || {};
+            render(detail.cart);
+            if (detail.open) openPanel();
+        });
+    }
+
+    /* --- Страница корзины: мгновенные изменения и синхронизация с шапкой --- */
+    function initCartPage() {
+        var page = document.querySelector("[data-cart-page]");
+        if (!page) return;
+
+        var updateUrl = page.getAttribute("data-cart-update-url");
+        var removeUrl = page.getAttribute("data-cart-remove-url");
+        var shopUrl = page.getAttribute("data-cart-shop-url") || "/magazin";
+
+        /* Кнопка «Обновить» нужна только как резерв без JavaScript. */
+        page.querySelectorAll("[data-cart-submit]").forEach(function (btn) {
+            btn.hidden = true;
+        });
+
+        function rowOf(element) {
+            return element.closest("[data-cart-item]");
+        }
+
+        function maxOf(row) {
+            return parseInt(row.getAttribute("data-cart-max"), 10) || 20;
+        }
+
+        function syncButtons(row, quantity) {
+            var max = maxOf(row);
+            var minus = row.querySelector('[data-cart-step="-1"]');
+            var plus = row.querySelector('[data-cart-step="1"]');
+            if (minus) minus.disabled = quantity <= 1;
+            if (plus) plus.disabled = quantity >= max;
+        }
+
+        function updateQuantity(variantId, quantity) {
+            if (!variantId) return;
+            var url = updateUrl.replace(
+                "__VARIANT__",
+                encodeURIComponent(variantId),
+            );
+            cartMutate("PATCH", url, { quantity: quantity });
+        }
+
+        function removeItem(variantId) {
+            if (!variantId) return;
+            var url = removeUrl.replace(
+                "__VARIANT__",
+                encodeURIComponent(variantId),
+            );
+            cartMutate("DELETE", url);
+        }
+
+        function commitRow(row, quantity) {
+            var max = maxOf(row);
+            var value = Math.min(max, Math.max(1, quantity));
+            var input = row.querySelector("[data-cart-qty]");
+            if (input) input.value = value;
+            syncButtons(row, value);
+            updateQuantity(row.getAttribute("data-variant-id"), value);
+        }
+
+        page.addEventListener("click", function (event) {
+            var step = event.target.closest("[data-cart-step]");
+            if (step) {
+                if (step.disabled) return;
+                var row = rowOf(step);
+                if (!row) return;
+                var input = row.querySelector("[data-cart-qty]");
+                if (!input) return;
+                var current = parseInt(input.value, 10) || 1;
+                var next =
+                    current + parseInt(step.getAttribute("data-cart-step"), 10);
+                if (next === current) return;
+                commitRow(row, next);
+                return;
+            }
+
+            var remove = event.target.closest("[data-cart-remove]");
+            if (remove) {
+                event.preventDefault();
+                var itemRow = rowOf(remove);
+                if (itemRow)
+                    removeItem(itemRow.getAttribute("data-variant-id"));
+            }
+        });
+
+        page.addEventListener("change", function (event) {
+            var input = event.target.closest("[data-cart-qty]");
+            if (!input) return;
+            var row = rowOf(input);
+            if (!row) return;
+            commitRow(row, parseInt(input.value, 10) || 1);
+        });
+
+        page.addEventListener("submit", function (event) {
+            var form = event.target.closest("[data-cart-update-form]");
+            if (!form) return;
+            event.preventDefault();
+            var row = rowOf(form);
+            if (!row) return;
+            var input = row.querySelector("[data-cart-qty]");
+            if (input) commitRow(row, parseInt(input.value, 10) || 1);
+        });
+
+        document.addEventListener("cart:updated", function (event) {
+            var cart = event.detail && event.detail.cart;
+            if (cart) renderCartPage(page, cart, shopUrl);
+        });
+    }
+
+    function renderCartPage(page, cart, shopUrl) {
+        var items = Array.isArray(cart.items) ? cart.items : [];
+        var byId = {};
+        items.forEach(function (item) {
+            byId[String(item.variant_id)] = item;
+        });
+
+        page.querySelectorAll("[data-cart-item]").forEach(function (row) {
+            var item = byId[row.getAttribute("data-variant-id")];
+            if (!item) {
+                if (row.parentNode) row.parentNode.removeChild(row);
+                return;
+            }
+
+            var max = cartLimit(item);
+            row.setAttribute("data-cart-max", max);
+
+            var input = row.querySelector("[data-cart-qty]");
+            if (input) {
+                input.value = item.quantity;
+                input.setAttribute("max", max);
+            }
+
+            var minus = row.querySelector('[data-cart-step="-1"]');
+            var plus = row.querySelector('[data-cart-step="1"]');
+            var quantity = parseInt(item.quantity, 10) || 1;
+            if (minus) minus.disabled = quantity <= 1;
+            if (plus) plus.disabled = quantity >= max;
+
+            var lineTotal = row.querySelector("[data-cart-line-total]");
+            if (lineTotal) lineTotal.textContent = item.line_total;
+        });
+
+        var subtotal = page.querySelector("[data-cart-subtotal]");
+        if (subtotal) subtotal.textContent = cart.subtotal || "";
+        var total = page.querySelector("[data-cart-total]");
+        if (total) total.textContent = cart.subtotal || "";
+
+        if (!items.length) showCartPageEmpty(page, shopUrl);
+    }
+
+    function showCartPageEmpty(page, shopUrl) {
+        var layout = page.querySelector("[data-cart-layout]");
+        if (!layout) return;
+
+        layout.outerHTML =
+            '<div class="empty" style="margin-top:24px">' +
+            CART_ICON +
+            "<h3>Корзина пуста</h3>" +
+            "<p>Добавьте авторские работы из магазина — здесь появятся выбранные товары.</p>" +
+            '<a class="btn" href="' +
+            escapeHtml(shopUrl) +
+            '">Перейти в магазин</a>' +
+            "</div>";
     }
 
     /* --- Тень шапки при прокрутке --- */

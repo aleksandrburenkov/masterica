@@ -65,6 +65,8 @@
                     </a>
                 @endauth
 
+                @include('partials.cart-widget')
+
                 <button type="button" class="burger" data-burger aria-label="Меню" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>

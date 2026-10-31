@@ -26,4 +26,20 @@ enum OrderStatus: string
             self::Refunded => 'Возврат',
         };
     }
+
+    /**
+     * A live order still holds a reservation on stock (on-hand minus reserved).
+     * Completing the order consumes the reservation; cancelling or refunding it
+     * releases the reservation.
+     */
+    public function isOpen(): bool
+    {
+        return in_array($this, [
+            self::Draft,
+            self::PendingPayment,
+            self::Paid,
+            self::Processing,
+            self::Ready,
+        ], true);
+    }
 }

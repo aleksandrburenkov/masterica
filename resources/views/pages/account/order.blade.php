@@ -51,11 +51,22 @@
                         <div class="summary__row total"><span>Итого</span><span>{{ money($order->total_cents) }}</span></div>
                     </div>
 
-                    @if (auth()->user()->can('cancel', $order))
-                        <form action="{{ route('account.order.cancel', $order->number) }}" method="post" style="margin-top:18px">
-                            @csrf
-                            <button class="btn btn--ghost" type="submit" onclick="return confirm('Отменить заказ?')">Отменить заказ</button>
-                        </form>
+                    @if (auth()->user()->can('cancel', $order) || auth()->user()->can('delete', $order))
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+                            @if (auth()->user()->can('cancel', $order))
+                                <form action="{{ route('account.order.cancel', $order->number) }}" method="post">
+                                    @csrf
+                                    <button class="btn btn--ghost" type="submit" onclick="return confirm('Отменить заказ?')">Отменить заказ</button>
+                                </form>
+                            @endif
+                            @if (auth()->user()->can('delete', $order))
+                                <form action="{{ route('account.order.delete', $order->number) }}" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn--ghost" type="submit" onclick="return confirm('Удалить заказ? Действие необратимо.')">Удалить заказ</button>
+                                </form>
+                            @endif
+                        </div>
                     @endif
 
                     <div class="note-strip" style="margin-top:18px">Снимки названия, варианта, артикула, цены и валюты сохранены на момент оформления и не перезаписываются.</div>

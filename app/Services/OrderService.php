@@ -173,9 +173,7 @@ class OrderService
         }
 
         DB::transaction(function () use ($order, $actor) {
-            $order->load('items.variant');
-            $this->stock->writeOffForOrder($order);
-
+            // Остаток списывается наблюдателем OrderObserver при смене статуса.
             $order->forceFill([
                 'status' => OrderStatus::Completed,
                 'completed_at' => now(),
@@ -190,14 +188,14 @@ class OrderService
 
     public function cancel(Order $order, ?string $reason = null, ?User $actor = null): Order
     {
-        if (in_array($order->status, [OrderStatus::Completed, OrderStatus::Cancelled], true)) {
+        // Отмена завершённого заказа возвращает остаток, поэтому здесь её
+        // пропускаем только для уже отменённых/возвращённых заказов.
+        if (in_array($order->status, [OrderStatus::Cancelled, OrderStatus::Refunded], true)) {
             return $order;
         }
 
         DB::transaction(function () use ($order, $reason, $actor) {
-            $order->load('items.variant');
-            $this->stock->releaseForOrder($order, $reason);
-
+            // Освобождение резерва (или возврат остатка) выполняет наблюдатель.
             $order->forceFill([
                 'status' => OrderStatus::Cancelled,
             ])->save();
@@ -206,5 +204,75 @@ class OrderService
         });
 
         return $order->refresh();
+    }
+
+    public function refund(Order $order, ?string $reason = null, ?User $actor = null): Order
+    {
+        if (in_array($order->status, [OrderStatus::Cancelled, OrderStatus::Refunded], true)) {
+            return $order;
+        }
+
+        DB::transaction(function () use ($order, $reason, $actor) {
+            $order->forceFill([
+                'status' => OrderStatus::Refunded,
+                'payment_status' => PaymentStatus::Refunded,
+            ])->save();
+
+            $this->audit->log($actor ?? $order->user, 'order.refunded', $order, $reason);
+            $this->notifications->notify($order->user, 'Оформлен возврат', 'По заказу '.$order->number.' оформлен возврат.');
+        });
+
+        return $order->refresh();
+    }
+
+    /**
+     * Reconcile stock after a status change, no matter where it happened.
+     * Runs under an order row lock so concurrent transitions cannot double
+     * write off or double return units.
+     */
+    public function reconcileStock(Order $order, ?string $oldStatus, ?string $newStatus): void
+    {
+        DB::transaction(function () use ($order, $oldStatus, $newStatus) {
+            $locked = Order::query()->whereKey($order->getKey())->lockForUpdate()->first();
+            if (! $locked) {
+                return;
+            }
+
+            $locked->loadMissing('items.variant');
+
+            $previous = $oldStatus !== null ? OrderStatus::tryFrom($oldStatus) : null;
+            $current = $newStatus !== null ? OrderStatus::tryFrom($newStatus) : null;
+
+            if ($previous !== OrderStatus::Completed && $current === OrderStatus::Completed) {
+                $this->stock->writeOffForOrder($locked);
+            } elseif ($previous === OrderStatus::Completed && $current !== OrderStatus::Completed) {
+                $this->stock->returnForOrder($locked, 'Возврат при отмене заказа '.$locked->number);
+            }
+
+            if (($previous?->isOpen() ?? false)
+                && in_array($current, [OrderStatus::Cancelled, OrderStatus::Refunded], true)) {
+                $this->stock->releaseForOrder($locked, 'Освобождение резерва по заказу '.$locked->number);
+            }
+        });
+    }
+
+    /**
+     * Deleting an order releases its reservation (open orders) or returns the
+     * written-off stock (completed orders). Idempotent for already-released
+     * orders.
+     */
+    public function reconcileDeletion(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $order->loadMissing('items.variant');
+
+            if ($order->status === OrderStatus::Completed) {
+                $this->stock->returnForOrder($order, 'Возврат при удалении заказа '.$order->number);
+            }
+
+            if ($order->status->isOpen()) {
+                $this->stock->releaseForOrder($order, 'Освобождение резерва при удалении заказа '.$order->number);
+            }
+        });
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use App\Support\LegalDocuments;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -32,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
                 $livewire?->dispatch('refresh-sidebar');
             });
         });
+
+        // Пересчёт остатков при любом изменении статуса заказа (включая правку
+        // в админке) и при удалении: списание при выполнении, освобождение
+        // резерва при отмене/возврате, возврат остатка при отмене выполненного.
+        Order::observe(OrderObserver::class);
 
         Paginator::defaultView('vendor.pagination.site');
         Paginator::defaultSimpleView('vendor.pagination.site');

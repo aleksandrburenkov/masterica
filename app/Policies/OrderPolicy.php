@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\User;
 
@@ -38,8 +39,17 @@ class OrderPolicy
             && in_array($order->status->value, ['draft', 'pending_payment', 'paid'], true);
     }
 
+    /**
+     * Staff may delete any order; an owner may delete their own order unless it
+     * was completed or refunded (those must be handled by staff).
+     */
     public function delete(User $user, Order $order): bool
     {
-        return $user->isOwner();
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        return $order->user_id === $user->id
+            && ! in_array($order->status, [OrderStatus::Completed, OrderStatus::Refunded], true);
     }
 }

@@ -67,6 +67,8 @@ Route::get('/magazin/{product:slug}', [ShopController::class, 'show'])->name('sh
 
 // Корзина
 Route::get('/korzina', [CartController::class, 'index'])->name('cart.index');
+// Лёгкий JSON-снапшот корзины для бейджа и мини-корзины в шапке.
+Route::get('/korzina/sostoyanie', [CartController::class, 'state'])->name('cart.state');
 Route::post('/korzina', [CartController::class, 'add'])->name('cart.add');
 Route::patch('/korzina/{variant}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/korzina/{variant}', [CartController::class, 'remove'])->name('cart.remove');
@@ -145,6 +147,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/zakazy', [AccountController::class, 'orders'])->name('orders');
         Route::get('/zakazy/{order:number}', [AccountController::class, 'order'])->name('order');
         Route::post('/zakazy/{order:number}/otmena', [AccountController::class, 'cancelOrder'])->name('order.cancel');
+        Route::delete('/zakazy/{order:number}', [AccountController::class, 'deleteOrder'])->name('order.delete');
         Route::get('/profil', [AccountController::class, 'profile'])->name('profile');
         Route::patch('/profil', [AccountController::class, 'updateProfile'])->name('profile.update');
     });

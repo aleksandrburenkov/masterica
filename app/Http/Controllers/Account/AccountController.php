@@ -106,6 +106,17 @@ class AccountController extends Controller
         return back()->with('success', 'Заказ отменён.');
     }
 
+    public function deleteOrder(Request $request, Order $order): RedirectResponse
+    {
+        $this->authorize('delete', $order);
+
+        // Удаление заказа освобождает резерв или возвращает списанный остаток
+        // (наблюдатель OrderObserver), поэтому карточки товаров обновляются.
+        $order->delete();
+
+        return redirect()->route('account.orders')->with('success', 'Заказ удалён.');
+    }
+
     public function profile(Request $request): View
     {
         return view('pages.account.profile', ['user' => $request->user()]);

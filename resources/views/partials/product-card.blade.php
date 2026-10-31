@@ -3,7 +3,8 @@
 @php
     $variant = $product->variants->firstWhere('is_active', true) ?? $product->variants->first();
     $price = $variant?->price_cents ?? $product->price_cents;
-    $stock = $product->variants->sum('stock');
+    // Актуальное наличие с учётом резервов по оформленным заказам.
+    $stock = $product->available_stock ?? max(0, $product->variants->sum('stock'));
 @endphp
 
 <article class="card card--pad-0 catalog-card" data-reveal>
