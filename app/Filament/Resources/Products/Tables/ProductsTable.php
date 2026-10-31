@@ -18,8 +18,10 @@ class ProductsTable
             ->columns([
                 ImageColumn::make('image')->label('Фото')->height(40)->getStateUsing(fn ($record) => media_url($record->image, 'images/photo-1.jpg')),
                 TextColumn::make('title')->label('Название')->searchable()->sortable()->wrap(),
+                TextColumn::make('sku')->label('Артикул')->searchable()->copyable(),
                 TextColumn::make('technique.name')->label('Техника')->badge(),
                 TextColumn::make('price_cents')->label('Цена')->money('RUB', divideBy: 100)->sortable(),
+                TextColumn::make('sale_price_cents')->label('Акция')->money('RUB', divideBy: 100)->placeholder('—')->color('danger'),
                 TextColumn::make('stock_total')->label('Остаток')->state(fn ($record) => $record->totalStock())->badge()->color(fn ($state) => $state > 0 ? 'success' : 'gray'),
                 TextColumn::make('variants_count')->label('Вариантов')->counts('variants'),
                 ToggleColumn::make('is_published')->label('Опубликовано'),

@@ -2,7 +2,11 @@
 
 @php
     $variant = $product->variants->firstWhere('is_active', true) ?? $product->variants->first();
-    $price = $variant?->price_cents ?? $product->price_cents;
+    $hasSale = $product->hasSalePrice();
+    $base = (int) $product->price_cents;
+    $sale = (int) $product->sale_price_cents;
+    // Без акции сохраняем прежнее поведение: цена варианта, иначе базовая.
+    $price = $hasSale ? $sale : ($variant?->price_cents ?? $base);
     // Актуальное наличие с учётом резервов по оформленным заказам.
     $stock = $product->available_stock ?? max(0, $product->variants->sum('stock'));
 @endphp
@@ -18,7 +22,14 @@
         <h3><a href="{{ route('shop.show', $product->slug) }}">{{ $product->title }}</a></h3>
         <p class="desc">{{ $product->short_description }}</p>
         <div class="catalog-card__foot">
-            <div class="price">{{ money($price) }}</div>
+            <div class="price">
+                @if ($hasSale)
+                    <s class="strike price__old">{{ money($base) }}</s>
+                    <span class="price__sale">{{ money($sale) }}</span>
+                @else
+                    {{ money($price) }}
+                @endif
+            </div>
             @if ($stock > 0)
                 <span class="badge badge--green">В наличии: {{ $stock }}</span>
             @else

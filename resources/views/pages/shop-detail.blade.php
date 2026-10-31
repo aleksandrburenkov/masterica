@@ -79,6 +79,10 @@
                     <h1 style="margin-top:14px">{{ $product->title }}</h1>
                     <p class="lead-muted">{{ $product->short_description }}</p>
 
+                    @if ($product->sizes)
+                        <p class="muted">Размеры: {{ $product->sizes }}</p>
+                    @endif
+
                     @if ($product->description)
                         <p>{{ $product->description }}</p>
                     @endif
@@ -106,7 +110,14 @@
                                         </div>
                                     </div>
                                     <div style="text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-                                        <span class="price" style="font-size:20px">{{ money($variant->price_cents) }}</span>
+                                        <span class="price" style="font-size:20px">
+                                            @if ($product->hasSalePrice())
+                                                <s class="strike price__old">{{ money($product->price_cents) }}</s>
+                                                <span class="price__sale">{{ money($variant->price_cents) }}</span>
+                                            @else
+                                                {{ money($variant->price_cents) }}
+                                            @endif
+                                        </span>
                                         <button class="btn btn--sm" type="submit" @disabled($available <= 0)>В корзину</button>
                                     </div>
                                 </form>

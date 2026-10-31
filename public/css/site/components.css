@@ -541,6 +541,14 @@ video.hero__video {
     font-weight: 400;
     font-family: var(--font-body);
 }
+.price__old {
+    font-size: 0.72em;
+    font-weight: 400;
+    margin-right: 8px;
+}
+.price__sale {
+    color: #b0323e;
+}
 .card-link {
     font-weight: 700;
     color: var(--primary-2);

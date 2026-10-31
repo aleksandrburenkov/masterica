@@ -258,6 +258,7 @@ class CatalogSeeder extends Seeder
                 [
                     'technique_id' => $techniques[$row['technique']]->id,
                     'title' => $row['title'],
+                    'sku' => $row['sku'],
                     'short_description' => $row['short'],
                     'description' => $row['description'],
                     'price_cents' => $row['price'],
