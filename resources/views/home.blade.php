@@ -172,7 +172,7 @@
             <div class="container">
                 <div class="section-head">
                     <h2>Отзывы</h2>
-                    <p>Демонстрационные отзывы локальной версии помечены как «Демо-отзыв».</p>
+                    <p>Что говорят гости студии после занятий и мастер-классов.</p>
                 </div>
                 @include('partials.reviews-slider', ['reviews' => $reviews])
                 <div class="center" style="margin-top:28px">

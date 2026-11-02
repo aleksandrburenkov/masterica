@@ -15,9 +15,7 @@ return new class extends Migration
             $table->string('type', 16)->default('text');
             $table->unsignedTinyInteger('rating')->nullable();
             $table->text('body');
-            $table->string('video_path')->nullable();
             $table->string('city')->nullable();
-            $table->boolean('is_demo')->default(false)->index();
             $table->string('status', 32)->default('pending')->index();
             $table->boolean('consent_publish')->default(false);
             $table->boolean('consent_marketing')->default(false);

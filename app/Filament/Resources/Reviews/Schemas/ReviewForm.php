@@ -24,7 +24,6 @@ class ReviewForm
                 Select::make('type')->label('Тип')->options(collect(ReviewType::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all())->required(),
                 Select::make('rating')->label('Оценка')->options([5 => '5', 4 => '4', 3 => '3', 2 => '2', 1 => '1']),
                 Textarea::make('body')->label('Текст')->rows(5)->required()->columnSpanFull(),
-                TextInput::make('video_path')->label('Ссылка на видео (внешняя)')->columnSpanFull(),
                 Placeholder::make('review_video_info')
                     ->label('Загруженное видео')
                     ->columnSpanFull()
@@ -41,8 +40,7 @@ class ReviewForm
                 Toggle::make('consent_data')->label('Согласие на обработку персональных данных')->default(false),
                 Toggle::make('consent_publish')->label('Согласие на публикацию')->default(false),
                 Toggle::make('consent_marketing')->label('Согласие на маркетинг')->default(false),
-                Toggle::make('is_demo')->label('Демонстрационный (demo)')->default(false)->helperText('Демо-отзывы не выдаются за отзывы реальных клиентов и исключаются из production.'),
-            ])->columns(4),
+            ])->columns(3),
         ]);
     }
 }

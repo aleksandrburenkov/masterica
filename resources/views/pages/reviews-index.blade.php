@@ -1,7 +1,7 @@
 @extends('layouts.site')
 
 @section('title', 'Отзывы — '.setting('studio.name', 'Корни'))
-@section('meta_description', 'Отзывы о занятиях студии. Демонстрационные отзывы локальной версии помечены как «Демо-отзыв».')
+@section('meta_description', 'Отзывы о занятиях студии.')
 @section('canonical', route('reviews.index'))
 
 @section('breadcrumbs')
@@ -18,7 +18,7 @@
             <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>Отзывы</h1>
-                    <p class="lead">Отзывы проходят модерацию до публикации. Синтетические демонстрационные отзывы помечены как «Демо-отзыв».</p>
+                    <p class="lead">Отзывы проходят модерацию до публикации.</p>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                             <label for="r-type">Тип отзыва</label>
                             <select id="r-type" class="select" name="type" required>
                                 <option value="text">Текстовый</option>
-                                <option value="video">Видео (файл или ссылка)</option>
+                                <option value="video">Видео (файл)</option>
                             </select>
                         </div>
                         <div class="field">
@@ -114,11 +114,6 @@
                         </div>
                         <p class="hint">Файл проверяется на вирусы и вредоносные вложения, затем проходит модерацию. Длительность — до {{ intdiv((int) config('video.max_duration_seconds', 600), 60) }} мин.</p>
                         @error('video_file')<div class="error-text">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="field">
-                        <label for="r-video">Или ссылка на видео</label>
-                        <input id="r-video" class="input" type="url" name="video_url" value="{{ old('video_url') }}" placeholder="https://">
-                        @error('video_url')<div class="error-text">{{ $message }}</div>@enderror
                     </div>
                     <div class="field">
                         <label class="checkbox">

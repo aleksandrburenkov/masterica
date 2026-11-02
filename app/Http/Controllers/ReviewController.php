@@ -44,7 +44,6 @@ class ReviewController extends Controller
             'rating' => ['nullable', 'integer', 'min:1', 'max:5'],
             'body' => ['required', 'string', 'min:10', 'max:2000'],
             'city' => ['nullable', 'string', 'max:120'],
-            'video_url' => ['nullable', 'url:http,https', 'max:255'],
             'video_file' => [
                 'nullable',
                 'file',
@@ -58,9 +57,9 @@ class ReviewController extends Controller
 
         $hasFile = $request->hasFile('video_file');
 
-        if ($data['type'] === 'video' && ! $hasFile && empty($data['video_url'])) {
+        if ($data['type'] === 'video' && ! $hasFile) {
             throw ValidationException::withMessages([
-                'video_file' => 'Прикрепите видеофайл или укажите ссылку на видео.',
+                'video_file' => 'Прикрепите видеофайл.',
             ]);
         }
 
@@ -72,8 +71,6 @@ class ReviewController extends Controller
                 'rating' => $data['rating'] ?? null,
                 'body' => $data['body'],
                 'city' => $data['city'] ?? null,
-                'video_path' => $data['video_url'] ?? null,
-                'is_demo' => false,
                 'status' => ReviewStatus::Pending,
                 'consent_data' => true,
                 'consent_publish' => true,

@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'user_id', 'masterclass_id', 'type', 'rating', 'body', 'video_path',
-    'city', 'is_demo', 'status', 'consent_data', 'consent_publish', 'consent_marketing',
+    'user_id', 'masterclass_id', 'type', 'rating', 'body',
+    'city', 'status', 'consent_data', 'consent_publish', 'consent_marketing',
     'source', 'published_at', 'moderated_by', 'moderated_at',
 ])]
 class Review extends Model
@@ -21,7 +21,6 @@ class Review extends Model
         return [
             'type' => ReviewType::class,
             'status' => ReviewStatus::class,
-            'is_demo' => 'boolean',
             'consent_data' => 'boolean',
             'consent_publish' => 'boolean',
             'consent_marketing' => 'boolean',
@@ -64,10 +63,5 @@ class Review extends Model
     public function scopePublished($query)
     {
         return $query->where('status', ReviewStatus::Approved->value);
-    }
-
-    public function scopeDemo($query)
-    {
-        return $query->where('is_demo', true);
     }
 }

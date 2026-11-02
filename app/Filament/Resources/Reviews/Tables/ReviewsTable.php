@@ -9,10 +9,8 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class ReviewsTable
@@ -36,14 +34,12 @@ class ReviewsTable
                         'error' => 'warning',
                         default => 'gray',
                     }),
-                IconColumn::make('is_demo')->label('Demo')->boolean(),
                 TextColumn::make('status')->label('Статус')->badge()->formatStateUsing(fn ($state) => $state->label()),
                 TextColumn::make('published_at')->label('Опубликован')->dateTime('d.m.Y')->toggleable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')->label('Статус')->options(collect(ReviewStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->label()])->all()),
-                TernaryFilter::make('is_demo')->label('Демонстрационные'),
             ])
             ->recordActions([
                 Action::make('approve')

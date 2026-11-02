@@ -26,7 +26,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Local-only demonstration data. Never load this seeder in production:
- * all reviews and profiles created here are synthetic and flagged as demo.
+ * all reviews and profiles created here are synthetic.
  */
 class DemoSeeder extends Seeder
 {
@@ -202,7 +202,7 @@ class DemoSeeder extends Seeder
 
     private function seedReviews(User $owner): void
     {
-        if (Review::query()->where('is_demo', true)->exists()) {
+        if (Review::query()->where('source', 'Синтетический демонстрационный отзыв')->exists()) {
             return;
         }
 
@@ -227,14 +227,13 @@ class DemoSeeder extends Seeder
                 ],
             );
 
-            $review = Review::create([
+            Review::create([
                 'user_id' => $author->id,
                 'masterclass_id' => $masterclasses->isNotEmpty() ? $masterclasses[$i % $masterclasses->count()]->id : null,
                 'type' => ReviewType::Text,
                 'rating' => $rating,
                 'body' => $body,
                 'city' => $city,
-                'is_demo' => true,
                 'status' => ReviewStatus::Approved,
                 'consent_publish' => true,
                 'consent_marketing' => (bool) ($i % 2 === 0),
@@ -243,8 +242,6 @@ class DemoSeeder extends Seeder
                 'moderated_by' => $owner->id,
                 'moderated_at' => now()->subDays(4),
             ]);
-
-            $review->forceFill(['is_demo' => true])->save();
         }
     }
 }

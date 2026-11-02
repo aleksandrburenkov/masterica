@@ -60,31 +60,17 @@ class ReviewVideoTest extends TestCase
         ])->assertRedirect(route('login'));
     }
 
-    public function test_a_video_review_requires_a_file_or_a_link(): void
+    public function test_a_video_review_requires_a_file(): void
     {
         $this->actingAs($this->client())
             ->postJson(route('reviews.store'), [
                 'type' => 'video',
-                'body' => 'Видеоотзыв без файла и ссылки.',
+                'body' => 'Видеоотзыв без файла.',
                 'consent_data' => '1',
                 'consent_publish' => '1',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors('video_file');
-    }
-
-    public function test_javascript_video_link_is_rejected(): void
-    {
-        $this->actingAs($this->client())
-            ->postJson(route('reviews.store'), [
-                'type' => 'video',
-                'body' => 'Ссылка с недопустимой схемой.',
-                'video_url' => 'javascript:alert(1)',
-                'consent_data' => '1',
-                'consent_publish' => '1',
-            ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('video_url');
     }
 
     public function test_uploaded_video_is_scanned_and_awaits_moderation(): void

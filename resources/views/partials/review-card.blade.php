@@ -10,9 +10,6 @@
                 @if ($review->masterclass)<span>{{ $review->masterclass->title }}</span>@endif
             </div>
         </div>
-        @if ($review->is_demo)
-            <span class="badge badge--gray demo-tag" style="margin-left:auto">Демо-отзыв</span>
-        @endif
     </div>
 
     @if ($review->rating)
@@ -48,11 +45,7 @@
         </div>
     @elseif ($review->type->value === 'video')
         <div class="review-media">
-            @if ($review->video_path)
-                <a class="chip" href="{{ $review->video_path }}" target="_blank" rel="noopener nofollow"><x-ico name="play" style="width:16px;height:16px" /> Видеоотзыв</a>
-            @else
-                <span class="chip"><x-ico name="play" style="width:16px;height:16px" /> Видеоотзыв</span>
-            @endif
+            <span class="chip"><x-ico name="play" style="width:16px;height:16px" /> Видеоотзыв</span>
         </div>
     @endif
 
