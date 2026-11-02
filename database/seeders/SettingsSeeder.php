@@ -14,7 +14,7 @@ class SettingsSeeder extends Seeder
             'studio' => [
                 'studio.name' => ['Корни', 'string'],
                 'studio.tagline' => ['Арт-студия «Корни»', 'string'],
-                'studio.city' => ['Брянске', 'string'],
+                'studio.city' => ['Брянск', 'string'],
                 'studio.address' => ['г. Брянск, ул. Московская, д. 23', 'string'],
                 'studio.phone' => ['+7 (906) 698-31-06', 'string'],
                 'studio.hours' => ['Ежедневно 10:00–19:00', 'string'],

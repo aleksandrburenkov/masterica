@@ -2,7 +2,7 @@
 
 @php $firstSession = $sessions->first(); @endphp
 
-@section('title', $masterclass->seo_title ?: ($masterclass->title.' — мастер-класс в '.setting('studio.city', 'Брянске')))
+@section('title', $masterclass->seo_title ?: ($masterclass->title.' — мастер-класс в Брянске'))
 @section('meta_description', $masterclass->seo_description ?: $masterclass->short_description)
 @section('canonical', route('masterclasses.show', $masterclass->slug))
 @section('og_type', 'article')

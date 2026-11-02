@@ -46,7 +46,7 @@
             @endif
 
             <div class="note-strip" style="margin-top:32px">
-                Оплата при получении. Самовывоз из студии — бесплатно, доставка по {{ setting('studio.city', 'Брянску') }} — {{ money((int) setting('pricing.delivery_city_cents', 40000)) }}.
+                Оплата при получении. Самовывоз из студии — бесплатно, доставка по Брянску — {{ money((int) setting('pricing.delivery_city_cents', 40000)) }}.
             </div>
         </div>
     </section>

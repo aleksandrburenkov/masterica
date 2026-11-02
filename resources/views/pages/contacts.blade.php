@@ -15,7 +15,7 @@
 @endphp
 
 @section('title', 'Контакты — '.$studioName.', '.$studioCity)
-@section('meta_description', 'Адрес, телефон и часы работы студии «'.$studioName.'» в '.$studioCity.'.')
+@section('meta_description', 'Адрес, телефон и часы работы студии «'.$studioName.'» в Брянске.')
 @section('canonical', route('contacts'))
 
 @section('breadcrumbs')

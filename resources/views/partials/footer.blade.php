@@ -3,7 +3,7 @@
         <div class="footer-grid">
             <div class="footer-brand">
                 <img src="{{ asset('images/logo.png') }}" alt="Арт-студия «{{ setting('studio.name', 'Корни') }}»">
-                <p>Творческие занятия и авторские работы в {{ setting('studio.city', 'Брянске') }}.</p>
+                <p>Творческие занятия и авторские работы в Брянске.</p>
             </div>
 
             <div>

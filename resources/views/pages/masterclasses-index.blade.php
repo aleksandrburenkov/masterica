@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Мастер-классы в ' . setting('studio.city', 'Брянске') . ' — каталог занятий')
+@section('title', 'Мастер-классы в Брянске — каталог занятий')
 @section('meta_description', 'Каталог мастер-классов: бумажная лоза, бисер, синельная проволока, фоамиран, макраме,
     канзаши. Даты, ведущие, возраст и стоимость.')
 @section('canonical', route('masterclasses.index'))
@@ -16,7 +16,7 @@
         <div class="container">
             <div class="hero__inner">
                 <div class="hero__content" data-reveal>
-                    <h1>Мастер-классы в {{ setting('studio.city', 'Брянске') }}</h1>
+                    <h1>Мастер-классы в Брянске</h1>
                     <p class="lead">Творческие занятия для детей и взрослых — в студии и на выезде.</p>
                     <a class="btn" href="#catalog">Выбрать направление</a>
                 </div>

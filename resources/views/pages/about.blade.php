@@ -1,7 +1,7 @@
 @extends('layouts.site')
 
 @section('title', 'О студии «'.setting('studio.name', 'Корни').'» — мастера и направление')
-@section('meta_description', 'Арт-студия «Корни» в '.setting('studio.city', 'Брянске').'. Ведущий мастер — Ирина Буренкова. Плетение из бумажной лозы и другие техники.')
+@section('meta_description', 'Арт-студия «Корни» в Брянске. Ведущий мастер — Ирина Буренкова. Плетение из бумажной лозы и другие техники.')
 @section('canonical', route('about'))
 
 @section('breadcrumbs')
@@ -15,7 +15,7 @@
             <div class="hero__inner">
                 <div class="hero__content" data-reveal>
                     <h1>О студии «{{ setting('studio.name', 'Корни') }}»</h1>
-                    <p class="lead">Творческая студия в {{ setting('studio.city', 'Брянске') }}: занятия для детей и взрослых и авторские работы ручной работы. Основное направление — плетение из бумажной лозы.</p>
+                    <p class="lead">Творческая студия в Брянске: занятия для детей и взрослых и авторские работы ручной работы. Основное направление — плетение из бумажной лозы.</p>
                     <a class="btn" href="{{ route('masterclasses.index') }}">Выбрать занятие</a>
                 </div>
             </div>
