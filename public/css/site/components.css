@@ -192,10 +192,24 @@
     width: 18px;
     height: 18px;
 }
+/* Кнопка поиска всегда поверх выезжающего поля, поэтому в открытом
+   состоянии виден и доступен крестик для закрытия */
+.search-toggle {
+    position: relative;
+    z-index: 2;
+}
 .search-wrap.is-open .search-toggle__search {
     display: none;
 }
 .search-wrap:not(.is-open) .search-toggle__close {
+    display: none;
+}
+/* Пока поле пустое — крестик (закрыть). Как только появился текст —
+   показываем лупу (запуск поиска), крестик скрываем. */
+.search-wrap.is-open.has-value .search-toggle__search {
+    display: inline-flex;
+}
+.search-wrap.is-open.has-value .search-toggle__close {
     display: none;
 }
 
@@ -277,6 +291,58 @@
     }
     .account-link__short {
         display: inline;
+    }
+}
+
+/* Узкие экраны: раскрытый поиск занимает всё место, а иконки кабинета и
+   корзины плавно уходят, освобождая строку под поле поиска. */
+@media (max-width: 520px) {
+    .search-wrap {
+        justify-content: flex-end;
+        transition: flex-grow var(--speed) var(--ease);
+    }
+
+    .account-link,
+    .cart-widget {
+        min-width: 0;
+        overflow: hidden;
+        margin-left: 0;
+        transform-origin: right center;
+        transition:
+            max-width var(--speed) var(--ease),
+            margin-left var(--speed) var(--ease),
+            opacity var(--speed) var(--ease),
+            transform var(--speed) var(--ease);
+    }
+    .account-link {
+        max-width: 32px;
+    }
+    .account-link--named {
+        max-width: 120px;
+    }
+    .cart-widget {
+        max-width: 72px;
+    }
+
+    /* Раскрытый поиск забирает освободившееся место и растягивается на всю
+       ширину блока, а .search-toggle с крестиком остаётся поверх него */
+    .search-wrap.is-open {
+        flex-grow: 1;
+    }
+    .search-wrap.is-open .search-form {
+        left: 0;
+        right: 0;
+        width: auto;
+    }
+
+    /* Соседние иконки плавно исчезают и схлопываются */
+    .search-wrap.is-open ~ .account-link,
+    .search-wrap.is-open ~ .cart-widget {
+        max-width: 0;
+        margin-left: -12px;
+        opacity: 0;
+        transform: scale(0.85);
+        pointer-events: none;
     }
 }
 

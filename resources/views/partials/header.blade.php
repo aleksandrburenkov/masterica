@@ -71,7 +71,7 @@
                 </div>
 
                 @auth
-                    <a class="account-link" href="{{ route('account.dashboard') }}" title="Личный кабинет">
+                    <a class="account-link account-link--named" href="{{ route('account.dashboard') }}" title="Личный кабинет">
                         <x-ico name="user" />
                         <span class="account-link__full">{{ auth()->user()->name }}</span>
                         <span class="account-link__short">{{ $userShortName }}</span>

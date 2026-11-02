@@ -387,23 +387,62 @@
 
         var toggle = wrap.querySelector("[data-search-toggle]");
         var input = wrap.querySelector('input[type="search"]');
+        var form = wrap.querySelector("form");
 
-        toggle.addEventListener("click", function () {
-            var open = wrap.classList.toggle("is-open");
-            toggle.setAttribute("aria-expanded", open ? "true" : "false");
-            if (open && input) {
+        function hasValue() {
+            return !!input && input.value.trim() !== "";
+        }
+
+        function syncState() {
+            wrap.classList.toggle("has-value", hasValue());
+        }
+
+        function openSearch() {
+            wrap.classList.add("is-open");
+            toggle.setAttribute("aria-expanded", "true");
+            syncState();
+            if (input) {
                 setTimeout(function () {
                     input.focus();
                 }, 120);
-            } else if (!open && input) {
+            }
+        }
+
+        function closeSearch() {
+            wrap.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+            if (input) {
                 input.blur();
+            }
+        }
+
+        toggle.addEventListener("click", function () {
+            if (wrap.classList.contains("is-open") && hasValue()) {
+                if (form) {
+                    if (form.requestSubmit) {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                }
+                return;
+            }
+
+            if (wrap.classList.contains("is-open")) {
+                closeSearch();
+            } else {
+                openSearch();
             }
         });
 
+        if (input) {
+            input.addEventListener("input", syncState);
+        }
+        syncState();
+
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape" && wrap.classList.contains("is-open")) {
-                wrap.classList.remove("is-open");
-                toggle.setAttribute("aria-expanded", "false");
+                closeSearch();
             }
         });
     }
