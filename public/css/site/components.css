@@ -144,6 +144,9 @@
     width: 20px;
     height: 20px;
 }
+.account-link__short {
+    display: none;
+}
 
 /* Раскрывающийся поиск */
 .search-wrap {
@@ -238,6 +241,9 @@
         flex-direction: column;
         align-items: stretch;
     }
+    .header-user {
+        justify-content: flex-end;
+    }
     .site-header .mobile-menu {
         display: none;
         flex-direction: column;
@@ -260,6 +266,17 @@
 @media (max-width: 620px) {
     .header-phone {
         display: none;
+    }
+}
+@media (max-width: 767px) {
+    .account-link {
+        white-space: nowrap;
+    }
+    .account-link__full {
+        display: none;
+    }
+    .account-link__short {
+        display: inline;
     }
 }
 

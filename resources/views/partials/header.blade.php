@@ -8,6 +8,23 @@
         ['label' => 'Отзывы', 'route' => 'reviews.index'],
         ['label' => 'Контакты', 'route' => 'contacts'],
     ];
+
+    $userShortName = null;
+    if (auth()->check()) {
+        $parts = preg_split('/\s+/u', trim((string) auth()->user()->name), -1, PREG_SPLIT_NO_EMPTY);
+        $parts = $parts ?: [];
+        $count = count($parts);
+        if ($count === 1) {
+            $userShortName = mb_substr($parts[0], 0, 1);
+        } elseif ($count === 2) {
+            $isPatronymic = (bool) preg_match('/(ович|евич|ич|овна|евна|ична|инична)$/iu', $parts[1]);
+            $userShortName = $isPatronymic
+                ? mb_substr($parts[0], 0, 1) . '.' . mb_substr($parts[1], 0, 1) . '.'
+                : $parts[0] . ' ' . mb_substr($parts[1], 0, 1);
+        } elseif ($count >= 3) {
+            $userShortName = $parts[0] . ' ' . mb_substr($parts[2], 0, 1);
+        }
+    }
 @endphp
 <header class="site-header" data-header>
     <div class="container">
@@ -56,12 +73,13 @@
                 @auth
                     <a class="account-link" href="{{ route('account.dashboard') }}" title="Личный кабинет">
                         <x-ico name="user" />
-                        <span>{{ auth()->user()->name }}</span>
+                        <span class="account-link__full">{{ auth()->user()->name }}</span>
+                        <span class="account-link__short">{{ $userShortName }}</span>
                     </a>
                 @else
                     <a class="account-link" href="{{ route('login') }}">
                         <x-ico name="user" />
-                        <span>Личный кабинет</span>
+                        <span class="account-link__full">Личный кабинет</span>
                     </a>
                 @endauth
 
