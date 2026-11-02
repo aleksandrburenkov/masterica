@@ -482,7 +482,9 @@ ul.clean {
 
 .datepicker {
     position: fixed;
-    z-index: 1200;
+    /* Ниже липкой шапки (.site-header, z-index 100), чтобы она всегда
+       перекрывала всплывающий календарь, но выше обычного контента. */
+    z-index: 95;
     width: 296px;
     padding: 14px;
     background: var(--card);

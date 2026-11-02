@@ -239,15 +239,23 @@
             var left = Math.min(rect.left, window.innerWidth - width - 8);
             var top = rect.bottom + 6;
 
+            // Не даём календарю уйти под липкую шапку: считаем её нижнюю
+            // границу и держим попап ниже неё при перевороте вверх.
+            var header = document.querySelector("[data-header]");
+            var headerBottom = header
+                ? header.getBoundingClientRect().bottom
+                : 0;
+            var minTop = Math.max(8, headerBottom + 8);
+
             if (
                 top + height > window.innerHeight - 8 &&
-                rect.top - height - 6 > 8
+                rect.top - height - 6 > minTop
             ) {
                 top = rect.top - height - 6;
             }
 
             picker.style.left = Math.max(8, left) + "px";
-            picker.style.top = top + "px";
+            picker.style.top = Math.max(minTop, top) + "px";
         }
 
         function openPicker(state) {
