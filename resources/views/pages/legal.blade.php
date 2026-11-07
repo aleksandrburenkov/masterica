@@ -29,11 +29,67 @@
             line-height: 1.65;
         }
 
-        .legal-body ul {
+        .legal-body h3,
+        .legal-body h4 {
+            margin: 20px 0 8px;
+            color: var(--ink);
+        }
+
+        .legal-body ul,
+        .legal-body ol {
             margin: 0 0 12px;
             padding-left: 22px;
             display: grid;
             gap: 6px;
+        }
+
+        .legal-body li > ul,
+        .legal-body li > ol {
+            margin-top: 6px;
+            margin-bottom: 0;
+        }
+
+        .legal-body a {
+            color: var(--violet);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .legal-body blockquote {
+            margin: 16px 0;
+            padding: 10px 16px;
+            border-left: 3px solid var(--violet);
+            background: var(--line);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .legal-body img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 16px 0;
+            border-radius: 10px;
+        }
+
+        .legal-body table {
+            width: 100%;
+            margin: 16px 0;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .legal-body th,
+        .legal-body td {
+            padding: 8px 12px;
+            border: 1px solid var(--line-2);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .legal-body th {
+            color: var(--ink);
+            background: var(--line);
+            font-weight: 600;
         }
     </style>
 @endpush
@@ -58,7 +114,7 @@
                 </div>
 
                 <div class="legal-body" style="margin-top:20px;color:var(--ink-soft)">
-                    {!! $document->body !!}
+                    {!! $document->safeBody() !!}
                 </div>
             </div>
 

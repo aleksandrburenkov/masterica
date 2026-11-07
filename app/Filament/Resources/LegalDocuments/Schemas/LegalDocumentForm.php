@@ -3,13 +3,17 @@
 namespace App\Filament\Resources\LegalDocuments\Schemas;
 
 use App\Filament\Support\SlugField;
+use App\Filament\Support\SourceCodeAction;
 use App\Models\LegalDocument;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\RichEditorTool;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 /**
  * Форма правового документа. Текст хранится в базе и не хардкодится в шаблонах.
@@ -52,10 +56,29 @@ class LegalDocumentForm
                     ->helperText('Показывается в футере и как подпись согласия у чекбоксов.')
                     ->rows(2)
                     ->columnSpanFull(),
-                Textarea::make('body')
+                RichEditor::make('body')
                     ->label('Полный текст (HTML)')
-                    ->helperText('Используйте теги <h2>, <p>, <ul>, <li>. Текст выводится на странице документа.')
-                    ->rows(16)
+                    ->helperText('Визуальный редактор: заголовки, списки, ссылки, таблицы и изображения. Кнопка «HTML» на панели инструментов переключает в режим правки исходного кода.')
+                    ->json(false)
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'strike', 'link'],
+                        ['h2', 'h3', 'h4'],
+                        ['bulletList', 'orderedList', 'blockquote'],
+                        ['table', 'attachFiles'],
+                        ['sourceCode'],
+                        ['undo', 'redo'],
+                    ])
+                    ->tools([
+                        RichEditorTool::make('sourceCode')
+                            ->label('HTML')
+                            ->icon(Heroicon::CodeBracket)
+                            ->action(arguments: '{ html: $getEditor()?.getHTML() }'),
+                    ])
+                    ->registerActions([SourceCodeAction::make()])
+                    ->fileAttachmentsDirectory('legal')
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsVisibility('public')
+                    ->minHeight('26rem')
                     ->columnSpanFull(),
             ])->columns(2),
 

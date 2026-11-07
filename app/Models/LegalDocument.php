@@ -32,8 +32,55 @@ class LegalDocument extends Model
 
     protected static function booted(): void
     {
+        // Текст документа выводится на сайте без экранирования, поэтому
+        // очищаем HTML при любом сохранении — и из админки, и из сидеров.
+        static::saving(function (LegalDocument $document): void {
+            if (! $document->isDirty('body')) {
+                return;
+            }
+
+            $body = trim((string) $document->body);
+            $body = $body === '' ? null : Str::sanitizeHtml($body);
+
+            // Редактор сериализует блоки без переносов строк. Если разметка
+            // семантически не изменилась, оставляем исходное форматирование,
+            // чтобы сохранение без правок не переписывало существующие документы.
+            $originalBody = $document->getOriginal('body');
+
+            if (
+                $body !== null
+                && is_string($originalBody)
+                && $originalBody !== ''
+                && self::htmlSignature($body) === self::htmlSignature($originalBody)
+            ) {
+                $body = $originalBody;
+            }
+
+            $document->body = $body;
+        });
+
         static::saved(fn () => LegalDocuments::flush());
         static::deleted(fn () => LegalDocuments::flush());
+    }
+
+    /**
+     * Безопасный HTML для вывода на публичной странице.
+     *
+     * Повторная очистка нужна для документов, сохранённых до включения
+     * санитайзера: они могли попасть в базу с небезопасной разметкой.
+     */
+    public function safeBody(): string
+    {
+        return Str::sanitizeHtml((string) $this->body);
+    }
+
+    /**
+     * Семантическая подпись HTML без пробелов между тегами.
+     * Нужна только для сравнения «до/после» при сохранении.
+     */
+    private static function htmlSignature(string $html): string
+    {
+        return preg_replace('/>\s+</u', '><', trim($html)) ?? trim($html);
     }
 
     /**
