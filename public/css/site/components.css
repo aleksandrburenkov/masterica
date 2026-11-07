@@ -1308,7 +1308,7 @@ video.hero__video {
         position: fixed;
         right: 12px;
         left: 12px;
-        top: auto;
+        top: 120px;
         width: auto;
         max-height: min(72vh, 520px);
         transform-origin: top center;
