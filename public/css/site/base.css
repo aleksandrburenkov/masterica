@@ -164,7 +164,7 @@ h5 {
 }
 
 h1 {
-    font-size: clamp(32px, 4.8vw, 78px);
+    font-size: clamp(41px, 4.8vw, 78px);
     width: 100%;
 }
 h2 {
@@ -267,6 +267,11 @@ ul.clean {
 @media (max-width: 960px) {
     .grid-3 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 900px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
     }
 }
 @media (max-width: 680px) {
