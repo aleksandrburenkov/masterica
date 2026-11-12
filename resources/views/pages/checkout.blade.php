@@ -51,27 +51,11 @@
                     </div>
 
                     <div class="field">
-                        <label class="checkbox">
-                            <input type="checkbox" name="accept_offer" value="1" required>
-                            <span>
-                                Я ознакомлен(а) и согласен(на) с
-                                <a href="{{ route('legal.show', legal('offer_terms', 'slug', 'publichnaya-oferta')) }}" target="_blank" rel="noopener">условиями Публичной оферты</a>
-                                и принимаю их (акцепт оферты). Условия возврата и обмена товара указаны в оферте.
-                            </span>
-                        </label>
-                        @error('accept_offer')<div class="error-text">{{ $message }}</div>@enderror
-                        <label class="checkbox" style="margin-top:8px">
-                            <input type="checkbox" name="consent_data" value="1" required>
-                            <span>
-                                {{ legal('consent_checkout', 'lead', 'Даю согласие на обработку персональных данных для оформления и доставки заказа') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
-                            </span>
-                        </label>
-                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
-                        <label class="checkbox" style="margin-top:8px">
-                            <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
-                        </label>
+                        @include('partials.consent-fields', [
+                            'dataTextKey' => 'consent_checkout',
+                            'dataFallback' => 'Даю согласие на обработку персональных данных (фамилия и имя, номер телефона, адрес электронной почты, адрес доставки) в целях оформления, оплаты и доставки заказа, до достижения целей обработки либо до отзыва согласия',
+                            'acceptOffer' => true,
+                        ])
                     </div>
 
                     <button class="btn btn--block" type="submit">Подтвердить заказ</button>

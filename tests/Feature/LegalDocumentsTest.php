@@ -101,7 +101,8 @@ class LegalDocumentsTest extends TestCase
             ->assertOk()
             ->assertSee('name="consent_data"', false)
             ->assertSee('required', false)
-            ->assertSee('Условия обработки');
+            ->assertSee('Политикой конфиденциальности')
+            ->assertSee('Пользовательским соглашением');
 
         $this->get(route('outreach.index'))
             ->assertOk()

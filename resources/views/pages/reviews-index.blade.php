@@ -116,25 +116,10 @@
                         @error('video_file')<div class="error-text">{{ $message }}</div>@enderror
                     </div>
                     <div class="field">
-                        <label class="checkbox">
-                            <input type="checkbox" name="consent_data" value="1" required>
-                            <span>
-                                {{ legal('consent_review_data', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения и публикации отзыва') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
-                            </span>
-                        </label>
-                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
-                        <label class="checkbox" style="margin-top:8px">
-                            <input type="checkbox" name="consent_publish" value="1" required>
-                            <span>
-                                {{ legal('consent_review', 'lead', 'Даю согласие на публикацию отзыва и использование моего имени, текста, фото- и видеоматериалов') }}.
-                                <a href="{{ route('legal.show', legal('review_consent', 'slug', 'soglasie-na-publikaciyu-otzyva')) }}" target="_blank" rel="noopener">Подробнее</a>
-                            </span>
-                        </label>
-                        <label class="checkbox" style="margin-top:8px">
-                            <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
-                        </label>
+                        @include('partials.consent-fields', [
+                            'dataText' => 'Даю согласие на обработку персональных данных в целях рассмотрения и публикации отзыва, до достижения целей обработки либо до отзыва согласия',
+                            'publishFallback' => 'Даю согласие на публикацию отзыва и использование моего имени, текста отзыва, фото- и видеоматериалов в информационных и маркетинговых целях; согласие можно отозвать в любое время',
+                        ])
                     </div>
                     <button class="btn btn--block" type="submit">Отправить на модерацию</button>
                     <p class="form-note" style="margin-top:14px">Согласие на публикацию можно отозвать в любое время; после отзыва публикация удаляется или обезличивается.</p>

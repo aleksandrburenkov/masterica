@@ -36,7 +36,7 @@
                         </div>
                         <label class="checkbox" style="margin-bottom:14px">
                             <input type="checkbox" name="consent_marketing" value="1" @checked(old('consent_marketing', $user->consent_marketing))>
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                            <span>{{ legal('consent_marketing', 'lead', 'Даю согласие на получение информационных и рекламных сообщений студии (необязательно); согласие можно отозвать в любое время') }}.</span>
                         </label>
                         <button class="btn" type="submit">Сохранить</button>
                     </form>

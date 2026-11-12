@@ -91,18 +91,12 @@
                         <div class="field"><label for="ct-phone">Телефон</label><input id="ct-phone" class="input" type="text" name="contact_phone" value="{{ old('contact_phone', auth()->user()?->phone) }}" required></div>
                         <div class="field"><label for="ct-email">Электронная почта</label><input id="ct-email" class="input" type="email" name="contact_email" value="{{ old('contact_email', auth()->user()?->email) }}" required></div>
                         <div class="field"><label for="ct-comment">Сообщение</label><textarea id="ct-comment" class="textarea @error('message') is-invalid @enderror" name="message" required>{{ old('message') }}</textarea>@error('message')<div class="error-text">{{ $message }}</div>@enderror</div>
-                        <label class="checkbox" style="margin-bottom:8px">
-                            <input type="checkbox" name="consent_data" value="1" required>
-                            <span>
-                                {{ legal('consent_contacts', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения обращения и направления ответа') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
-                            </span>
-                        </label>
-                        @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
-                        <label class="checkbox" style="margin-bottom:14px">
-                            <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
-                        </label>
+                        <div class="field">
+                            @include('partials.consent-fields', [
+                                'dataTextKey' => 'consent_contacts',
+                                'dataFallback' => 'Даю согласие на обработку персональных данных (фамилия и имя, номер телефона, адрес электронной почты) в целях рассмотрения обращения и направления ответа, до достижения целей обработки либо до отзыва согласия',
+                            ])
+                        </div>
                         <button class="btn btn--block" type="submit">Отправить</button>
                     </form>
                 </div>
