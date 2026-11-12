@@ -196,4 +196,21 @@ class PagesSettingsTest extends TestCase
         $this->assertTrue(Settings::bool('pages.maintenance_enabled'));
         $this->assertSame('Идут работы', setting('pages.maintenance_text'));
     }
+
+    public function test_toggling_global_maintenance_applies_immediately_without_saving(): void
+    {
+        $this->seed();
+
+        $this->actingAs(User::where('email', 'owner@korni.local')->firstOrFail());
+
+        Livewire::test(PagesSettings::class)
+            ->fillForm(['maintenance_enabled' => true]);
+
+        $this->assertTrue(Settings::bool('pages.maintenance_enabled'));
+
+        Livewire::test(PagesSettings::class)
+            ->fillForm(['maintenance_enabled' => false]);
+
+        $this->assertFalse(Settings::bool('pages.maintenance_enabled'));
+    }
 }

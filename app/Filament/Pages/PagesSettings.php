@@ -81,17 +81,29 @@ class PagesSettings extends Page implements HasTable
                 ->description('Одним переключателем скрывает содержимое всех страниц сайта от посетителей. Действует на весь сайт сразу, без настройки отдельных страниц. Владелец сайта, авторизованный в админ-панели, видит сайт как обычно.')
                 ->schema([
                     Toggle::make('maintenance_enabled')
-                        ->label('Скрыть весь сайт от посетителей')
-                        ->helperText('Включите на время обновлений и правок на продакшене. Посетители увидят страницу с текстом ниже.')
+                        ->label('Режим модернизации включён')
+                        ->helperText('Включите на время обновлений и правок. Посетители сразу увидят страницу с текстом ниже. Применяется мгновенно — нажимать «Сохранить» не нужно.')
                         ->onColor('danger')
                         ->offColor('success')
+                        ->live()
+                        ->afterStateUpdated(function (?bool $state): void {
+                            Settings::set('pages.maintenance_enabled', $state ? '1' : '0', 'pages', 'bool');
+
+                            Notification::make()
+                                ->title($state ? 'Режим модернизации включён' : 'Режим модернизации выключен')
+                                ->body($state
+                                    ? 'Посетители видят страницу «на техническом обслуживании». Вы в админ-панели видите сайт как обычно.'
+                                    : 'Сайт снова доступен всем посетителям.')
+                                ->{$state ? 'warning' : 'success'}()
+                                ->send();
+                        })
                         ->columnSpanFull(),
                 ]),
-            Section::make('Страница на техническом обслуживании')
-                ->description('Этот текст видят посетители неактивных страниц. Изменение применяется сразу ко всем неактивным страницам.')
+            Section::make('Текст страницы «на техническом обслуживании»')
+                ->description('Этот текст видят посетители, пока включён режим модернизации, а также на скрытых отдельных страницах. Чтобы применить изменения, нажмите «Сохранить».')
                 ->schema([
                     Textarea::make('maintenance_text')
-                        ->label('Текст для неактивных страниц')
+                        ->label('Текст для посетителей')
                         ->rows(3)
                         ->required()
                         ->columnSpanFull(),
@@ -106,7 +118,7 @@ class PagesSettings extends Page implements HasTable
         Settings::set('pages.maintenance_enabled', ($state['maintenance_enabled'] ?? false) ? '1' : '0', 'pages', 'bool');
         Settings::set('pages.maintenance_text', (string) ($state['maintenance_text'] ?? ''), 'pages', 'text');
 
-        Notification::make()->title('Настройки страниц сохранены')->success()->send();
+        Notification::make()->title('Текст страницы сохранён')->success()->send();
     }
 
     public function table(Table $table): Table
@@ -159,7 +171,7 @@ class PagesSettings extends Page implements HasTable
     public function getFormActions(): array
     {
         return [
-            Action::make('save')->label('Сохранить текст')->submit('save')->color('primary'),
+            Action::make('save')->label('Сохранить')->submit('save')->color('primary'),
         ];
     }
 
