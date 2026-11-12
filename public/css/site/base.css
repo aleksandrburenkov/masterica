@@ -393,7 +393,7 @@ ul.clean {
     font-weight: 500;
     color: var(--ink);
     margin-bottom: 8px;
-    font-size: 14px;
+    font-size: 13px;
 }
 .field .hint {
     color: var(--muted);

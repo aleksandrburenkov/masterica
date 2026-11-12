@@ -911,6 +911,14 @@ video.hero__video {
     height: 22px;
 }
 
+/* Кнопка «наверх» — только для десктопа.
+   Брейкпоинт совпадает с переключением навигации (.nav-links / .burger). */
+@media (max-width: 1080px) {
+    .to-top {
+        display: none;
+    }
+}
+
 /* Анимация появления */
 [data-reveal] {
     opacity: 0;
@@ -1325,7 +1333,8 @@ video.hero__video {
 
 @media (max-width: 426px) {
     .master-card {
-        align-items: start;
+        /* align-items: start; */
+        grid-template-columns: 1fr;
     }
     .master-card img {
         height: 160px;

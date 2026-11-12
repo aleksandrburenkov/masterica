@@ -459,13 +459,15 @@
         });
     }
 
-    /* --- Кнопка «наверх»: появляется при прокрутке, скрывается через 3 с покоя --- */
+    /* --- Кнопка «наверх»: только десктоп (тот же брейкпоинт, что и в CSS) --- */
     function initBackToTop() {
         var btn = document.querySelector("[data-to-top]");
         if (!btn) return;
 
+        var mobileQuery = window.matchMedia("(max-width: 1080px)");
         var idleTimer = null;
         var minScroll = 400;
+        var bound = false;
 
         function show() {
             btn.classList.add("is-visible");
@@ -486,23 +488,47 @@
             }
         }
 
-        window.addEventListener("scroll", onActivity, { passive: true });
-        ["mousemove", "touchstart", "keydown"].forEach(function (evt) {
-            window.addEventListener(
-                evt,
-                function () {
-                    if (window.scrollY > minScroll) {
-                        show();
-                        scheduleHide();
-                    }
-                },
-                { passive: true },
-            );
-        });
-
-        btn.addEventListener("click", function () {
+        function onClick() {
             window.scrollTo({ top: 0, behavior: "smooth" });
-        });
+        }
+
+        function enable() {
+            if (bound) return;
+            bound = true;
+            window.addEventListener("scroll", onActivity, { passive: true });
+            window.addEventListener("mousemove", onActivity, { passive: true });
+            window.addEventListener("touchstart", onActivity, { passive: true });
+            window.addEventListener("keydown", onActivity, { passive: true });
+            btn.addEventListener("click", onClick);
+        }
+
+        function disable() {
+            if (!bound) return;
+            bound = false;
+            window.removeEventListener("scroll", onActivity);
+            window.removeEventListener("mousemove", onActivity);
+            window.removeEventListener("touchstart", onActivity);
+            window.removeEventListener("keydown", onActivity);
+            btn.removeEventListener("click", onClick);
+            clearTimeout(idleTimer);
+            btn.classList.remove("is-visible");
+        }
+
+        function sync() {
+            if (mobileQuery.matches) {
+                disable();
+            } else {
+                enable();
+            }
+        }
+
+        sync();
+
+        if (mobileQuery.addEventListener) {
+            mobileQuery.addEventListener("change", sync);
+        } else if (mobileQuery.addListener) {
+            mobileQuery.addListener(sync);
+        }
     }
 
     /* --- Плавные переходы к якорям --- */
