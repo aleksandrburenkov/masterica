@@ -15,6 +15,13 @@ class LegalDocumentAdminEditingTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed();
+        $this->seedLegalDocuments();
+    }
+
     public function test_editing_a_seeded_document_saves_without_duplicate_key_error(): void
     {
         $this->seed();

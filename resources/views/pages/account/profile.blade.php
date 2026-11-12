@@ -36,7 +36,7 @@
                         </div>
                         <label class="checkbox" style="margin-bottom:14px">
                             <input type="checkbox" name="consent_marketing" value="1" @checked(old('consent_marketing', $user->consent_marketing))>
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                            <span>Согласен(на) получать новости и предложения студии (необязательно)</span>
                         </label>
                         <button class="btn" type="submit">Сохранить</button>
                     </form>
@@ -46,10 +46,10 @@
                         <p class="muted" style="font-size:15px">Мы собираем только минимум, необходимый для занятий, заказов и доступа к курсам. Аккаунт оформляет совершеннолетнее лицо; отдельный аккаунт ребёнка не создаётся.</p>
                         <div class="note-strip">
                             Данные обрабатываются в соответствии с
-                            <a href="{{ route('legal.show', legal('privacy_policy', 'slug', 'politika-konfidencialnosti')) }}" target="_blank" rel="noopener">Политикой конфиденциальности</a>
-                            и <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Согласием на обработку персональных данных</a>.
+                            <a href="{{ route('legal.show', 'politika-konfidencialnosti') }}" target="_blank" rel="noopener">Политикой конфиденциальности</a>
+                            и <a href="{{ route('legal.show', 'politika-konfidencialnosti') }}" target="_blank" rel="noopener">Согласием на обработку персональных данных</a>.
                             Данные участников-несовершеннолетних обрабатываются исключительно в объёме, необходимом для оказания услуги, на основании согласия законного представителя.
-                            Условия работы платформы — в <a href="{{ route('legal.show', legal('platform_terms', 'slug', 'polzovatelskoe-soglashenie')) }}" target="_blank" rel="noopener">Пользовательском соглашении</a>.
+                            Условия работы платформы — в <a href="{{ route('legal.show', 'offer') }}" target="_blank" rel="noopener">Пользовательском соглашении</a>.
                         </div>
                     </div>
                 </div>

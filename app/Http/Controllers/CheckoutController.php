@@ -29,8 +29,6 @@ class CheckoutController extends Controller
             'items' => $items,
             'subtotal' => $this->cart->subtotalCents(),
             'deliveryOptions' => $this->deliveryOptions(),
-            'prepDays' => setting('rules.delivery_prep_days', '3–5'),
-            'paymentNote' => setting('rules.payment_note'),
         ]);
     }
 

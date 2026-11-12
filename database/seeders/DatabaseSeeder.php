@@ -11,10 +11,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // Production-safe content: studio settings, legal documents, catalogue and course.
+        // Production-safe content: studio settings and catalogue.
+        // Правовые документы создаются вручную через админ-панель.
         $this->call([
             SettingsSeeder::class,
-            LegalDocumentsSeeder::class,
             CatalogSeeder::class,
         ]);
 

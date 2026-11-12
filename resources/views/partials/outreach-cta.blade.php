@@ -85,8 +85,6 @@
                             @error('request_masterclass')
                                 <div class="error-text">{{ $message }}</div>
                             @enderror
-                            <p class="form-note" style="margin-top:8px">Активных сеансов пока нет. Отправьте запрос —
-                                студия сообщит о новых датах.</p>
                         </div>
                     @endif
 
@@ -106,10 +104,6 @@
                         @error('workshop_session_id')
                             <div class="error-text">{{ $message }}</div>
                         @enderror
-                        @if ($ctaSessions->isEmpty())
-                            <p class="form-note" style="margin-top:8px">Свободных дат для записи пока нет. Свяжитесь со
-                                студией по телефону — подберём время.</p>
-                        @endif
                     </div>
 
                     <div class="field">
@@ -130,8 +124,8 @@
                         <label class="checkbox">
                             <input type="checkbox" name="consent_data" value="1" required>
                             <span>
-                                {{ legal('consent_contacts', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения заявки и связи со мной') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'politika-konfidencialnosti')) }}"
+                                Даю согласие на обработку персональных данных для рассмотрения заявки и связи со мной.
+                                <a href="{{ route('legal.show', 'politika-konfidencialnosti') }}"
                                     target="_blank" rel="noopener">Условия обработки</a>
                             </span>
                         </label>
@@ -140,15 +134,11 @@
                         @enderror
                         <label class="checkbox" style="margin-top:8px">
                             <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                            <span>Согласен(на) получать новости и предложения студии (необязательно)</span>
                         </label>
                     </div>
 
                     <button type="submit" class="btn btn--block" @disabled(!$requestMode && $ctaSessions->isEmpty())>Записаться</button>
-                    <p class="form-note" style="margin-top:14px">Заявка не является заключённым договором до её
-                        подтверждения студией. Порядок записи и оплаты — в <a
-                            href="{{ route('legal.show', legal('booking_rules', 'slug', 'pravila-zapisi-i-zakaza')) }}"
-                            target="_blank" rel="noopener">Правилах записи</a>.</p>
                 </form>
             </div>
         </div>

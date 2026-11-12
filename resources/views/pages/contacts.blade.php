@@ -94,14 +94,14 @@
                         <label class="checkbox" style="margin-bottom:8px">
                             <input type="checkbox" name="consent_data" value="1" required>
                             <span>
-                                {{ legal('consent_contacts', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения обращения и направления ответа') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                                Даю согласие на обработку персональных данных для рассмотрения обращения и направления ответа.
+                                <a href="{{ route('legal.show', 'politika-konfidencialnosti') }}" target="_blank" rel="noopener">Условия обработки</a>
                             </span>
                         </label>
                         @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
                         <label class="checkbox" style="margin-bottom:14px">
                             <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                            <span>Согласен(на) получать новости и предложения студии (необязательно)</span>
                         </label>
                         <button class="btn btn--block" type="submit">Отправить</button>
                     </form>

@@ -24,13 +24,6 @@ use Illuminate\Http\Request;
  */
 class SitePages
 {
-    /** Маршруты правовых документов, у которых публичный адрес задан ключом. */
-    private const LEGAL_ROUTE_KEYS = [
-        'legal.privacy' => 'privacy_policy',
-        'legal.consent' => 'consent_personal_data',
-        'legal.rules' => 'booking_rules',
-    ];
-
     /**
      * Статические страницы сайта.
      *
@@ -158,12 +151,6 @@ class SitePages
             return $document instanceof LegalDocument
                 ? self::findBySource($document)
                 : null;
-        }
-
-        if (isset(self::LEGAL_ROUTE_KEYS[$name])) {
-            $document = LegalDocuments::get(self::LEGAL_ROUTE_KEYS[$name]);
-
-            return $document !== null ? self::findBySource($document) : null;
         }
 
         $key = self::routeKeyMap()[$name] ?? null;

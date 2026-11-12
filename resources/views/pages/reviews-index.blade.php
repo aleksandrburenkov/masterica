@@ -119,31 +119,29 @@
                         <label class="checkbox">
                             <input type="checkbox" name="consent_data" value="1" required>
                             <span>
-                                {{ legal('consent_review_data', 'lead', 'Даю согласие на обработку персональных данных для рассмотрения и публикации отзыва') }}.
-                                <a href="{{ route('legal.show', legal('consent_personal_data', 'slug', 'soglasie-na-obrabotku-dannyh')) }}" target="_blank" rel="noopener">Условия обработки</a>
+                                Даю согласие на обработку персональных данных для рассмотрения и публикации отзыва.
+                                <a href="{{ route('legal.show', 'politika-konfidencialnosti') }}" target="_blank" rel="noopener">Условия обработки</a>
                             </span>
                         </label>
                         @error('consent_data')<div class="error-text">{{ $message }}</div>@enderror
                         <label class="checkbox" style="margin-top:8px">
                             <input type="checkbox" name="consent_publish" value="1" required>
                             <span>
-                                {{ legal('consent_review', 'lead', 'Даю согласие на публикацию отзыва и использование моего имени, текста, фото- и видеоматериалов') }}.
-                                <a href="{{ route('legal.show', legal('review_consent', 'slug', 'soglasie-na-publikaciyu-otzyva')) }}" target="_blank" rel="noopener">Подробнее</a>
+                                Даю согласие на публикацию отзыва и использование моего имени, текста, фото- и видеоматериалов.
+                                <a href="{{ route('legal.show', 'offer') }}" target="_blank" rel="noopener">Подробнее</a>
                             </span>
                         </label>
                         <label class="checkbox" style="margin-top:8px">
                             <input type="checkbox" name="consent_marketing" value="1">
-                            <span>{{ legal('consent_marketing', 'lead', 'Согласен(на) получать новости и предложения студии (необязательно)') }}</span>
+                            <span>Согласен(на) получать новости и предложения студии (необязательно)</span>
                         </label>
                     </div>
                     <button class="btn btn--block" type="submit">Отправить на модерацию</button>
-                    <p class="form-note" style="margin-top:14px">Согласие на публикацию можно отозвать в любое время; после отзыва публикация удаляется или обезличивается.</p>
                 </form>
             @else
                 <div class="card center">
                     <p class="lead-muted">Оставлять отзывы могут только зарегистрированные пользователи. Войдите — и вернитесь к форме.</p>
                     <a class="btn" href="{{ route('login', ['redirect' => route('reviews.index').'#leave-review']) }}">Войти и оставить отзыв</a>
-                    <p class="form-note" style="margin-top:14px">Нет аккаунта? <a href="{{ route('register') }}">Создайте</a> — это займёт минуту.</p>
                 </div>
             @endauth
         </div>

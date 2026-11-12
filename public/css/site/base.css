@@ -683,14 +683,6 @@ ul.clean {
     border-color: #e88;
 }
 
-.form-note {
-    font-size: 13px;
-    color: var(--muted);
-    background: var(--bg-2);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-}
-
 /* --- Flash --- */
 .flash {
     border-radius: var(--radius-sm);

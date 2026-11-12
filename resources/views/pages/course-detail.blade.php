@@ -70,7 +70,6 @@
                                     @csrf
                                     <button class="btn btn--block" type="submit">Получить доступ к курсу</button>
                                 </form>
-                                <p class="form-note" style="margin-top:14px">Оформляя доступ, вы принимаете <a href="{{ route('legal.show', legal('license_terms', 'slug', 'licenzionnoe-soglashenie')) }}" target="_blank" rel="noopener">Лицензионное соглашение</a> и <a href="{{ route('legal.show', legal('platform_terms', 'slug', 'polzovatelskoe-soglashenie')) }}" target="_blank" rel="noopener">Пользовательское соглашение</a>. Оплата означает предоставление права доступа к материалам курса, а не передачу прав на контент. Доступ открывается после подтверждения оплаты.</p>
                             @endif
                         @else
                             <a class="btn btn--block" href="{{ route('login', ['redirect' => url()->current()]) }}">Войти и записаться</a>

@@ -15,6 +15,7 @@ class PublicPagesTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+        $this->seedLegalDocuments();
     }
 
     public function test_home_page_loads(): void
@@ -41,9 +42,6 @@ class PublicPagesTest extends TestCase
             'courses' => ['courses.index'],
             'reviews' => ['reviews.index'],
             'guides' => ['guides.index'],
-            'privacy' => ['legal.privacy'],
-            'consent' => ['legal.consent'],
-            'rules' => ['legal.rules'],
         ];
     }
 

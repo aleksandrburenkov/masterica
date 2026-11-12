@@ -19,27 +19,20 @@ class LegalDocumentsTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+        $this->seedLegalDocuments();
     }
 
-    /** @return array<string, array{string}> */
+    /**
+     * Правовые документы заводит владелец через админ-панель; в проекте их три.
+     *
+     * @return array<string, array{string}>
+     */
     public static function requiredKeys(): array
     {
         return [
             'privacy_policy' => ['privacy_policy'],
-            'consent_personal_data' => ['consent_personal_data'],
-            'booking_rules' => ['booking_rules'],
-            'offer_terms' => ['offer_terms'],
-            'license_terms' => ['license_terms'],
-            'outreach_terms' => ['outreach_terms'],
-            'review_consent' => ['review_consent'],
-            'platform_terms' => ['platform_terms'],
-            'consent_registration' => ['consent_registration'],
-            'consent_booking' => ['consent_booking'],
-            'consent_checkout' => ['consent_checkout'],
-            'consent_outreach' => ['consent_outreach'],
-            'consent_contacts' => ['consent_contacts'],
-            'consent_review' => ['consent_review'],
-            'consent_marketing' => ['consent_marketing'],
+            'public_offer' => ['public_offer'],
+            'personal_data' => ['personal_data'],
         ];
     }
 
@@ -70,29 +63,21 @@ class LegalDocumentsTest extends TestCase
 
     public function test_public_legal_pages_render_persisted_documents(): void
     {
-        $this->get(route('legal.privacy'))
+        $this->get(route('legal.show', 'politika-konfidencialnosti'))
             ->assertOk()
             ->assertSee('Политика в отношении обработки персональных данных')
             ->assertSee('152-ФЗ');
-
-        $this->get(route('legal.consent'))
-            ->assertOk()
-            ->assertSee('Согласие на обработку персональных данных');
-
-        $this->get(route('legal.rules'))
-            ->assertOk()
-            ->assertSee('Правила записи на мастер-классы и оформления заказов');
     }
 
-    public function test_generic_document_route_renders_offer_and_license(): void
+    public function test_generic_document_route_renders_offer_and_payment(): void
     {
-        $this->get(route('legal.show', 'publichnaya-oferta'))
+        $this->get(route('legal.show', 'offer'))
             ->assertOk()
-            ->assertSee('Публичная оферта');
+            ->assertSee('Пользовательское соглашение');
 
-        $this->get(route('legal.show', 'licenzionnoe-soglashenie'))
+        $this->get(route('legal.show', 'personal'))
             ->assertOk()
-            ->assertSee('Лицензионное соглашение');
+            ->assertSee('Оплата и возврат');
     }
 
     public function test_forms_expose_required_consent_checkboxes_with_document_links(): void
@@ -130,7 +115,7 @@ class LegalDocumentsTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee(route('legal.show', 'politika-konfidencialnosti'), false)
-            ->assertSee(route('legal.show', 'publichnaya-oferta'), false)
+            ->assertSee(route('legal.show', 'offer'), false)
             ->assertSee('152-ФЗ');
     }
 
@@ -158,7 +143,7 @@ class LegalDocumentsTest extends TestCase
 
         $this->assertSame('Обновлённая аннотация политики конфиденциальности.', LegalDocuments::get('privacy_policy')?->lead);
 
-        $this->get(route('legal.privacy'))
+        $this->get(route('legal.show', 'politika-konfidencialnosti'))
             ->assertOk()
             ->assertSee('Обновлённая аннотация политики конфиденциальности.');
     }

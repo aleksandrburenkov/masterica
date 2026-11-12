@@ -71,7 +71,6 @@
                         <div class="summary__row"><span>Доставка</span><span>рассчитывается при оформлении</span></div>
                         <div class="summary__row total"><span>К оплате</span><span data-cart-total>{{ money($subtotal) }}</span></div>
                         <a class="btn btn--block" style="margin-top:16px" href="{{ route('checkout.index') }}">Оформить заказ</a>
-                        <p class="form-note" style="margin-top:14px">Корзина не резервирует товар — остаток проверяется при оформлении.</p>
                     </div>
                 </div>
             @endif

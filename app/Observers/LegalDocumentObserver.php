@@ -6,9 +6,8 @@ use App\Models\LegalDocument;
 use App\Support\SitePages;
 
 /**
- * Синхронизирует правовые документы с реестром страниц: они доступны как по
- * адресу /dokumenty/{слаг}, так и по «дружественным» маршрутам
- * (/politika-konfidencialnosti и т.п.).
+ * Синхронизирует правовые документы с реестром страниц: каждый документ
+ * доступен по адресу /dokumenty/{слаг}.
  */
 class LegalDocumentObserver
 {
