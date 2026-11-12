@@ -7,6 +7,7 @@ use App\Support\LegalDocuments;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 /**
@@ -139,5 +140,10 @@ class LegalDocument extends Model
     public function scopeProductionReady($query)
     {
         return $query->where('is_production_ready', true);
+    }
+
+    public function sitePage(): MorphOne
+    {
+        return $this->morphOne(SitePage::class, 'source');
     }
 }

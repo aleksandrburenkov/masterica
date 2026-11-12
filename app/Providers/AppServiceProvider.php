@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\ContentPage;
+use App\Models\LegalDocument;
 use App\Models\Order;
+use App\Observers\ContentPageObserver;
+use App\Observers\LegalDocumentObserver;
 use App\Observers\OrderObserver;
 use App\Support\LegalDocuments;
 use Filament\Actions\Action;
@@ -39,6 +43,11 @@ class AppServiceProvider extends ServiceProvider
         // в админке) и при удалении: списание при выполнении, освобождение
         // резерва при отмене/возврате, возврат остатка при отмене выполненного.
         Order::observe(OrderObserver::class);
+
+        // Реестр страниц сайта (раздел «Страницы сайта») синхронизируется с
+        // материалами и правовыми документами при любом их изменении.
+        ContentPage::observe(ContentPageObserver::class);
+        LegalDocument::observe(LegalDocumentObserver::class);
 
         Paginator::defaultView('vendor.pagination.site');
         Paginator::defaultSimpleView('vendor.pagination.site');

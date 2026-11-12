@@ -36,7 +36,7 @@ class HomeController extends Controller
             ->get();
 
         $masters = Master::query()->active()->take(1)->get();
-        $guides = ContentPage::query()->published()->orderBy('sort')->take(2)->get();
+        $guides = ContentPage::query()->published()->active()->orderBy('sort')->take(2)->get();
 
         return view('home', compact('masterclasses', 'sessions', 'reviews', 'masters', 'guides'));
     }

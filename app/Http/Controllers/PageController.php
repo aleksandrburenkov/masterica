@@ -29,7 +29,7 @@ class PageController extends Controller
 
     public function guides(): View
     {
-        $guides = ContentPage::query()->published()->orderBy('sort')->get();
+        $guides = ContentPage::query()->published()->active()->orderBy('sort')->get();
 
         return view('pages.guides-index', compact('guides'));
     }
@@ -40,6 +40,7 @@ class PageController extends Controller
 
         $others = ContentPage::query()
             ->published()
+            ->active()
             ->whereKeyNot($page->getKey())
             ->take(2)
             ->get();

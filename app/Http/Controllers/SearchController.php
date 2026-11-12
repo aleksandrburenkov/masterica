@@ -35,7 +35,7 @@ class SearchController extends Controller
                 ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('short_description', 'like', $like))
                 ->take(6)->get();
 
-            $guides = ContentPage::query()->published()
+            $guides = ContentPage::query()->published()->active()
                 ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('excerpt', 'like', $like))
                 ->take(6)->get();
         }

@@ -22,5 +22,9 @@ class DatabaseSeeder extends Seeder
         if (! app()->environment('production')) {
             $this->call(DemoSeeder::class);
         }
+
+        // Единый реестр страниц сайта: статические маршруты, материалы и
+        // правовые документы. Выполняется последним, чтобы собрать все страницы.
+        $this->call(SitePagesSeeder::class);
     }
 }

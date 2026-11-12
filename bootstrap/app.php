@@ -2,6 +2,7 @@
 
 use App\Console\Commands\ProcessReviewVideosCommand;
 use App\Exceptions\SlugMovedException;
+use App\Http\Middleware\EnsurePageIsActive;
 use App\Http\Middleware\NoStorePrivate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'no-store' => NoStorePrivate::class,
+        ]);
+
+        // Неактивные страницы реестра показывают посетителю страницу
+        // «на техническом обслуживании» вместо своего содержимого.
+        $middleware->web(append: [
+            EnsurePageIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

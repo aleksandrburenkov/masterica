@@ -47,7 +47,7 @@ class SitemapController extends Controller
         foreach (Course::query()->published()->get() as $item) {
             $urls[] = ['loc' => route('courses.show', $item->slug), 'changefreq' => 'monthly', 'priority' => '0.7', 'lastmod' => $item->updated_at->toDateString()];
         }
-        foreach (ContentPage::query()->published()->get() as $item) {
+        foreach (ContentPage::query()->published()->active()->get() as $item) {
             $urls[] = ['loc' => route('guides.show', $item->slug), 'changefreq' => 'monthly', 'priority' => '0.5', 'lastmod' => $item->updated_at->toDateString()];
         }
         foreach (LegalDocuments::all() as $document) {
