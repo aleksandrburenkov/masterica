@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\Bookings\BookingResource;
+use App\Filament\Resources\CourseEnrollments\CourseEnrollmentResource;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\OutreachRequests\OutreachRequestResource;
 use App\Filament\Support\NavigationGroupIndicator;
@@ -45,7 +46,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-grouped-requests.css')).'">')
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
             ->navigationGroups([
-                NavigationGroup::make('Блок курсы'),
+                NavigationGroup::make('Блок курсы')
+                    ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([
+                        CourseEnrollmentResource::class,
+                    ])),
                 NavigationGroup::make('Магазин')
                     ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([
                         OrderResource::class,

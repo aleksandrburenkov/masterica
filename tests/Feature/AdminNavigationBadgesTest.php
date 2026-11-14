@@ -2,18 +2,24 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EnrollmentStatus;
 use App\Enums\OrderStatus;
 use App\Enums\OutreachStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\ReviewStatus;
 use App\Enums\UserRole;
 use App\Filament\Resources\ContactRequests\ContactRequestResource;
 use App\Filament\Resources\ContactRequests\Pages\EditContactRequest;
+use App\Filament\Resources\CourseEnrollments\CourseEnrollmentResource;
+use App\Filament\Resources\CourseEnrollments\Pages\EditCourseEnrollment;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\OutreachRequests\OutreachRequestResource;
 use App\Filament\Resources\Reviews\Pages\ListReviews;
 use App\Filament\Resources\Reviews\ReviewResource;
 use App\Filament\Support\NavigationGroupIndicator;
 use App\Models\ContactRequest;
+use App\Models\Course;
+use App\Models\CourseEnrollment;
 use App\Models\Order;
 use App\Models\OutreachRequest;
 use App\Models\Review;
@@ -81,6 +87,25 @@ class AdminNavigationBadgesTest extends TestCase
         ], $attributes));
     }
 
+    private function course(): Course
+    {
+        return Course::create([
+            'title' => 'Курс для проверки маркера',
+            'slug' => 'course-'.uniqid(),
+            'short_description' => 'Описание курса',
+        ]);
+    }
+
+    private function enrollment(array $attributes = []): CourseEnrollment
+    {
+        return CourseEnrollment::create(array_merge([
+            'user_id' => $this->user()->id,
+            'course_id' => $this->course()->id,
+            'status' => EnrollmentStatus::PendingPayment,
+            'payment_status' => PaymentStatus::Unpaid,
+        ], $attributes));
+    }
+
     public function test_contact_request_badge_counts_only_new_records(): void
     {
         $this->assertNull(ContactRequestResource::getNavigationBadge());
@@ -145,6 +170,61 @@ class AdminNavigationBadgesTest extends TestCase
 
         $this->assertSame('fi-nav-group-has-new', $attributes['class']);
         $this->assertSame('2', $attributes['data-nav-new-count']);
+    }
+
+    public function test_course_enrollment_badge_counts_pending_course_requests(): void
+    {
+        $this->assertNull(CourseEnrollmentResource::getNavigationBadge());
+
+        $this->enrollment();
+        $this->enrollment();
+        $this->enrollment(['status' => EnrollmentStatus::Active, 'payment_status' => PaymentStatus::Paid]);
+
+        $this->assertSame('2', CourseEnrollmentResource::getNavigationBadge());
+    }
+
+    public function test_course_enrollment_badge_disappears_when_access_is_granted(): void
+    {
+        $enrollment = $this->enrollment();
+
+        $this->assertSame('1', CourseEnrollmentResource::getNavigationBadge());
+
+        $enrollment->update(['status' => EnrollmentStatus::Active, 'payment_status' => PaymentStatus::Paid]);
+
+        $this->assertNull(CourseEnrollmentResource::getNavigationBadge());
+    }
+
+    public function test_courses_group_marker_follows_pending_course_requests(): void
+    {
+        $group = collect(Filament::getPanel('admin')->getNavigationGroups())
+            ->first(fn ($group): bool => $group instanceof NavigationGroup && $group->getLabel() === 'Блок курсы');
+
+        $this->assertInstanceOf(NavigationGroup::class, $group);
+        $this->assertSame([], $group->getExtraSidebarAttributes());
+
+        $this->enrollment();
+
+        $attributes = $group->getExtraSidebarAttributes();
+
+        $this->assertSame('fi-nav-group-has-new', $attributes['class']);
+        $this->assertSame('1', $attributes['data-nav-new-count']);
+    }
+
+    public function test_granting_course_access_from_the_admin_dispatches_sidebar_refresh(): void
+    {
+        $this->actingAs($this->user());
+
+        $enrollment = $this->enrollment();
+
+        $this->assertSame('1', CourseEnrollmentResource::getNavigationBadge());
+
+        Livewire::test(EditCourseEnrollment::class, ['record' => $enrollment->getRouteKey()])
+            ->fillForm(['status' => EnrollmentStatus::Active->value, 'payment_status' => PaymentStatus::Paid->value])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertDispatched('refresh-sidebar');
+
+        $this->assertNull(CourseEnrollmentResource::getNavigationBadge());
     }
 
     public function test_registered_group_marker_follows_unread_records(): void

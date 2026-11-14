@@ -2,21 +2,26 @@
 
 namespace App\Filament\Resources\CourseEnrollments;
 
+use App\Enums\EnrollmentStatus;
 use App\Filament\Resources\CourseEnrollments\Pages\CreateCourseEnrollment;
 use App\Filament\Resources\CourseEnrollments\Pages\EditCourseEnrollment;
 use App\Filament\Resources\CourseEnrollments\Pages\ListCourseEnrollments;
 use App\Filament\Resources\CourseEnrollments\Schemas\CourseEnrollmentForm;
 use App\Filament\Resources\CourseEnrollments\Tables\CourseEnrollmentsTable;
+use App\Filament\Support\Concerns\HasUnreadBadge;
 use App\Models\CourseEnrollment;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class CourseEnrollmentResource extends Resource
 {
+    use HasUnreadBadge;
+
     protected static ?string $model = CourseEnrollment::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
@@ -37,6 +42,11 @@ class CourseEnrollmentResource extends Resource
     public static function table(Table $table): Table
     {
         return CourseEnrollmentsTable::configure($table);
+    }
+
+    public static function getUnreadBadgeQuery(): Builder
+    {
+        return static::getEloquentQuery()->where('status', EnrollmentStatus::PendingPayment->value);
     }
 
     public static function getPages(): array
