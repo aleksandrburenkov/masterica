@@ -47,12 +47,25 @@
         </div>
 
         <div class="header-nav">
-            <nav class="nav-links" aria-label="Основная навигация">
+            <nav id="site-nav" class="nav-links" aria-label="Основная навигация"
+                data-label-desktop="Основная навигация"
+                data-label-mobile="Мобильная навигация"
+                data-label-open="Мобильное меню">
                 @foreach ($navItems as $item)
                     @if (Route::has($item['route']))
                         <a href="{{ route($item['route']) }}" @class(['is-active' => request()->routeIs($item['route'] . '*')])>{{ $item['label'] }}</a>
                     @endif
                 @endforeach
+
+                <div class="nav-links__extra">
+                    @auth
+                        <a href="{{ route('account.dashboard') }}">Личный кабинет</a>
+                        <a href="{{ route('account.profile') }}">Профиль</a>
+                    @else
+                        <a href="{{ route('login') }}">Войти</a>
+                        <a href="{{ route('register') }}">Создать аккаунт</a>
+                    @endauth
+                </div>
             </nav>
 
             <div class="header-user">
@@ -85,25 +98,11 @@
 
                 @include('partials.cart-widget')
 
-                <button type="button" class="burger" data-burger aria-label="Меню" aria-expanded="false">
+                <button type="button" class="burger" data-burger aria-controls="site-nav" aria-label="Открыть меню" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
         </div>
-
-        <nav class="mobile-menu" aria-label="Мобильная навигация">
-            @foreach ($navItems as $item)
-                @if (Route::has($item['route']))
-                    <a href="{{ route($item['route']) }}">{{ $item['label'] }}</a>
-                @endif
-            @endforeach
-            @auth
-                <a href="{{ route('account.dashboard') }}">Личный кабинет</a>
-                <a href="{{ route('account.profile') }}">Профиль</a>
-            @else
-                <a href="{{ route('login') }}">Войти</a>
-                <a href="{{ route('register') }}">Создать аккаунт</a>
-            @endauth
-        </nav>
     </div>
 </header>
+<div class="menu-backdrop" data-menu-backdrop aria-hidden="true"></div>

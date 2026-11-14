@@ -215,12 +215,46 @@
 }
 
 /* Мобильное меню */
+.nav-links__extra {
+    display: none;
+}
+.menu-backdrop {
+    display: none;
+}
 .burger {
     display: none;
 }
 @media (max-width: 1080px) {
-    .nav-links {
+    .site-header {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: rgba(247, 248, 255, 0.96);
+    }
+    .site-header.menu-open {
+        background: transparent;
+        border-bottom-color: transparent;
+        box-shadow: none;
+        pointer-events: none;
+    }
+    .site-header.menu-open .header-top,
+    .site-header.menu-open .header-user > :not(.burger) {
         display: none;
+    }
+    .header-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .site-header.menu-open .header-nav {
+        padding: 0;
+        border-top-color: transparent;
+    }
+    .header-user {
+        position: relative;
+        z-index: 2;
+        justify-content: flex-end;
+    }
+    .site-header.menu-open .header-user {
+        padding-block: 10px;
     }
     .burger {
         display: inline-flex;
@@ -234,6 +268,7 @@
         border: 1.5px solid var(--line-2);
         background: #fff;
         cursor: pointer;
+        pointer-events: auto;
     }
     .burger span {
         display: block;
@@ -252,31 +287,85 @@
     .site-header.menu-open .burger span:nth-child(3) {
         transform: translateY(-7px) rotate(-45deg);
     }
-    .header-nav {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .header-user {
-        justify-content: flex-end;
-    }
-    .site-header .mobile-menu {
-        display: none;
-        flex-direction: column;
-        gap: 4px;
-        padding-bottom: 16px;
-    }
-    .site-header.menu-open .mobile-menu {
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1;
         display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 0;
+        width: 66.6667vw;
+        height: 100vh;
+        height: 100dvh;
+        margin: 0;
+        padding: calc(env(safe-area-inset-top, 0px) + 72px) 20px
+            calc(env(safe-area-inset-bottom, 0px) + 24px);
+        background: #fff;
+        box-shadow: -18px 0 44px rgba(24, 30, 72, 0.18);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        transform: translateX(100%);
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+            transform var(--speed) var(--ease),
+            visibility var(--speed) var(--ease);
     }
-    .site-header .mobile-menu a {
-        padding: 12px 4px;
+    .site-header.menu-open .nav-links {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+    }
+    .nav-links a {
+        padding: 14px 4px;
         border-bottom: 1px solid var(--line);
-        font-weight: 500;
         color: var(--ink-soft);
+        font-size: 16px;
+        font-weight: 500;
     }
-}
-.mobile-menu {
-    display: none;
+    .nav-links a::after {
+        display: none;
+    }
+    .nav-links a.is-active {
+        color: var(--ink);
+    }
+    .nav-links__extra {
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+        padding-top: 18px;
+    }
+    .nav-links__extra a {
+        font-size: 15px;
+    }
+    .menu-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 96;
+        background: rgba(20, 26, 64, 0.24);
+        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+            opacity var(--speed) var(--ease),
+            visibility var(--speed) var(--ease);
+    }
+    body.menu-open .menu-backdrop {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+    html.menu-open,
+    body.menu-open {
+        overflow: hidden;
+    }
 }
 @media (max-width: 620px) {
     .header-phone {

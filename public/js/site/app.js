@@ -451,12 +451,86 @@
     function initMobileMenu() {
         var header = document.querySelector(".site-header");
         var burger = document.querySelector("[data-burger]");
-        if (!header || !burger) return;
+        var nav = document.querySelector(".nav-links");
+        var backdrop = document.querySelector("[data-menu-backdrop]");
+        if (!header || !burger || !nav) return;
+
+        var mobileQuery = window.matchMedia("(max-width: 1080px)");
+        var isOpen = false;
+
+        function syncLabels() {
+            var mobile = mobileQuery.matches;
+            var navLabel = mobile
+                ? isOpen
+                    ? nav.dataset.labelOpen
+                    : nav.dataset.labelMobile
+                : nav.dataset.labelDesktop;
+
+            if (navLabel) {
+                nav.setAttribute("aria-label", navLabel);
+            }
+            burger.setAttribute(
+                "aria-label",
+                isOpen ? "Закрыть меню" : "Открыть меню",
+            );
+        }
+
+        function setOpen(open) {
+            if (open === isOpen) {
+                syncLabels();
+                return;
+            }
+            if (open && !mobileQuery.matches) return;
+
+            var wasOpen = isOpen;
+            isOpen = open;
+            header.classList.toggle("menu-open", open);
+            document.documentElement.classList.toggle("menu-open", open);
+            document.body.classList.toggle("menu-open", open);
+            burger.setAttribute("aria-expanded", open ? "true" : "false");
+            syncLabels();
+
+            if (!open && wasOpen && mobileQuery.matches) {
+                burger.focus({ preventScroll: true });
+            }
+        }
 
         burger.addEventListener("click", function () {
-            var open = header.classList.toggle("menu-open");
-            burger.setAttribute("aria-expanded", open ? "true" : "false");
+            setOpen(!isOpen);
         });
+
+        nav.addEventListener("click", function (e) {
+            if (e.target.closest("a")) {
+                setOpen(false);
+            }
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener("click", function () {
+                setOpen(false);
+            });
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && isOpen) {
+                setOpen(false);
+            }
+        });
+
+        function handleBreakpointChange() {
+            if (!mobileQuery.matches) {
+                setOpen(false);
+            }
+            syncLabels();
+        }
+
+        if (mobileQuery.addEventListener) {
+            mobileQuery.addEventListener("change", handleBreakpointChange);
+        } else if (mobileQuery.addListener) {
+            mobileQuery.addListener(handleBreakpointChange);
+        }
+
+        syncLabels();
     }
 
     /* --- Кнопка «наверх»: только десктоп (тот же брейкпоинт, что и в CSS) --- */
