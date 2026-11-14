@@ -38,7 +38,7 @@
                 <div data-reveal>
                     <h2>Что важно знать</h2>
                     <ul class="list-check">
-                        <li><x-ico name="check-circle" /><span>Обычное занятие длится {{ (int) (setting('pricing.workshop_duration_minutes', 120) / 60) }} часа, вместимость сеанса — {{ setting('pricing.workshop_capacity', 8) }} участников.</span></li>
+                        <li><x-ico name="check-circle" /><span>Обычное занятие длится 1,5–2 часа, вместимость сеанса — 8–12 человек.</span></li>
                         <li><x-ico name="check-circle" /><span>Уровень — начинающий; материалы включены в стоимость.</span></li>
                         <li><x-ico name="check-circle" /><span>Место резервируется на {{ setting('rules.hold_minutes', '15') }} минут во время оформления, затем запись подтверждается.</span></li>
                         <li><x-ico name="check-circle" /><span>{{ setting('rules.cancel_policy') }}</span></li>

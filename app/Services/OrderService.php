@@ -26,8 +26,8 @@ class OrderService
     public function deliveryCents(DeliveryMethod $method): int
     {
         return match ($method) {
-            DeliveryMethod::Pickup => Settings::int('pricing.delivery_pickup_cents', 0),
-            DeliveryMethod::CityDelivery => Settings::int('pricing.delivery_city_cents', 40000),
+            DeliveryMethod::Pickup => 0,
+            DeliveryMethod::CityDelivery => Settings::int('rules.delivery_city_cents', 40000),
         };
     }
 

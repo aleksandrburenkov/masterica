@@ -58,7 +58,6 @@ class StudioSettings extends Page
     public function form(Schema $schema): Schema
     {
         $studio = [];
-        $pricing = [];
         $rules = [];
 
         foreach (self::fields() as $name => $meta) {
@@ -105,7 +104,6 @@ class StudioSettings extends Page
             }
 
             match ($meta['group']) {
-                'pricing' => $pricing[] = $component,
                 'rules' => $rules[] = $component,
                 default => $studio[] = $component,
             };
@@ -113,7 +111,6 @@ class StudioSettings extends Page
 
         return $schema->components([
             Section::make('Студия и контакты')->schema($studio)->columns(2),
-            Section::make('Цены (в рублях и копейках хранения)')->schema($pricing)->columns(2),
             Section::make('Правила')->schema($rules)->columns(2),
         ]);
     }
@@ -171,16 +168,11 @@ class StudioSettings extends Page
             'og_description' => ['studio.og_description', 'Описание для SEO (OG)', true],
             'legal_note' => ['studio.legal_note', 'Примечание в футере', true],
 
-            'workshop_price_cents' => ['pricing.workshop_price_cents', 'Обычный МК: цена, ₽'],
-            'workshop_duration_minutes' => ['pricing.workshop_duration_minutes', 'Обычный МК: длительность, мин'],
-            'workshop_capacity' => ['pricing.workshop_capacity', 'Обычный МК: мест в сеансе'],
-            'delivery_pickup_cents' => ['pricing.delivery_pickup_cents', 'Самовывоз, ₽'],
-            'delivery_city_cents' => ['pricing.delivery_city_cents', 'Доставка по городу, ₽'],
-
             'currency' => ['rules.currency', 'Валюта (ISO)'],
             'hold_minutes' => ['rules.hold_minutes', 'Резерв места, мин'],
             'free_cancel_hours' => ['rules.free_cancel_hours', 'Бесплатная отмена, часов'],
             'delivery_prep_days' => ['rules.delivery_prep_days', 'Срок подготовки заказа, дней'],
+            'delivery_city_cents' => ['rules.delivery_city_cents', 'Доставка по городу, ₽'],
             'cancel_policy' => ['rules.cancel_policy', 'Правило отмены', true],
             'payment_note' => ['rules.payment_note', 'Примечание об оплате', true],
             'materials_note' => ['rules.materials_note', 'Материалы', true],
@@ -193,7 +185,7 @@ class StudioSettings extends Page
                 'key' => $key,
                 'label' => $label,
                 'group' => explode('.', $key)[0],
-                'type' => str_ends_with($key, '_cents') || str_ends_with($key, '_minutes') || str_ends_with($key, '_hours') || str_ends_with($key, '_days') || str_ends_with($key, '_included') || str_ends_with($key, '_capacity') || str_ends_with($key, '_zoom') ? 'int' : 'string',
+                'type' => str_ends_with($key, '_cents') || str_ends_with($key, '_minutes') || str_ends_with($key, '_hours') || str_ends_with($key, '_days') || str_ends_with($key, '_included') || str_ends_with($key, '_zoom') ? 'int' : 'string',
                 'textarea' => (bool) ($info[2] ?? false),
                 'money' => str_ends_with($key, '_cents'),
                 'kind' => $info[3] ?? null,

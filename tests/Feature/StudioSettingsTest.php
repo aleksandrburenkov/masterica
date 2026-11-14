@@ -20,16 +20,14 @@ class StudioSettingsTest extends TestCase
 
         Livewire::test(StudioSettings::class)
             ->assertFormSet([
-                'workshop_price_cents' => '1 500,00',
-                'delivery_pickup_cents' => '0,00',
                 'delivery_city_cents' => '400,00',
             ])
             ->fillForm([
-                'workshop_price_cents' => '2 500,50',
+                'delivery_city_cents' => '2 500,50',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
-        $this->assertSame(250050, (int) setting('pricing.workshop_price_cents'));
+        $this->assertSame(250050, (int) setting('rules.delivery_city_cents'));
     }
 }

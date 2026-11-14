@@ -13,7 +13,6 @@ use App\Models\Product;
 use App\Models\Technique;
 use App\Models\WorkshopSession;
 use App\Services\StockService;
-use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -197,7 +196,7 @@ class CatalogSeeder extends Seeder
                 'master_id' => $master->id,
                 'starts_at' => $startsAtLocal->copy()->utc(),
                 'timezone' => $timezone,
-                'capacity' => Settings::int('pricing.workshop_capacity', 8),
+                'capacity' => 8,
                 'price_cents' => null,
                 'location_name' => 'Студия «Корни»',
                 'address' => setting('studio.address'),

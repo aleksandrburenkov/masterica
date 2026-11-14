@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\OrderService;
 use App\Services\StockService;
+use App\Support\Settings;
 use Database\Seeders\CatalogSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -64,6 +65,23 @@ class OrderTest extends TestCase
         // Physical stock is unchanged; availability drops because of the reservation.
         $this->assertSame($variant->stock, $variant->fresh()->stock);
         $this->assertSame($availableBefore - 1, $stock->availableFor($variant->fresh()));
+    }
+
+    public function test_pickup_order_ignores_stale_delivery_price_setting(): void
+    {
+        Settings::set('pricing.delivery_pickup_cents', '99900', 'pricing', 'int');
+
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+        $user = User::factory()->create(['role' => UserRole::Client]);
+
+        $this->actingAs($user)
+            ->withSession(['cart' => [$variant->id => 1]])
+            ->post(route('checkout.store'), $this->contact())
+            ->assertRedirect();
+
+        $order = Order::firstOrFail();
+        $this->assertSame(0, $order->delivery_cents);
+        $this->assertSame($order->subtotal_cents, $order->total_cents);
     }
 
     public function test_checkout_validation_errors_render_as_fixed_notification(): void
