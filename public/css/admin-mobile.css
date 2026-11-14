@@ -1,0 +1,58 @@
+/*
+ * Mobile refinements for the admin panel.
+ *
+ * Filament already stacks resource tables on mobile (see AppServiceProvider),
+ * but a few pieces keep desktop layouts:
+ *  - on 320px phones the sidebar is as wide as the viewport, covering the
+ *    topbar close button, so it needs its own close control;
+ *  - KeyValue rows squeeze both inputs and the delete button on narrow phones;
+ *  - video metadata in the review editor uses a fixed two-column definition list.
+ */
+
+.fi-sidebar-mobile-close {
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .fi-sidebar-mobile-close {
+        display: inline-flex;
+        flex: none;
+        margin-inline-end: 0.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .fi-fo-key-value .fi-fo-key-value-table {
+        table-layout: fixed;
+    }
+
+    .fi-fo-key-value .fi-fo-key-value-table thead th:not(.fi-has-action),
+    .fi-fo-key-value .fi-fo-key-value-table tbody td:not(.fi-has-action) {
+        width: calc((100% - 2.5rem) / 2);
+    }
+
+    .fi-fo-key-value .fi-fo-key-value-table thead th.fi-has-action,
+    .fi-fo-key-value .fi-fo-key-value-table tbody td.fi-has-action {
+        width: 2.5rem;
+        padding-inline: 0.25rem;
+    }
+
+    .fi-fo-key-value .fi-fo-key-value-table td .fi-input {
+        padding-inline: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .review-video-meta {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 2px !important;
+    }
+
+    .review-video-meta dt:not(:first-of-type) {
+        margin-top: 8px;
+    }
+
+    .review-video-meta dd {
+        margin-bottom: 4px !important;
+    }
+}

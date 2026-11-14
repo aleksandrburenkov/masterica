@@ -11,6 +11,7 @@ use App\Observers\OrderObserver;
 use App\Support\LegalDocuments;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Table;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -28,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         // Единый календарь админки: вместо системного виджета браузера
         // используется календарь Filament, оформленный в стилях проекта.
         DateTimePicker::configureUsing(fn (DateTimePicker $picker) => $picker->native(false));
+
+        // На мобильных экранах таблицы админки показываются карточками:
+        // широкие таблицы не уходят в горизонтальную прокрутку, а подписи
+        // колонок остаются рядом со значениями.
+        Table::configureUsing(fn (Table $table) => $table->stackedOnMobile());
 
         // Счётчики разделов админки обновляются без перезагрузки страницы:
         // после любого действия Filament (сохранение статуса, модерация отзыва,

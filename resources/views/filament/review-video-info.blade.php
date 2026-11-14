@@ -46,7 +46,7 @@
         </video>
     @endif
 
-    <dl style="display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:0;font-size:13px">
+    <dl class="review-video-meta" style="display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:0;font-size:13px">
         <dt style="color:#6b7280">Файл</dt>
         <dd style="margin:0">{{ $video->original_name ?: '—' }}</dd>
 

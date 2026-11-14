@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Techniques\Pages\ListTechniques;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -87,5 +89,23 @@ class AdminResourcesTest extends TestCase
         $this->actingAs($this->owner())
             ->get('/admin/'.$slug.'/create')
             ->assertOk();
+    }
+
+    public function test_resource_tables_stack_on_mobile(): void
+    {
+        $this->actingAs($this->owner());
+
+        Livewire::test(ListTechniques::class)
+            ->assertSuccessful()
+            ->assertSee('fi-ta-table-stacked-on-mobile', false);
+    }
+
+    public function test_admin_layout_includes_mobile_adaptations(): void
+    {
+        $this->actingAs($this->owner())
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('css/admin-mobile.css', false)
+            ->assertSee('fi-sidebar-mobile-close', false);
     }
 }
