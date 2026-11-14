@@ -44,7 +44,9 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-calendar.css')).'">')
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-navigation-badges.css')).'">')
             ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-grouped-requests.css')).'">')
+            ->renderHook(PanelsRenderHook::STYLES_AFTER, fn (): string => '<link rel="stylesheet" href="'.e(asset('css/admin-sidebar.css')).'">')
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-sidebar-scroll-lock.js')).'" defer data-navigate-once></script>')
             ->navigationGroups([
                 NavigationGroup::make('Блок курсы')
                     ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([

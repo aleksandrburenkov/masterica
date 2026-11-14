@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
+use App\Filament\Resources\Orders\Pages\EditOrder;
+use App\Filament\Resources\Orders\RelationManagers\ItemsRelationManager;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -14,6 +16,7 @@ use Database\Seeders\CatalogSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
@@ -82,6 +85,25 @@ class OrderTest extends TestCase
         $order = Order::firstOrFail();
         $this->assertSame(0, $order->delivery_cents);
         $this->assertSame($order->subtotal_cents, $order->total_cents);
+    }
+
+    public function test_admin_order_items_table_stacks_on_mobile(): void
+    {
+        $variant = ProductVariant::where('sku', 'KOR-BASKET-01')->firstOrFail();
+
+        $this->actingAs(User::factory()->create(['role' => UserRole::Client]))
+            ->withSession(['cart' => [$variant->id => 1]])
+            ->post(route('checkout.store'), $this->contact())
+            ->assertRedirect();
+
+        $order = Order::firstOrFail();
+
+        Livewire::test(ItemsRelationManager::class, [
+            'ownerRecord' => $order,
+            'pageClass' => EditOrder::class,
+        ])
+            ->assertSuccessful()
+            ->assertSee('fi-ta-table-stacked-on-mobile', false);
     }
 
     public function test_checkout_validation_errors_render_as_fixed_notification(): void

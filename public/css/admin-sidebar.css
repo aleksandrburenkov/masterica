@@ -1,0 +1,11 @@
+html.admin-sidebar-scroll-locked,
+body.admin-sidebar-scroll-locked {
+    overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+    .fi-sidebar-nav {
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+}
