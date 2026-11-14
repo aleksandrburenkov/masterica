@@ -25,17 +25,17 @@
                             <a class="btn" href="{{ route('shop.index') }}">Перейти в магазин</a>
                         </div>
                     @else
-                        <table class="table" style="background:#fff;border-radius:var(--radius);overflow:hidden">
+                        <table class="table table--orders">
                             <thead><tr><th>Заказ</th><th>Дата</th><th>Состав</th><th>Сумма</th><th>Статус</th><th></th></tr></thead>
                             <tbody>
                                 @foreach ($orders as $order)
                                     <tr>
-                                        <td><strong>{{ $order->number }}</strong></td>
-                                        <td>{{ optional($order->placed_at)->translatedFormat('d.m.Y') }}</td>
-                                        <td>{{ $order->items->count() }} поз.</td>
-                                        <td>{{ money($order->total_cents) }}</td>
-                                        <td><span class="badge {{ $order->status->value === 'completed' ? 'badge--green' : 'badge--amber' }}">{{ $order->status->label() }}</span></td>
-                                        <td><a class="card-link" href="{{ route('account.order', $order->number) }}">Открыть</a></td>
+                                        <td data-label="Заказ"><strong>{{ $order->number }}</strong></td>
+                                        <td data-label="Дата">{{ optional($order->placed_at)->translatedFormat('d.m.Y') }}</td>
+                                        <td data-label="Состав">{{ $order->items->count() }} поз.</td>
+                                        <td data-label="Сумма">{{ money($order->total_cents) }}</td>
+                                        <td data-label="Статус"><span class="badge {{ $order->status->value === 'completed' ? 'badge--green' : 'badge--amber' }}">{{ $order->status->label() }}</span></td>
+                                        <td class="table--orders__action"><a class="card-link" href="{{ route('account.order', $order->number) }}">Открыть</a></td>
                                     </tr>
                                 @endforeach
                             </tbody>

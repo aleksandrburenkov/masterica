@@ -997,6 +997,11 @@ video.hero__video {
 .table tr:last-child td {
     border-bottom: 0;
 }
+.table--orders {
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
 
 .badge {
     display: inline-flex;

@@ -63,7 +63,102 @@
     gap: clamp(20px, 3vw, 40px);
     align-items: start;
 }
-@media (max-width: 900px) { .account { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+    .account { grid-template-columns: 1fr; }
+
+    .table--orders {
+        display: block;
+        background: transparent;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    .table--orders thead {
+        display: none;
+    }
+
+    .table--orders tbody {
+        display: grid;
+        gap: 12px;
+    }
+
+    .table--orders tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px 16px;
+        padding: 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table--orders td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .table--orders td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 2px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .table--orders td:nth-child(1),
+    .table--orders td:nth-child(2),
+    .table--orders td:nth-child(3) {
+        grid-column: 1;
+    }
+
+    .table--orders td:nth-child(1) {
+        grid-row: 1;
+    }
+
+    .table--orders td:nth-child(2) {
+        grid-row: 2;
+    }
+
+    .table--orders td:nth-child(3) {
+        grid-row: 3;
+    }
+
+    .table--orders td:nth-child(4),
+    .table--orders td:nth-child(5),
+    .table--orders td:nth-child(6) {
+        grid-column: 2;
+        text-align: right;
+    }
+
+    .table--orders td:nth-child(4) {
+        grid-row: 1;
+    }
+
+    .table--orders td:nth-child(5) {
+        grid-row: 2;
+    }
+
+    .table--orders td:nth-child(6) {
+        grid-row: 3;
+        justify-self: end;
+        align-self: end;
+    }
+
+    .table--orders__action .card-link {
+        padding: 8px 14px;
+        border: 1px solid var(--line-2);
+        border-radius: 999px;
+        background: var(--bg-2);
+        white-space: nowrap;
+    }
+}
 
 .account-nav {
     position: sticky;
