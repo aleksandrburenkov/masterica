@@ -25,7 +25,8 @@
     color: var(--ink);
 }
 .brand img {
-    height: clamp(44px, 4vw, 58px);
+    height: clamp(80px, 5vw, 130px);
+    /* height: clamp(44px, 4vw, 80px); */
     width: auto;
 }
 .brand__text {
@@ -302,10 +303,21 @@
         transition: flex-grow var(--speed) var(--ease);
     }
 
-    .account-link,
-    .cart-widget {
+    .account-link {
         min-width: 0;
         overflow: hidden;
+        margin-left: 0;
+        transform-origin: right center;
+        transition:
+            max-width var(--speed) var(--ease),
+            margin-left var(--speed) var(--ease),
+            opacity var(--speed) var(--ease),
+            transform var(--speed) var(--ease);
+    }
+
+    .cart-widget {
+        min-width: 0;
+
         margin-left: 0;
         transform-origin: right center;
         transition:
@@ -1052,7 +1064,7 @@ video.hero__video {
     color: var(--accent);
 }
 .footer-brand img {
-    height: 56px;
+    height: 130px;
     margin-bottom: 14px;
 }
 .footer-brand p {
