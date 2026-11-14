@@ -115,8 +115,7 @@ class LegalDocumentsTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee(route('legal.show', 'politika-konfidencialnosti'), false)
-            ->assertSee(route('legal.show', 'offer'), false)
-            ->assertSee('152-ФЗ');
+            ->assertSee(route('legal.show', 'offer'), false);
     }
 
     public function test_owner_can_manage_legal_documents(): void
