@@ -21,6 +21,7 @@ class OrderService
         private readonly StockService $stock,
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly RequestNotificationService $requestNotifications,
     ) {}
 
     public function deliveryCents(DeliveryMethod $method): int
@@ -37,7 +38,7 @@ class OrderService
      */
     public function place(User $user, array $data): Order
     {
-        return DB::transaction(function () use ($user, $data) {
+        $order = DB::transaction(function () use ($user, $data) {
             $raw = $this->cart->raw();
 
             if ($raw === []) {
@@ -145,6 +146,11 @@ class OrderService
 
             return $order->refresh();
         });
+
+        // Уведомляем администраторов после коммита заказа.
+        $this->requestNotifications->send($order);
+
+        return $order;
     }
 
     public function markPaid(Order $order, ?User $actor = null): Order

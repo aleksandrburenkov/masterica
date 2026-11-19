@@ -59,6 +59,7 @@ class StudioSettings extends Page
     {
         $studio = [];
         $rules = [];
+        $notifications = [];
 
         foreach (self::fields() as $name => $meta) {
             if ($meta['kind'] === 'latitude' || $meta['kind'] === 'longitude') {
@@ -97,6 +98,13 @@ class StudioSettings extends Page
                     ->validationMessages([
                         'regex' => 'Укажите сумму в рублях, например 1 500,00',
                     ]);
+            } elseif ($meta['kind'] === 'email') {
+                $component = TextInput::make($name)
+                    ->label($meta['label'])
+                    ->email()
+                    ->maxLength(160)
+                    ->nullable()
+                    ->helperText('Если адрес заполнен и корректен, письма о новых обращениях приходят на него вместо email владельца. Пустое или некорректное значение — используется email пользователя с ролью «Владелец».');
             } else {
                 $component = $meta['textarea']
                     ? Textarea::make($name)->label($meta['label'])->rows(2)
@@ -105,12 +113,17 @@ class StudioSettings extends Page
 
             match ($meta['group']) {
                 'rules' => $rules[] = $component,
+                'notifications' => $notifications[] = $component,
                 default => $studio[] = $component,
             };
         }
 
         return $schema->components([
             Section::make('Студия и контакты')->schema($studio)->columns(2),
+            Section::make('Почтовые уведомления о новых обращениях')
+                ->description('Письма приходят владельцу автоматически. Дополнительных получателей владелец назначает в разделе «Рассылка обращений».')
+                ->schema($notifications)
+                ->columns(2),
             Section::make('Правила')->schema($rules)->columns(2),
         ]);
     }
@@ -167,6 +180,8 @@ class StudioSettings extends Page
             'map_zoom' => ['studio.map_zoom', 'Масштаб карты', false, 'zoom'],
             'og_description' => ['studio.og_description', 'Описание для SEO (OG)', true],
             'legal_note' => ['studio.legal_note', 'Примечание в футере', true],
+
+            'alternate_owner_email' => ['notifications.alternate_owner_email', 'Альтернативный email владельца', false, 'email'],
 
             'currency' => ['rules.currency', 'Валюта (ISO)'],
             'hold_minutes' => ['rules.hold_minutes', 'Резерв места, мин'],

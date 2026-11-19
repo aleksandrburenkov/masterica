@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'participants_count', 'contact_name', 'contact_phone', 'contact_email',
     'child_age', 'unit_price_cents', 'total_cents', 'currency',
     'hold_expires_at', 'confirmed_at', 'attended_at', 'canceled_at',
-    'cancel_reason', 'notes', 'consent_data', 'consent_marketing',
+    'cancel_reason', 'notes', 'source', 'consent_data', 'consent_marketing',
 ])]
 class Booking extends Model
 {

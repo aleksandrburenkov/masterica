@@ -14,6 +14,7 @@ class OutreachService
         private readonly OutreachCalculator $calculator,
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly RequestNotificationService $requestNotifications,
     ) {}
 
     /**
@@ -66,6 +67,8 @@ class OutreachService
             'Заявка на выездной мастер-класс принята',
             'Заявка '.$request->number.'. Мы свяжемся для подтверждения.',
         );
+
+        $this->requestNotifications->send($request);
 
         return $request;
     }

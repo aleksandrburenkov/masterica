@@ -16,6 +16,7 @@ class CourseService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly RequestNotificationService $requestNotifications,
     ) {}
 
     public function enrollmentFor(User $user, Course $course): ?CourseEnrollment
@@ -29,10 +30,18 @@ class CourseService
     /** Create (idempotently) a pending enrollment awaiting payment. */
     public function enroll(User $user, Course $course): CourseEnrollment
     {
-        return CourseEnrollment::firstOrCreate(
+        $enrollment = CourseEnrollment::firstOrCreate(
             ['user_id' => $user->id, 'course_id' => $course->id],
             ['status' => EnrollmentStatus::PendingPayment, 'payment_status' => PaymentStatus::Unpaid],
         );
+
+        // Письмо отправляем только при первом поступлении заявки, повторная
+        // запись на тот же курс не создаёт дубликат уведомления.
+        if ($enrollment->wasRecentlyCreated) {
+            $this->requestNotifications->send($enrollment);
+        }
+
+        return $enrollment;
     }
 
     /**

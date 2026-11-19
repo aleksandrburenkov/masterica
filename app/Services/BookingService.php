@@ -17,6 +17,7 @@ class BookingService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly RequestNotificationService $requestNotifications,
     ) {}
 
     /**
@@ -32,7 +33,7 @@ class BookingService
      */
     public function create(?User $user, WorkshopSession $session, array $data): Booking
     {
-        return DB::transaction(function () use ($user, $session, $data) {
+        $booking = DB::transaction(function () use ($user, $session, $data) {
             $this->expireStaleHolds();
 
             /** @var WorkshopSession $locked */
@@ -78,6 +79,7 @@ class BookingService
                 'canceled_at' => null,
                 'cancel_reason' => null,
                 'notes' => $data['notes'] ?? null,
+                'source' => $data['source'] ?? null,
                 'consent_data' => (bool) ($data['consent_data'] ?? false),
                 'consent_marketing' => (bool) ($data['consent_marketing'] ?? false),
             ];
@@ -110,6 +112,12 @@ class BookingService
 
             return $booking->refresh();
         });
+
+        // Письмо администраторам отправляется после успешного коммита, чтобы
+        // не уведомлять о заявке, которая не сохранилась.
+        $this->requestNotifications->send($booking);
+
+        return $booking;
     }
 
     public function confirm(Booking $booking, ?string $reason = null): Booking

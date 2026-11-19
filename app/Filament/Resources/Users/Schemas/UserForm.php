@@ -23,6 +23,12 @@ class UserForm
                     ->dehydrated(fn ($state) => filled($state))
                     ->helperText('Оставьте пустым, чтобы не менять.'),
                 Toggle::make('consent_marketing')->label('Согласие на рассылку'),
+                Toggle::make('receives_request_notifications')
+                    ->label('Получать письма о новых обращениях')
+                    ->helperText('Письма будут приходить на email, указанный выше. Владелец получает их автоматически.')
+                    ->dehydrated(false)
+                    ->visible(fn (): bool => auth()->user()?->isOwner() ?? false)
+                    ->columnSpanFull(),
             ])->columns(2),
         ]);
     }

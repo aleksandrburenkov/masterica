@@ -15,6 +15,7 @@ class ContactRequestService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly RequestNotificationService $requestNotifications,
     ) {}
 
     public function create(?User $user, array $data): ContactRequest
@@ -40,6 +41,8 @@ class ContactRequestService
             'Обращение принято',
             'Обращение '.$request->number.'. Студия ответит вам удобным способом.',
         );
+
+        $this->requestNotifications->send($request);
 
         return $request;
     }

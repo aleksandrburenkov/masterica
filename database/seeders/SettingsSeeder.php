@@ -36,6 +36,9 @@ class SettingsSeeder extends Seeder
                 'rules.payment_note' => ['Оплата в студии. Платёжный провайдер не подключён — оплата при получении и тестовая отметка оплаты работают локально.', 'text'],
                 'rules.materials_note' => ['Материалы включены в стоимость обычного занятия.', 'text'],
             ],
+            'notifications' => [
+                'notifications.alternate_owner_email' => ['', 'string'],
+            ],
             'pages' => [
                 'pages.maintenance_text' => ['Страница находится на техническом обслуживании.', 'text'],
                 'pages.maintenance_enabled' => ['0', 'bool'],
