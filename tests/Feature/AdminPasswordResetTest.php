@@ -65,6 +65,9 @@ class AdminPasswordResetTest extends TestCase
         $this->assertStringContainsString('С уважением, администратор сайта', $html);
         $this->assertStringContainsString('Все права защищены.', $html);
         $this->assertStringContainsString('Если кнопка «Сбросить пароль» не работает', $html);
+        $this->assertStringContainsString('class="inner-body" align="center" width="100%"', $html);
+        $this->assertStringContainsString('max-width: 570px', $html);
+        $this->assertStringNotContainsString('width="570"', $html);
         $this->assertStringNotContainsString('Regards', $html);
         $this->assertStringNotContainsString("If you're having trouble", $html);
     }
