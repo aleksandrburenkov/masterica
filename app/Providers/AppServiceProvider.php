@@ -5,11 +5,15 @@ namespace App\Providers;
 use App\Models\ContentPage;
 use App\Models\LegalDocument;
 use App\Models\Order;
+use App\Models\User;
+use App\Notifications\AdminResetPasswordNotification;
 use App\Observers\ContentPageObserver;
 use App\Observers\LegalDocumentObserver;
 use App\Observers\OrderObserver;
+use App\Observers\UserPasswordResetObserver;
 use App\Support\LegalDocuments;
 use Filament\Actions\Action;
+use Filament\Auth\Notifications\ResetPassword as FilamentResetPasswordNotification;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Table;
 use Illuminate\Pagination\Paginator;
@@ -21,7 +25,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Filament resolves the notification from the container in its password
+        // reset page, so this replaces only the email content, not the flow.
+        $this->app->bind(FilamentResetPasswordNotification::class, AdminResetPasswordNotification::class);
     }
 
     public function boot(): void
@@ -54,6 +60,10 @@ class AppServiceProvider extends ServiceProvider
         // материалами и правовыми документами при любом их изменении.
         ContentPage::observe(ContentPageObserver::class);
         LegalDocument::observe(LegalDocumentObserver::class);
+
+        // Reset links are one-time credentials: any change to an account's email
+        // or password, as well as deletion, revokes all outstanding tokens.
+        User::observe(UserPasswordResetObserver::class);
 
         Paginator::defaultView('vendor.pagination.site');
         Paginator::defaultSimpleView('vendor.pagination.site');

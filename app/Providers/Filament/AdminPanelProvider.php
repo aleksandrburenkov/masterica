@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
 use App\Filament\Resources\Bookings\BookingResource;
 use App\Filament\Resources\CourseEnrollments\CourseEnrollmentResource;
 use App\Filament\Resources\Orders\OrderResource;
@@ -35,7 +36,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
+            ->passwordReset()
             ->brandName('Корни — панель студии')
             ->favicon(asset('images/logo.png'))
             ->colors([
@@ -49,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::SIDEBAR_LOGO_AFTER, fn (): string => view('filament.sidebar-mobile-close')->render())
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-calendar.js')).'" defer></script>')
             ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => '<script src="'.e(asset('js/admin-sidebar-scroll-lock.js')).'" defer data-navigate-once></script>')
+            ->renderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn (): string => view('filament.auth.forgot-password-link')->render())
             ->navigationGroups([
                 NavigationGroup::make('Блок курсы')
                     ->extraSidebarAttributes(fn (): array => NavigationGroupIndicator::attributes([

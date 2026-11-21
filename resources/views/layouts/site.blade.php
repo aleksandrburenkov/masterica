@@ -19,7 +19,7 @@
         <meta property="og:image" content="@yield('og_image')">
     @endif
 
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="preload" href="{{ asset('fonts/gothampro.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ asset('fonts/gothampro_bold.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/site/base.css') }}">
